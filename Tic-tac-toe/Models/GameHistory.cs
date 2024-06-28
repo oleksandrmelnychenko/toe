@@ -29,6 +29,7 @@ namespace Tic_tac_toe.Models
         public void ClearHistory()
         {
             moves.Clear();
+            OnPropertyChanged(nameof(HistoryField));
         }
 
         public event PropertyChangedEventHandler PropertyChanged;

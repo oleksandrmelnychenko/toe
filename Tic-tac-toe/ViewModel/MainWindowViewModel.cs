@@ -1,9 +1,7 @@
-﻿using Avalonia.Media.Imaging;
-using Avalonia.Threading;
-using Prism.Commands;
+﻿using Prism.Commands;
 using ReactiveUI;
 using System.Collections.ObjectModel;
-using System.Reactive;
+using System.Linq;
 using Tic_tac_toe.Constants;
 using Tic_tac_toe.Fabric;
 using Tic_tac_toe.Models;
@@ -14,11 +12,16 @@ namespace Tic_tac_toe.ViewModel
 {
     internal partial class MainWindowViewModel : ViewModelBase
     {
+        private GameHistory _gameHistory;
         private string _gameStatusField;
 
         private EndOfGameChecker _endOfGameChecker;
 
-        public GameHistory GameHistory { get; set; }
+        public GameHistory gameHistory
+        {
+            get => _gameHistory;
+            set => this.RaiseAndSetIfChanged(ref _gameHistory, value);
+        }
 
         private ObservableCollection<Cell> _cells;
 
@@ -44,43 +47,45 @@ namespace Tic_tac_toe.ViewModel
         public MainWindowViewModel(UserService userService, WinnerCombinationBase winnerCombination, GameHistory gameHistory)
         {
             BoxClickCommand = new DelegateCommand<string>(BoxClick);
-            Cells = new ObservableCollection<Cell>(CellFactory.Build(9, CellType.Cell));
             _userService = userService;
             _endOfGameChecker = new EndOfGameChecker(winnerCombination);
-            GameHistory = gameHistory;
+            this.gameHistory = gameHistory;
             StartNewGame();
         }
 
         public void StartNewGame()
         {
-            boxCollection = new Cell[9];
-            for (int i = 0; i < boxCollection.Length; i++)
-            {
-                boxCollection[i] = new Cell();
-            }
+            //boxCollection = new Cell[9];
+            //for (int i = 0; i < boxCollection.Length; i++)
+            //{
+            //    boxCollection[i] = new Cell();
+            //}
+            Cells = new ObservableCollection<Cell>(CellFactory.Build(9, CellType.Cell));
             GameStatusField = GameStatusConst.PlayerTurn + " " + _userService.CurrentUser.UserSymbolName;
         }
 
         public void RestartGame()
         {
-            for (int i = 0; i < boxCollection.Length; i++)
-            {
-                boxCollection[i].BoxReset();
-            }
+            //for (int i = 0; i < boxCollection.Length; i++)
+            //{
+            //    boxCollection[i].BoxReset();
+            //}
+            Cells = new ObservableCollection<Cell>(CellFactory.Build(9, CellType.Cell));
             _userService.ChangeCurrentUser();
+            gameHistory.ClearHistory();
             GameStatusField = GameStatusConst.PlayerTurn + " " + _userService.CurrentUser.UserSymbolName;
         }
 
         public void BoxClick(string param)
         {
             Cells[int.Parse(param) - 1].BoxSetValues(_userService.CurrentUser.UserSymbol, _userService.CurrentUser.UserSymbolName);
-            GameHistory.AddMove(new Move(_userService.CurrentUser, int.Parse(param) - 1));
+            gameHistory.AddMove(new Move(_userService.CurrentUser, int.Parse(param) - 1));
             ChangeTurn();
         }
 
         public void ChangeTurn()
         {
-            if (!_endOfGameChecker.CheckForWinner(boxCollection))
+            if (!_endOfGameChecker.CheckForWinner(Cells.ToList()))
             {
                 if (GameStatusField == GameStatusConst.PlayerTurn + " " + SymbolsConst.SymbolX)
                 {
@@ -97,7 +102,7 @@ namespace Tic_tac_toe.ViewModel
                 return;
             }
 
-            if (_endOfGameChecker.CheckForDraw(boxCollection))
+            if (_endOfGameChecker.CheckForDraw(Cells.ToList()))
             {
                 GameStatusField = GameStatusConst.Draw;
             }

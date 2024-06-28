@@ -13,14 +13,14 @@ namespace Tic_tac_toe.Service
             _winnerCombination = winnerCombination;
         }
 
-        public bool CheckForWinner(Cell[] boxes)
+        public bool CheckForWinner(List<Cell> cells)
         {
             foreach (var combination in _winnerCombination.Combination)
             {
-                string firstSymbol = boxes[combination[0]].SymbolName;
+                string firstSymbol = cells[combination[0]].SymbolName;
                 if (!string.IsNullOrEmpty(firstSymbol) &&
-                    firstSymbol == boxes[combination[1]].SymbolName &&
-                    firstSymbol == boxes[combination[2]].SymbolName)
+                    firstSymbol == cells[combination[1]].SymbolName &&
+                    firstSymbol == cells[combination[2]].SymbolName)
                 {
                     return true;
                 }
@@ -28,9 +28,9 @@ namespace Tic_tac_toe.Service
             return false;
         }
 
-        public bool CheckForDraw(Cell[] boxes)
+        public bool CheckForDraw(List<Cell> cells)
         {
-            foreach (Cell box in boxes)
+            foreach (Cell box in cells)
             {
                 if(string.IsNullOrEmpty(box.SymbolName))
                 {
