@@ -30,6 +30,7 @@ namespace TicTacToeGame.Client.Models
         public void ClearHistory()
         {
             moves.Clear();
+            OnPropertyChanged(nameof(HistoryField));
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
