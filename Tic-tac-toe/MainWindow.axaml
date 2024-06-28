@@ -1,0 +1,53 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" Width="900" Height="620" WindowStartupLocation="CenterScreen" CanResize="True"
+        xmlns:vm="using:Tic_tac_toe.ViewModel"
+        x:DataType="vm:MainWindowViewModel"
+        x:Class="Tic_tac_toe.MainWindow"
+        Title="Tic_tac_toe">
+
+	<DockPanel>
+		<StackPanel Name="GameField" DockPanel.Dock="Left">
+			<Grid ColumnDefinitions="200, 200, 200" RowDefinitions="200, 200, 200" Margin="10">
+				<Button IsEnabled="{Binding Cells[0].IsEmpty}" Width="200" Height="200" Grid.Row="0" Grid.Column="0" Name="Box1" Command="{Binding BoxClickCommand}" CommandParameter="1">
+					<Image Width="200" Height="200" Name="ImageBox1" Source="{Binding Cells[0].BoxImage}"/>
+				</Button>
+				<Button IsEnabled="{Binding Cells[1].IsEmpty}" Width="200" Height="200" Grid.Row="1" Grid.Column="0" Name="Box2" Command="{Binding BoxClickCommand}" CommandParameter="2">
+					<Image Width="200" Height="200" Name="ImageBox2" Source="{Binding Cells[1].BoxImage}"/>
+				</Button>
+				<Button IsEnabled="{Binding Cells[2].IsEmpty}" Width="200" Height="200" Grid.Row="2" Grid.Column="0" Name="Box3" Command="{Binding BoxClickCommand}" CommandParameter="3">
+					<Image Width="200" Height="200" Name="ImageBox3" Source="{Binding Cells[2].BoxImage}"/>
+				</Button>
+				<Button IsEnabled="{Binding Cells[3].IsEmpty}" Width="200" Height="200" Grid.Row="0" Grid.Column="1" Name="Box4" Command="{Binding BoxClickCommand}" CommandParameter="4">
+					<Image Width="200" Height="200" Name="ImageBox4" Source="{Binding Cells[3].BoxImage}"/>
+				</Button>	
+				<Button IsEnabled="{Binding Cells[4].IsEmpty}" Width="200" Height="200" Grid.Row="1" Grid.Column="1" Name="Box5" Command="{Binding BoxClickCommand}" CommandParameter="5">
+					<Image Width="200" Height="200" Name="ImageBox5" Source="{Binding Cells[4].BoxImage}"/>
+				</Button>
+				<Button IsEnabled="{Binding Cells[5].IsEmpty}" Width="200" Height="200" Grid.Row="2" Grid.Column="1" Name="Box6" Command="{Binding BoxClickCommand}" CommandParameter="6">
+					<Image Width="200" Height="200" Name="ImageBox6" Source="{Binding Cells[5].BoxImage}"/>
+				</Button>
+				<Button IsEnabled="{Binding Cells[6].IsEmpty}" Width="200" Height="200" Grid.Row="0" Grid.Column="2" Name="Box7" Command="{Binding BoxClickCommand}" CommandParameter="7">
+					<Image Width="200" Height="200" Name="ImageBox7" Source="{Binding Cells[6].BoxImage}"/>
+				</Button>
+				<Button IsEnabled="{Binding Cells[7].IsEmpty}" Width="200" Height="200" Grid.Row="1" Grid.Column="2" Name="Box8" Command="{Binding BoxClickCommand}" CommandParameter="8">
+					<Image Width="200" Height="200" Name="ImageBox8" Source="{Binding Cells[7].BoxImage}"/>
+				</Button>
+				<Button IsEnabled="{Binding Cells[8].IsEmpty}" Width="200" Height="200" Grid.Row="2" Grid.Column="2" Name="Box9" Command="{Binding BoxClickCommand}" CommandParameter="9">
+					<Image Width="200" Height="200" Name="ImageBox9" Source="{Binding Cells[8].BoxImage}"/>
+				</Button>
+			</Grid>
+		</StackPanel>
+		<StackPanel VerticalAlignment="Center" Name="ButtonsField" DockPanel.Dock="Right" Width="350">
+			<TextBlock FontSize="24" HorizontalAlignment="Center" Margin="20" Text="{Binding GameStatusField}">
+			</TextBlock>
+			<TextBox Height="100" Width="250" AcceptsReturn="True" Margin="20" TextWrapping="Wrap" Text="{Binding GameHistory.HistoryField}"/>
+			<Button HorizontalAlignment="Center" Name="RestartButton" Command="{Binding RestartGame}">
+				Restart
+			</Button>
+		</StackPanel>
+	</DockPanel>
+
+</Window>
