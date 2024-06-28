@@ -13,11 +13,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\User\\source\\repos\\Tic-tac-toe - Copy\\Tic-tac-toe-Server\\Tic-tac-toe-Server.csproj",
+      "projectUniqueName": "C:\\Projects\\Tic-tac-toe\\Tic-tac-toe-Server\\Tic-tac-toe-Server.csproj",
       "projectName": "Tic-tac-toe-Server",
-      "projectPath": "C:\\Users\\User\\source\\repos\\Tic-tac-toe - Copy\\Tic-tac-toe-Server\\Tic-tac-toe-Server.csproj",
+      "projectPath": "C:\\Projects\\Tic-tac-toe\\Tic-tac-toe-Server\\Tic-tac-toe-Server.csproj",
       "packagesPath": "C:\\Users\\User\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\User\\source\\repos\\Tic-tac-toe - Copy\\Tic-tac-toe-Server\\obj\\",
+      "outputPath": "C:\\Projects\\Tic-tac-toe\\Tic-tac-toe-Server\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\User\\AppData\\Roaming\\NuGet\\NuGet.Config",

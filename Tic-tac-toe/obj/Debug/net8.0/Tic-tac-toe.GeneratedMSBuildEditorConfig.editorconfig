@@ -13,12 +13,12 @@ build_property.PlatformNeutralAssembly =
 build_property.EnforceExtendedAnalyzerRules = 
 build_property._SupportedPlatformList = Linux,macOS,Windows
 build_property.RootNamespace = Tic-tac-toe
-build_property.ProjectDir = C:\Users\User\source\repos\Tic-tac-toe - Copy\Tic-tac-toe\
+build_property.ProjectDir = C:\Projects\Tic-tac-toe\Tic-tac-toe\
 build_property.EnableComHosting = 
 build_property.EnableGeneratedComInterfaceComImportInterop = 
 
-[C:/Users/User/source/repos/Tic-tac-toe - Copy/Tic-tac-toe/App.axaml]
+[C:/Projects/Tic-tac-toe/Tic-tac-toe/App.axaml]
 build_metadata.AdditionalFiles.SourceItemGroup = AvaloniaXaml
 
-[C:/Users/User/source/repos/Tic-tac-toe - Copy/Tic-tac-toe/MainWindow.axaml]
+[C:/Projects/Tic-tac-toe/Tic-tac-toe/MainWindow.axaml]
 build_metadata.AdditionalFiles.SourceItemGroup = AvaloniaXaml

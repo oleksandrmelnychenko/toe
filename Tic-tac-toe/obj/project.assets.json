@@ -9307,11 +9307,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\User\\source\\repos\\Tic-tac-toe - Copy\\Tic-tac-toe\\Tic-tac-toe.csproj",
+      "projectUniqueName": "C:\\Projects\\Tic-tac-toe\\Tic-tac-toe\\Tic-tac-toe.csproj",
       "projectName": "Tic-tac-toe",
-      "projectPath": "C:\\Users\\User\\source\\repos\\Tic-tac-toe - Copy\\Tic-tac-toe\\Tic-tac-toe.csproj",
+      "projectPath": "C:\\Projects\\Tic-tac-toe\\Tic-tac-toe\\Tic-tac-toe.csproj",
       "packagesPath": "C:\\Users\\User\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\User\\source\\repos\\Tic-tac-toe - Copy\\Tic-tac-toe\\obj\\",
+      "outputPath": "C:\\Projects\\Tic-tac-toe\\Tic-tac-toe\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\User\\AppData\\Roaming\\NuGet\\NuGet.Config",

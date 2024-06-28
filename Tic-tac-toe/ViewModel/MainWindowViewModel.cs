@@ -104,15 +104,5 @@ namespace Tic_tac_toe.ViewModel
 
             _userService.ChangeCurrentUser();
         }
-<<<<<<< HEAD
-=======
-
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        protected virtual void OnPropertyChanged(string propertyName)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
->>>>>>> 4fd19a9102034b5d2c82082e9145b240c6e3aaf6
     }
 }
