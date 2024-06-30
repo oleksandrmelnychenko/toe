@@ -1,9 +1,7 @@
-﻿using System.Collections.ObjectModel;
-using Prism.Commands;
+﻿using Prism.Commands;
 using ReactiveUI;
-using TicTacToeGame.Client.Constants;
+using System.Collections.ObjectModel;
 using TicTacToeGame.Client.Game;
-using TicTacToeGame.Client.Models;
 
 namespace TicTacToeGame.Client
 {
@@ -12,9 +10,9 @@ namespace TicTacToeGame.Client
         private string _gameStatusField;
 
         private ObservableCollection<BoardCell> _boardBoardCells;
-        
+
         private readonly GameMaster _gameMaster = new();
-        
+
         public ObservableCollection<BoardCell> BoardCells
         {
             get => _boardBoardCells;
@@ -36,9 +34,9 @@ namespace TicTacToeGame.Client
             _gameMaster.StartGame();
 
             BoardCells = new ObservableCollection<BoardCell>(_gameMaster.GetActiveGameSessionBoard());
-            
+
             //GameStatusField = GameStatusConst.PlayerTurn + " " + _userService.CurrentUser.UserSymbolName;
-            
+
             // GameStatusField = GameStatusConst.PlayerTurn + " " + _userService.CurrentUser.UserSymbolName;
         }
 

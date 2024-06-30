@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using TicTacToeGame.Client.Models;
 
 namespace TicTacToeGame.Client.Game;
 
@@ -12,8 +11,6 @@ public class GameSession(IReadOnlyCollection<BoardCell> boardCells)
  
     public void HandleAction(GameAction action)
     {
-      
-        
         
         
     }

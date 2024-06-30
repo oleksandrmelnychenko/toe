@@ -28,9 +28,9 @@ public class GameMaster
 
     public void NewAction(BoardCell boardCell)
     {
-        // GameAction action = new();
+       // GameAction action = new();
         
-       // _activeGameSession.HandleAction();
+       //_activeGameSession.HandleAction();
     }
 
     public IReadOnlyCollection<BoardCell> GetActiveGameSessionBoard()
