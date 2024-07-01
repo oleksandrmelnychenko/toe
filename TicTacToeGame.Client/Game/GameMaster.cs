@@ -10,6 +10,8 @@ public class GameMaster
 
     private GameSession? _activeGameSession;
 
+    private UserService _userService = new();
+
     /// <summary>
     ///     The GameMaster class represents the game master that manages the Tic Tac Toe game.
     /// </summary>
@@ -28,15 +30,43 @@ public class GameMaster
 
     public void NewAction(BoardCell boardCell)
     {
-       // GameAction action = new();
-        
-       //_activeGameSession.HandleAction();
+        ArgumentNullException.ThrowIfNull(nameof(_activeGameSession));
+        GameAction action = new(_userService.CurrentUser, boardCell.Index);
+
+        _activeGameSession!.HandleAction(action);
+
+        HandleGameStatus();
+    }
+
+    private void HandleGameStatus()
+    {
+        if (_activeGameSession!.Status == Status.PlayerTurn)
+        {
+            _userService.ChangeCurrentUser();
+        }
+    }
+
+    public User GetCurrentUser()
+    {
+        return _userService.CurrentUser;
     }
 
     public IReadOnlyCollection<BoardCell> GetActiveGameSessionBoard()
     {
         ArgumentNullException.ThrowIfNull(nameof(_activeGameSession));
         return _activeGameSession!.BoardCells;
+    }
+
+    public Status GetStatus()
+    {
+        ArgumentNullException.ThrowIfNull(nameof(_activeGameSession));
+        return _activeGameSession!.Status;
+    }
+
+    public string GetHistory()
+    {
+        ArgumentNullException.ThrowIfNull(nameof(_activeGameSession));
+        return _activeGameSession!.History.HistoryField;
     }
     
     private static List<BoardCell> CreateNewBoard() => CellFactory.Build(CellsCount);

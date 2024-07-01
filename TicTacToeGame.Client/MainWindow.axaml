@@ -4,12 +4,13 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:client="clr-namespace:TicTacToeGame.Client"
 		xmlns:game="clr-namespace:TicTacToeGame.Client.Game"
+		xmlns:vm="using:TicTacToeGame.Client"
         mc:Ignorable="d" Width="900" Height="620" WindowStartupLocation="CenterScreen" CanResize="True"
         x:DataType="client:MainViewModel"
         x:Class="TicTacToeGame.Client.MainWindow"
         Title="Tic_tac_toe">
 
-	<DockPanel>
+	<DockPanel x:Name="Root">
 		<StackPanel Name="GameField" Margin="10" DockPanel.Dock="Left">
 			<ItemsControl ItemsSource="{Binding BoardCells}">
 				<ItemsControl.ItemsPanel>
@@ -19,8 +20,8 @@
 				</ItemsControl.ItemsPanel>
 				<ItemsControl.ItemTemplate>
 					<DataTemplate DataType="game:BoardCell">
-						<Button Width="200" Height="200">
-							
+						<Button IsEnabled="{Binding !IsDirty}" Width="200" Height="200" Command="{Binding #Root.((vm:MainViewModel)DataContext).OnCellClickCommandHandler}" CommandParameter="{Binding .}">
+							<TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="128" Text="{Binding Value}"></TextBlock>
 						</Button>
 					</DataTemplate>
 				</ItemsControl.ItemTemplate>
@@ -30,8 +31,8 @@
 		<StackPanel VerticalAlignment="Center" Name="ButtonsField" DockPanel.Dock="Right" Width="350">
 			<TextBlock FontSize="24" HorizontalAlignment="Center" Margin="20" Text="{Binding GameStatusField}">
 			</TextBlock>
-			<TextBox Height="100" Width="250" AcceptsReturn="True" Margin="20" TextWrapping="Wrap" Text=""/>
-			<Button HorizontalAlignment="Center" Name="RestartButton" Command="">
+			<TextBox Height="300" Width="200" AcceptsReturn="True" Margin="20" TextWrapping="Wrap" Text="{Binding HistoryTextField}"/>
+			<Button HorizontalAlignment="Center" Name="RestartButton" Command="{Binding OnRestartCommand}">
 				Restart
 			</Button>
 		</StackPanel>

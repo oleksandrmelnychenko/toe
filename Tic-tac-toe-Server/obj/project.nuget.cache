@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "9Mpnfap7KDS8OltUllGqzCnXrUjjMlQTAaGEuCtdwp26jUPlrSlyJ1hnDdRXNoprZTphfYSkt7VjLV+LG+gm6w==",
+  "dgSpecHash": "84/HNvhpB7w=",
   "success": true,
-  "projectFilePath": "D:\\Programming\\Course projects\\TicTacToeLast\\toe\\Tic-tac-toe-Server\\Tic-tac-toe-Server.csproj",
+  "projectFilePath": "C:\\Projects\\Tic-tac-toe\\Tic-tac-toe-Server\\Tic-tac-toe-Server.csproj",
   "expectedPackageFiles": [],
   "logs": []
 }

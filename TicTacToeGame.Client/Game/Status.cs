@@ -5,4 +5,5 @@ public enum Status
     Start,
     PlayerTurn,
     Finish,    
+    Draw
 }

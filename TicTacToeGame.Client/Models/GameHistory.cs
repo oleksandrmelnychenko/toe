@@ -4,7 +4,7 @@ using TicTacToeGame.Client.Game;
 
 namespace TicTacToeGame.Client.Models
 {
-    public class GameHistory : INotifyPropertyChanged
+    public class GameHistory
     {
         private List<GameAction> moves;
 
@@ -15,14 +15,13 @@ namespace TicTacToeGame.Client.Models
             moves = new List<GameAction>();
         }
 
-        public void AddMove(GameAction gameAction)
+        public void AddAction(GameAction gameAction)
         {
             moves.Add(gameAction);
             HistoryField = HistoryField + $"Player {gameAction.User.UserSymbolName} chose box {gameAction.BoxPosition}.\n";
-            OnPropertyChanged(nameof(HistoryField));
         }
 
-        public List<GameAction> GetMoves()
+        public List<GameAction> GetAction()
         {
             return moves;
         }
@@ -30,14 +29,7 @@ namespace TicTacToeGame.Client.Models
         public void ClearHistory()
         {
             moves.Clear();
-            OnPropertyChanged(nameof(HistoryField));
         }
 
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        protected virtual void OnPropertyChanged(string propertyName)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
     }
 }

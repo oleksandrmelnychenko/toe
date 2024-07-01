@@ -1,34 +1,47 @@
 ﻿using Avalonia.Media.Imaging;
+using System;
 using TicTacToeGame.Client.Constants;
 using TicTacToeGame.Client.Models;
 using TicTacToeGame.Client.Symbols;
 
 namespace TicTacToeGame.Client.Game
 {
-    internal class UserService
+    public class UserService
     {
-        public User User1 { get; set; } = null!;
-        public User User2 { get; set; } = null!;
+        private readonly User[] _users = new User[2];
+        private int _currentUserIndex;
 
-        public User CurrentUser { get; set; } = null!;
+        public User CurrentUser => _users[_currentUserIndex];
 
-        public void InitializeUsers()
+        public UserService()
         {
-            User1 = new User(new Bitmap(SymbolPath.XPath), SymbolsConst.SymbolX, true);
-            User2 = new User(new Bitmap(SymbolPath.OPath), SymbolsConst.SymbolO, false);
+            InitializeUsers();
+        }
 
-            CurrentUser = User1;
+        private void InitializeUsers()
+        {
+            _users[0] = new User(new Bitmap(SymbolPath.XPath), SymbolsConst.SymbolX, true);
+            _users[1] = new User(new Bitmap(SymbolPath.OPath), SymbolsConst.SymbolO, false);
+
+            _currentUserIndex = 0;
         }
 
         public void ChangeCurrentUser()
         {
-            if (CurrentUser == User1)
+            _currentUserIndex = _currentUserIndex == 0 ? 1 : 0;
+        }
+
+        public void SwapUsersSymbols()
+        {
+            if (_users[0].UserSymbolName == SymbolsConst.SymbolX)
             {
-                CurrentUser = User2;
+                _users[0].UserSymbolName = SymbolsConst.SymbolO;
+                _users[1].UserSymbolName = SymbolsConst.SymbolX;
             }
             else
             {
-                CurrentUser = User1;
+                _users[0].UserSymbolName = SymbolsConst.SymbolX;
+                _users[1].UserSymbolName = SymbolsConst.SymbolO;
             }
         }
     }
