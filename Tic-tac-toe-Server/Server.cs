@@ -1,10 +1,7 @@
-﻿using System.Diagnostics;
-using System.IO;
-using System.Net;
+﻿using System.Net;
 using System.Net.Sockets;
 using System.Text;
-using System.Threading.Tasks;
-using System.Collections.Generic;
+using Tic_tac_toe_Server.Logging;
 
 namespace TicTacToeServer
 {
@@ -13,11 +10,14 @@ namespace TicTacToeServer
         public TcpListener listener;
         public bool IsActive { get; private set; } = false;
 
+        private ILogger logger;
+
         private const int clientsNumber = 2;
         private List<TcpClient> clients = new List<TcpClient>(clientsNumber);
 
-        public Server(IPAddress address, int port)
+        public Server(IPAddress address, int port, ILogger logger)
         {
+            this.logger = logger;
             listener = new TcpListener(address, port);
         }
 
@@ -27,12 +27,12 @@ namespace TicTacToeServer
             {
                 listener.Start();
                 IsActive = true;
-                Console.WriteLine("Server started.");
+                logger.LogMessage("\nServer started.\n");
                 await AcceptClientsAsync();
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"An error occurred: {ex.Message}");
+                logger.LogError($"\nAn error occurred: {ex.Message}\n");
             }
         }
 
@@ -42,14 +42,15 @@ namespace TicTacToeServer
             {
                 listener.Stop();
                 IsActive = false;
-                Console.WriteLine("Server stopped.");
+                logger.LogMessage("\nServer stopped.\n");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"An error occurred while stopping the server: {ex.Message}");
+                logger.LogError($"\nAn error occurred while stopping the server: {ex.Message}\n");
             }
         }
 
+        //Accept clients while clients.Count < 2
         public async Task AcceptClientsAsync()
         {
             try
@@ -58,21 +59,22 @@ namespace TicTacToeServer
                 {
                     TcpClient client = await listener.AcceptTcpClientAsync();
                     clients.Add(client);
-                    Console.WriteLine("Client connected.");
+                    logger.LogMessage("\nClient connected.\n");
                 }
-                Console.WriteLine("All clients connected.");
+                logger.LogMessage("\nAll clients connected.\n");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"An error occurred while accepting clients: {ex.Message}");
+                logger.LogError($"\nAn error occurred while accepting clients: {ex.Message}\n");
             }
         }
 
+        //Listen messages from clients
         public async Task ListenClientsAsync()
         {
             if (!IsActive)
             {
-                Console.WriteLine("Server is not active.");
+                logger.LogWarning("\nServer is not active.\n");
                 return;
             }
 
@@ -89,10 +91,11 @@ namespace TicTacToeServer
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"General problem with reading data from client: {ex.Message}");
+                logger.LogError($"\nGeneral problem with reading data from client: {ex.Message}\n");
             }
         }
 
+        //When get message from one of the clients, processes it and sends it to all clients
         private async Task HandleClientAsync(TcpClient client)
         {
             try
@@ -109,7 +112,7 @@ namespace TicTacToeServer
                     }
 
                     var message = Encoding.UTF8.GetString(buffer, 0, received);
-                    Console.WriteLine($"Received message: {message}");
+                    //Console.WriteLine($"Received message: {message}");
                     message = ProcessMessage(message);
 
                     if (!string.IsNullOrEmpty(message))
@@ -120,11 +123,11 @@ namespace TicTacToeServer
             }
             catch (IOException ex)
             {
-                Console.WriteLine($"IO problem with reading data from client: {ex.Message}");
+                logger.LogError($"\nIO problem with reading data from client: {ex.Message}\n");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"General problem with reading data from client: {ex.Message}");
+                logger.LogError($"\nGeneral problem with reading data from client: {ex.Message}\n");
             }
             finally
             {
@@ -144,17 +147,18 @@ namespace TicTacToeServer
                     try
                     {
                         await client.GetStream().WriteAsync(bytes, 0, bytes.Length);
-                        Console.WriteLine("Data has been sent to the client");
+                        logger.LogMessage("\nData has been sent to the client\n");
                     }
                     catch (Exception ex)
                     {
-                        Console.WriteLine($"Server cannot send data: {ex}");
+                        logger.LogError($"\nServer cannot send data: {ex}\n");
                         client.Close();
                     }
                 }
                 else
                 {
-                    Console.WriteLine("Client is not connected to the server.");
+
+                    logger.LogWarning("\nClient is not connected to the server.\n");
                 }
             }
         }
