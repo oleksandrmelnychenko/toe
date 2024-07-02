@@ -1,6 +1,8 @@
 ﻿using Prism.Commands;
 using ReactiveUI;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using TicTacToeGame.Client.Constants;
 using TicTacToeGame.Client.Game;
 using TicTacToeGame.Client.Net;
@@ -57,7 +59,9 @@ namespace TicTacToeGame.Client
             _gameMaster.NewAction(boardCell);
             UpdateGameStatusField();
             UpdateHistoryTextField();
-            client.SendDataAsync().GetAwaiter().GetResult();
+
+            string boardCellsJson = JsonDataSerializer.SerializeGameData(BoardCells.ToList()); 
+            client.SendDataAsync(boardCellsJson).GetAwaiter().GetResult();
         }
 
         public void OnRestartClickCommandHandler()

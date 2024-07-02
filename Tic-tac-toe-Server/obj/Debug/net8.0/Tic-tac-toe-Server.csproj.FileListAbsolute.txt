@@ -181,3 +181,6 @@ C:\Projects\Tic-tac-toe\Tic-tac-toe-Server\obj\Debug\net8.0\refint\Tic-tac-toe-S
 C:\Projects\Tic-tac-toe\Tic-tac-toe-Server\obj\Debug\net8.0\Tic-tac-toe-Server.pdb
 C:\Projects\Tic-tac-toe\Tic-tac-toe-Server\obj\Debug\net8.0\Tic-tac-toe-Server.genruntimeconfig.cache
 C:\Projects\Tic-tac-toe\Tic-tac-toe-Server\obj\Debug\net8.0\ref\Tic-tac-toe-Server.dll
+C:\Projects\Tic-tac-toe\Tic-tac-toe-Server\bin\Debug\net8.0\Newtonsoft.Json.dll
+C:\Projects\Tic-tac-toe\Tic-tac-toe-Server\obj\Debug\net8.0\Tic-tac-toe-Server.csproj.AssemblyReference.cache
+C:\Projects\Tic-tac-toe\Tic-tac-toe-Server\obj\Debug\net8.0\Tic-tac-.A428FBC1.Up2Date

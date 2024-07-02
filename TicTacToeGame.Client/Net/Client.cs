@@ -6,6 +6,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
+using TicTacToeGame.Client.Game;
 
 namespace TicTacToeGame.Client.Net
 {
@@ -39,14 +40,13 @@ namespace TicTacToeGame.Client.Net
             }
         }
 
-        public async Task SendDataAsync()
+        public async Task SendDataAsync(string jsonMessage)
         {
             if (tcpClient.Connected)
             {
                 try
                 {
-                    var message = $"Client {Id} sent data: {DateTime.Now}";
-                    var bytes = Encoding.UTF8.GetBytes(message);
+                    var bytes = Encoding.UTF8.GetBytes(jsonMessage);
                     await stream.WriteAsync(bytes, 0, bytes.Length);
 
                     Debug.WriteLine("Data has been sent to the server");
