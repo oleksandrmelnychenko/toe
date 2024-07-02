@@ -1,12 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
-using TicTacToeGame.Client.Game;
 
 namespace TicTacToeGame.Client.Net
 {
@@ -18,6 +15,8 @@ namespace TicTacToeGame.Client.Net
         private NetworkStream stream;
 
         private IPEndPoint remoteEndPoint;
+
+        public event EventHandler<string> MessageReceived;
 
         public Client(IPAddress address, int port)
         {
@@ -32,11 +31,11 @@ namespace TicTacToeGame.Client.Net
             {
                 await tcpClient.ConnectAsync(remoteEndPoint);
                 stream = tcpClient.GetStream();
-                Debug.WriteLine($"Client {Id} connect to server");
+                Debug.WriteLine($"Client {Id} connected to server");
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
-                Debug.WriteLine($"Client {Id} can not connect to server: {ex}");
+                Debug.WriteLine($"Client {Id} cannot connect to server: {ex}");
             }
         }
 
@@ -48,12 +47,11 @@ namespace TicTacToeGame.Client.Net
                 {
                     var bytes = Encoding.UTF8.GetBytes(jsonMessage);
                     await stream.WriteAsync(bytes, 0, bytes.Length);
-
                     Debug.WriteLine("Data has been sent to the server");
                 }
                 catch (Exception ex)
                 {
-                    Debug.WriteLine($"Client {Id} can not send data: {ex}");
+                    Debug.WriteLine($"Client {Id} cannot send data: {ex}");
                 }
             }
             else
@@ -62,22 +60,21 @@ namespace TicTacToeGame.Client.Net
             }
         }
 
-        public async Task<string> ReadDataAsync()
+        private async Task<string> ReadDataAsync()
         {
             if (tcpClient.Connected)
             {
                 try
                 {
-                    byte[]buffer = new byte[1024];
-                    var received = await stream.ReadAsync(buffer);
-
+                    byte[] buffer = new byte[1024];
+                    var received = await stream.ReadAsync(buffer, 0, buffer.Length);
                     var message = Encoding.UTF8.GetString(buffer, 0, received);
-                    
+                    Debug.WriteLine($"Client {Id} received message");
                     return message;
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
-                    Debug.WriteLine($"Client {Id} can not read data from server: {ex}");
+                    Debug.WriteLine($"Client {Id} cannot read data from server: {ex}");
                     return null;
                 }
             }
@@ -88,22 +85,23 @@ namespace TicTacToeGame.Client.Net
             }
         }
 
-        public async Task<string> ListenForMessagesAsync()
+        public async Task ListenForMessagesAsync()
         {
-            if(!tcpClient.Connected)
+            if (!tcpClient.Connected)
             {
                 Debug.WriteLine($"Client {Id} is not connected to the server.");
-                return null;
+                return;
             }
 
-            var message = await ReadDataAsync();
-            if(string.IsNullOrEmpty(message))
+            Debug.WriteLine($"Client {Id} is waiting for messages.");
+            while (tcpClient.Connected)
             {
-                Debug.WriteLine("Message is null.");
-                return null;
+                var message = await ReadDataAsync();
+                if (!string.IsNullOrEmpty(message))
+                {
+                    MessageReceived?.Invoke(this, message);
+                }
             }
-            return message;
         }
-
     }
 }

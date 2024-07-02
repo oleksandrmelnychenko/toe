@@ -2,6 +2,8 @@
 using System.Net.Sockets;
 using System.Text;
 using Tic_tac_toe_Server.Logging;
+using TicTacToeGame.Client.Game;
+using TicTacToeGame.Client.Net;
 
 namespace TicTacToeServer
 {
@@ -138,7 +140,7 @@ namespace TicTacToeServer
 
         public async Task SendDataToClientsAsync(string message)
         {
-            var bytes = Encoding.UTF8.GetBytes(message);
+            var bytes = Encoding.UTF8.GetBytes(message + "\n");
 
             foreach (TcpClient client in clients)
             {
@@ -157,15 +159,16 @@ namespace TicTacToeServer
                 }
                 else
                 {
-
                     logger.LogWarning("\nClient is not connected to the server.\n");
                 }
             }
         }
 
+
         private string ProcessMessage(string message)
         {
-            return $"Processed: {message}";
+            List<BoardCell> cells = JsonDataSerializer.DeserializeGameData(message);
+            return $"{message}";
         }
     }
 }

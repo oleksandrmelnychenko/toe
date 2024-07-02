@@ -3,6 +3,8 @@ using ReactiveUI;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 using TicTacToeGame.Client.Constants;
 using TicTacToeGame.Client.Game;
 using TicTacToeGame.Client.Net;
@@ -51,19 +53,19 @@ namespace TicTacToeGame.Client
             BoardCells = new ObservableCollection<BoardCell>(_gameMaster.GetActiveGameSessionBoard());
 
             UpdateGameStatusField();
+
+            this.client.MessageReceived += Client_MessageReceived;
         }
 
-        public void OnCellClickCommandHandler(BoardCell boardCell)
+        public async void OnCellClickCommandHandler(BoardCell boardCell)
         {
             UpdateBoardCell(boardCell);
             _gameMaster.NewAction(boardCell);
             UpdateGameStatusField();
             UpdateHistoryTextField();
 
-            string boardCellsJson = JsonDataSerializer.SerializeGameData(BoardCells.ToList()); 
-            client.SendDataAsync(boardCellsJson).GetAwaiter().GetResult();
-
-            string m = client.ListenForMessagesAsync().GetAwaiter().GetResult();
+            string boardCellsJson = JsonDataSerializer.SerializeGameData(BoardCells.ToList());
+            await client.SendDataAsync(boardCellsJson);
         }
 
         public void OnRestartClickCommandHandler()
@@ -73,7 +75,6 @@ namespace TicTacToeGame.Client
             UpdateGameStatusField();
         }
 
-        //Тут напевно неправильна реалізація, не зрозумів як оновлювати клітинку в GameSession так як там IReadOnlyCollection тому просто онвлюю в цьому методі
         public void UpdateBoardCell(BoardCell boardCell)
         {
             boardCell.IsDirty = true;
@@ -81,12 +82,25 @@ namespace TicTacToeGame.Client
             _boardBoardCells[boardCell.Index] = boardCell;
         }
 
+        public void UpdateGameData(string message)
+        {
+            List<BoardCell> boardCells = JsonDataSerializer.DeserializeGameData(message);
+            for (int i = 0; i < _boardBoardCells.Count; i++)
+            {
+                _boardBoardCells[i] = boardCells[i];
+            }
+        }
+
+        private void Client_MessageReceived(object? sender, string message)
+        {
+            UpdateGameData(message);
+        }
+
         public void UpdateHistoryTextField()
         {
             HistoryTextField = _gameMaster.GetHistory();
         }
 
-        //Цим методом просто оновлюю поле для статусу гри, хід юзера змінюю в GameMaster
         public void UpdateGameStatusField()
         {
             if (_gameMaster.GetStatus() == Status.PlayerTurn || _gameMaster.GetStatus() == Status.Start)
@@ -103,4 +117,5 @@ namespace TicTacToeGame.Client
             }
         }
     }
+
 }

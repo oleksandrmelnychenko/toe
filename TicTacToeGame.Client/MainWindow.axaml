@@ -5,7 +5,7 @@
         xmlns:client="clr-namespace:TicTacToeGame.Client"
 		xmlns:game="clr-namespace:TicTacToeGame.Client.Game"
 		xmlns:vm="using:TicTacToeGame.Client"
-        mc:Ignorable="d" Width="900" Height="620" WindowStartupLocation="CenterScreen" CanResize="True"
+        mc:Ignorable="d" Width="900" Height="620" WindowStartupLocation="CenterScreen" CanResize="False"
         x:DataType="client:MainViewModel"
         x:Class="TicTacToeGame.Client.MainWindow"
         Title="Tic_tac_toe">
