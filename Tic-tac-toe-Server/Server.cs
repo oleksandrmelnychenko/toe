@@ -1,8 +1,12 @@
-﻿using System.Net;
+﻿using System.Diagnostics;
+using System.IO;
+using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading.Tasks;
+using System.Collections.Generic;
 
-namespace Tic_tac_toe_Server
+namespace TicTacToeServer
 {
     public class Server
     {
@@ -17,14 +21,14 @@ namespace Tic_tac_toe_Server
             listener = new TcpListener(address, port);
         }
 
-        public void StartServer()
+        public async Task StartServerAsync()
         {
             try
             {
                 listener.Start();
                 IsActive = true;
                 Console.WriteLine("Server started.");
-                AcceptClientsAsync().GetAwaiter().GetResult();
+                await AcceptClientsAsync();
             }
             catch (Exception ex)
             {
@@ -52,9 +56,9 @@ namespace Tic_tac_toe_Server
             {
                 while (clients.Count < clientsNumber)
                 {
-                    TcpClient client = new TcpClient();
-                    client = await listener.AcceptTcpClientAsync();
+                    TcpClient client = await listener.AcceptTcpClientAsync();
                     clients.Add(client);
+                    Console.WriteLine("Client connected.");
                 }
                 Console.WriteLine("All clients connected.");
             }
@@ -81,7 +85,7 @@ namespace Tic_tac_toe_Server
                     clientTasks.Add(HandleClientAsync(client));
                 }
 
-                await Task.WhenAll(clientTasks);
+                await Task.WhenAny(clientTasks);
             }
             catch (Exception ex)
             {
@@ -94,21 +98,23 @@ namespace Tic_tac_toe_Server
             try
             {
                 NetworkStream stream = client.GetStream();
-                var buffer = new byte[1_024];
+                var buffer = new byte[1024];
 
-                while (true)
+                while (client.Connected)
                 {
-                    int received = await stream.ReadAsync(buffer);
+                    int received = await stream.ReadAsync(buffer, 0, buffer.Length);
                     if (received == 0)
                     {
                         break;
                     }
 
                     var message = Encoding.UTF8.GetString(buffer, 0, received);
+                    Console.WriteLine($"Received message: {message}");
+                    message = ProcessMessage(message);
 
                     if (!string.IsNullOrEmpty(message))
                     {
-                        Console.WriteLine($"{message}");
+                        await SendDataToClientsAsync(message);
                     }
                 }
             }
@@ -120,8 +126,42 @@ namespace Tic_tac_toe_Server
             {
                 Console.WriteLine($"General problem with reading data from client: {ex.Message}");
             }
+            finally
+            {
+                clients.Remove(client);
+                client.Close();
+            }
         }
 
+        public async Task SendDataToClientsAsync(string message)
+        {
+            var bytes = Encoding.UTF8.GetBytes(message);
 
+            foreach (TcpClient client in clients)
+            {
+                if (client.Connected)
+                {
+                    try
+                    {
+                        await client.GetStream().WriteAsync(bytes, 0, bytes.Length);
+                        Console.WriteLine("Data has been sent to the client");
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Server cannot send data: {ex}");
+                        client.Close();
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("Client is not connected to the server.");
+                }
+            }
+        }
+
+        private string ProcessMessage(string message)
+        {
+            return $"Processed: {message}";
+        }
     }
 }

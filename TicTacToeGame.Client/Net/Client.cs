@@ -61,5 +61,49 @@ namespace TicTacToeGame.Client.Net
                 Debug.WriteLine($"Client {Id} is not connected to the server.");
             }
         }
+
+        public async Task<string> ReadDataAsync()
+        {
+            if (tcpClient.Connected)
+            {
+                try
+                {
+                    byte[]buffer = new byte[1024];
+                    var received = await stream.ReadAsync(buffer);
+
+                    var message = Encoding.UTF8.GetString(buffer, 0, received);
+                    
+                    return message;
+                }
+                catch(Exception ex)
+                {
+                    Debug.WriteLine($"Client {Id} can not read data from server: {ex}");
+                    return null;
+                }
+            }
+            else
+            {
+                Debug.WriteLine($"Client {Id} is not connected to the server.");
+                return null;
+            }
+        }
+
+        public async Task<string> ListenForMessagesAsync()
+        {
+            if(!tcpClient.Connected)
+            {
+                Debug.WriteLine($"Client {Id} is not connected to the server.");
+                return null;
+            }
+
+            var message = await ReadDataAsync();
+            if(string.IsNullOrEmpty(message))
+            {
+                Debug.WriteLine("Message is null.");
+                return null;
+            }
+            return message;
+        }
+
     }
 }

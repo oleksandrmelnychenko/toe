@@ -8,8 +8,8 @@ namespace Tic_tac_toe_Server
     {
         static void Main(string[] args)
         {
-            Server server = new Server(IPAddress.Parse("127.0.0.1"), 8888);
-            server.StartServer();
+            TicTacToeServer.Server server = new TicTacToeServer.Server(IPAddress.Parse("127.0.0.1"), 8888);
+            server.StartServerAsync().GetAwaiter().GetResult();
             while (server.IsActive == true)
             {
                 server.ListenClientsAsync().GetAwaiter().GetResult();

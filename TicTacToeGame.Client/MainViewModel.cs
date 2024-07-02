@@ -62,6 +62,8 @@ namespace TicTacToeGame.Client
 
             string boardCellsJson = JsonDataSerializer.SerializeGameData(BoardCells.ToList()); 
             client.SendDataAsync(boardCellsJson).GetAwaiter().GetResult();
+
+            string m = client.ListenForMessagesAsync().GetAwaiter().GetResult();
         }
 
         public void OnRestartClickCommandHandler()
