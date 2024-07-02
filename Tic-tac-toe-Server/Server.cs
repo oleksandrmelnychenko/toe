@@ -14,7 +14,6 @@ namespace Tic_tac_toe_Server
         public Server(IPAddress address, int port)
         {
             listener = new TcpListener(address, port);
-
         }
 
         public void StartServer()
