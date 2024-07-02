@@ -1,12 +1,13 @@
 ﻿using System.Net;
 using System.Net.Sockets;
+using System.Text;
 
 namespace Tic_tac_toe_Server
 {
     public class Server
     {
         public TcpListener listener;
-        private bool IsActive = false;
+        public bool IsActive { get; private set; } = false;
 
         private const int clientsNumber = 2;
         private List<TcpClient> clients = new List<TcpClient>(clientsNumber);
@@ -63,35 +64,64 @@ namespace Tic_tac_toe_Server
             }
         }
 
+        public async Task ListenClientsAsync()
+        {
+            if (!IsActive)
+            {
+                Console.WriteLine("Server is not active.");
+                return;
+            }
 
-        //public string ListenClients()
-        //{
-        //    if(IsActive)
-        //    {
-        //        try
-        //        {
-        //            TcpClient handler = listener.AcceptTcpClient();
-        //            NetworkStream stream = handler.GetStream();
+            try
+            {
+                List<Task> clientTasks = new List<Task>();
 
-        //            var buffer = new byte[1_024];
-        //            int received = stream.Read(buffer);
-        //            var message = Encoding.UTF8.GetString(buffer, 0, received);
+                foreach (TcpClient client in clients)
+                {
+                    clientTasks.Add(HandleClientAsync(client));
+                }
 
-        //            Console.WriteLine($"{message}");
-        //            return message;
-        //        }
-        //        catch (Exception ex)
-        //        {
-        //            Console.WriteLine($"Problem with reading data from client: {ex.Message}");
-        //            return " ";
-        //        }
-        //    }
-        //    else
-        //    {
-        //        Console.WriteLine("Server is not active.");
-        //        return " ";
-        //    }
-        //}
+                await Task.WhenAll(clientTasks);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"General problem with reading data from client: {ex.Message}");
+            }
+        }
+
+        private async Task HandleClientAsync(TcpClient client)
+        {
+            try
+            {
+                NetworkStream stream = client.GetStream();
+                var buffer = new byte[1_024];
+
+                while (true)
+                {
+                    int received = await stream.ReadAsync(buffer);
+                    if (received == 0)
+                    {
+                        break;
+                    }
+
+                    var message = Encoding.UTF8.GetString(buffer, 0, received);
+
+                    if (!string.IsNullOrEmpty(message))
+                    {
+                        Console.WriteLine($"{message}");
+                    }
+                }
+            }
+            catch (IOException ex)
+            {
+                Console.WriteLine($"IO problem with reading data from client: {ex.Message}");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"General problem with reading data from client: {ex.Message}");
+            }
+        }
+
 
     }
 }

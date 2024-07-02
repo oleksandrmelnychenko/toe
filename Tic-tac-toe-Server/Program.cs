@@ -10,7 +10,10 @@ namespace Tic_tac_toe_Server
         {
             Server server = new Server(IPAddress.Parse("127.0.0.1"), 8888);
             server.StartServer();
-            //server.ListenClients();
+            while (server.IsActive == true)
+            {
+                server.ListenClientsAsync().GetAwaiter().GetResult();
+            }
         }
     }
 }

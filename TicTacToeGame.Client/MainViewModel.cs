@@ -3,6 +3,7 @@ using ReactiveUI;
 using System.Collections.ObjectModel;
 using TicTacToeGame.Client.Constants;
 using TicTacToeGame.Client.Game;
+using TicTacToeGame.Client.Net;
 
 namespace TicTacToeGame.Client
 {
@@ -10,6 +11,7 @@ namespace TicTacToeGame.Client
     {
         private string? _gameStatusField;
         private string? _historyTextField;
+        private Net.Client client;
 
         public string? GameStatusField
         {
@@ -36,11 +38,12 @@ namespace TicTacToeGame.Client
         public DelegateCommand<BoardCell> OnCellCommand { get; init; }
         public DelegateCommand OnRestartCommand { get; init; }
 
-        public MainViewModel()
+        public MainViewModel(Net.Client client)
         {
             OnCellCommand = new DelegateCommand<BoardCell>(OnCellClickCommandHandler);
             OnRestartCommand = new DelegateCommand(OnRestartClickCommandHandler);
 
+            this.client = client;
             _gameMaster.StartGame();
 
             BoardCells = new ObservableCollection<BoardCell>(_gameMaster.GetActiveGameSessionBoard());
@@ -54,6 +57,7 @@ namespace TicTacToeGame.Client
             _gameMaster.NewAction(boardCell);
             UpdateGameStatusField();
             UpdateHistoryTextField();
+            client.SendDataAsync().GetAwaiter().GetResult();
         }
 
         public void OnRestartClickCommandHandler()
