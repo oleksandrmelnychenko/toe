@@ -64,8 +64,9 @@ namespace TicTacToeGame.Client
             UpdateGameStatusField();
             UpdateHistoryTextField();
 
-            string boardCellsJson = JsonDataSerializer.SerializeGameData(BoardCells.ToList());
-            await client.SendDataAsync(boardCellsJson);
+            PlayerMove playerMove = new PlayerMove(client.ClientId, boardCell);
+            string moveJson = JsonDataSerializer.SerializeMove(playerMove);
+            await client.SendDataAsync(moveJson);
         }
 
         public void OnRestartClickCommandHandler()
@@ -84,7 +85,7 @@ namespace TicTacToeGame.Client
 
         public void UpdateGameData(string message)
         {
-            List<BoardCell> boardCells = JsonDataSerializer.DeserializeGameData(message);
+            List<BoardCell> boardCells = JsonDataSerializer.DeserializeGameBoardData(message);
             for (int i = 0; i < _boardBoardCells.Count; i++)
             {
                 _boardBoardCells[i] = boardCells[i];

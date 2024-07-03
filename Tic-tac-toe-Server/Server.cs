@@ -164,10 +164,9 @@ namespace TicTacToeServer
             }
         }
 
-
         private string ProcessMessage(string message)
         {
-            List<BoardCell> cells = JsonDataSerializer.DeserializeGameData(message);
+            PlayerMove move = JsonDataSerializer.DeserializeMove(message);
             return $"{message}";
         }
     }
