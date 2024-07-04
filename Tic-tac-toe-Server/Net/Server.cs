@@ -25,7 +25,7 @@ namespace Tic_tac_toe_Server.Net
             listener = new TcpListener(address, port);
         }
 
-        public async Task StartServerAsync(UserService userService)
+        public async Task StartServerAsync(PlayerManager userService)
         {
             try
             {
@@ -55,7 +55,7 @@ namespace Tic_tac_toe_Server.Net
         }
 
         //Accept clients while clients.Count < 2
-        public async Task AcceptClientsAsync(UserService userService)
+        public async Task AcceptClientsAsync(PlayerManager userService)
         {
             try
             {

@@ -6,22 +6,22 @@ using TicTacToeGame.Client.Symbols;
 
 namespace TicTacToeGame.Client.Game
 {
-    public class UserService
+    public class PlayerManager
     {
-        public readonly User[] _users = new User[2];
+        public readonly Player[] _users = new Player[2];
         private int _currentUserIndex;
 
-        public User CurrentUser => _users[_currentUserIndex];
+        public Player CurrentUser => _users[_currentUserIndex];
 
-        public UserService()
+        public PlayerManager()
         {
             InitializeUsers();
         }
 
         private void InitializeUsers()
         {
-            _users[0] = new User(SymbolsConst.SymbolX, true, Guid.NewGuid());
-            _users[1] = new User(SymbolsConst.SymbolO, false, Guid.NewGuid());
+            _users[0] = new Player(SymbolsConst.SymbolX, true, Guid.NewGuid());
+            _users[1] = new Player(SymbolsConst.SymbolO, false, Guid.NewGuid());
 
             _currentUserIndex = 0;
         }

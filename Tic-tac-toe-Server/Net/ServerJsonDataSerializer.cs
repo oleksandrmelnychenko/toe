@@ -39,7 +39,7 @@ namespace TicTacToeGame.Client.Net
             return JsonConvert.DeserializeObject<ServerGameMessage>(serverMessage)!;
         }
 
-        public static string SerializeUser(User user)
+        public static string SerializeUser(Player user)
         {
             return JsonConvert.SerializeObject(user);
         }

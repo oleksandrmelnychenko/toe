@@ -3,12 +3,16 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:client="clr-namespace:TicTacToeGame.Client"
-		xmlns:game="clr-namespace:TicTacToeGame.Client.Game"
+        xmlns:game="clr-namespace:TicTacToeGame.Client.Game"
 		xmlns:vm="using:TicTacToeGame.Client"
-        mc:Ignorable="d" Width="900" Height="620" WindowStartupLocation="CenterScreen" CanResize="False"
-        x:DataType="client:MainViewModel"
-        x:Class="TicTacToeGame.Client.MainWindow"
-        Title="Tic_tac_toe">
+		mc:Ignorable="d" Width="900" Height="620" WindowStartupLocation="CenterScreen" CanResize="False"
+		x:DataType="client:MainViewModel"
+		x:Class="TicTacToeGame.Client.MainWindow"
+		Title="Tic_tac_toe">
+
+	<Window.Resources>
+		<game:MultiBoolToBoolConverter x:Key="MultiBoolToBoolConverter"/>
+	</Window.Resources>
 
 	<DockPanel x:Name="Root">
 		<StackPanel Name="GameField" Margin="10" DockPanel.Dock="Left">
@@ -20,7 +24,13 @@
 				</ItemsControl.ItemsPanel>
 				<ItemsControl.ItemTemplate>
 					<DataTemplate DataType="game:BoardCell">
-						<Button IsEnabled="{Binding !IsDirty}" Width="200" Height="200" Command="{Binding #Root.((vm:MainViewModel)DataContext).OnCellClickCommandHandler}" CommandParameter="{Binding .}">
+						<Button Width="200" Height="200" Command="{Binding #Root.((vm:MainViewModel)DataContext).OnCellClickCommandHandler}" CommandParameter="{Binding .}">
+							<Button.IsEnabled>
+								<MultiBinding Converter="{StaticResource MultiBoolToBoolConverter}">
+									<Binding Path="IsDirty"/>
+									<Binding Path="#Root.((vm:MainViewModel)DataContext).IsActive"/>
+								</MultiBinding>
+							</Button.IsEnabled>
 							<TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="128" Text="{Binding Value}"></TextBlock>
 						</Button>
 					</DataTemplate>

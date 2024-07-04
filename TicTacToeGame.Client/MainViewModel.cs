@@ -1,10 +1,6 @@
 ﻿using Prism.Commands;
 using ReactiveUI;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Threading.Tasks;
 using Tic_tac_toe_Server.Net;
 using TicTacToeGame.Client.Constants;
 using TicTacToeGame.Client.Game;
@@ -18,6 +14,7 @@ namespace TicTacToeGame.Client
         private string? _historyTextField;
         private Net.Client client;
         private ushort cellsCount = 9;
+        public bool IsActive { get; set; } = false;
 
         private Status gameStatus;
 
@@ -129,9 +126,9 @@ namespace TicTacToeGame.Client
 
         public string GetCurrentGameSymbol()
         {
-            if(client.User.UserSymbolName == SymbolsConst.SymbolX)
+            if (client.User.UserSymbolName == SymbolsConst.SymbolX)
             {
-                if(client.User.IsActived)
+                if (client.User.IsActived)
                 {
                     return SymbolsConst.SymbolX;
                 }
@@ -140,11 +137,11 @@ namespace TicTacToeGame.Client
                     return SymbolsConst.SymbolO;
                 }
             }
-            else if(client.User.UserSymbolName == SymbolsConst.SymbolO)
+            else if (client.User.UserSymbolName == SymbolsConst.SymbolO)
             {
-                if(client.User.IsActived)
+                if (client.User.IsActived)
                 {
-                    return SymbolsConst.SymbolO; 
+                    return SymbolsConst.SymbolO;
                 }
                 else
                 {

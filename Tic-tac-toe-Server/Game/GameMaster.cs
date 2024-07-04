@@ -10,7 +10,7 @@ public class GameMaster
 
     private GameSession? _activeGameSession;
 
-    private UserService _userService = new();
+    private PlayerManager _userService = new();
 
     /// <summary>
     ///     The GameMaster class represents the game master that manages the Tic Tac Toe game.
@@ -46,12 +46,12 @@ public class GameMaster
         }
     }
 
-    public User GetCurrentUser()
+    public Player GetCurrentUser()
     {
         return _userService.CurrentUser;
     }
 
-    public UserService GetUserService()
+    public PlayerManager GetUserService()
     {
         return _userService;
     }

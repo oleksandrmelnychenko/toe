@@ -14,7 +14,7 @@ namespace TicTacToeGame.Client.Net
         private TcpClient tcpClient;
         public Guid ClientId { get; init; }
 
-        public User User { get; private set; }
+        public Player User { get; private set; }
 
         private NetworkStream stream;
 

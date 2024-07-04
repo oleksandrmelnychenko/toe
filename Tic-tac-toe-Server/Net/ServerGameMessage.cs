@@ -15,7 +15,7 @@ namespace Tic_tac_toe_Server.Net
 
         public string GameHistory { get; set; }
 
-        public User? User { get; set; }
+        public Player? User { get; set; }
 
         public ServerGameMessage(Status gameStatus, List<BoardCell> boardCells, string gameHistory)
         {
@@ -23,7 +23,7 @@ namespace Tic_tac_toe_Server.Net
             BoardCells = boardCells;
             GameHistory = gameHistory;
         }
-        public ServerGameMessage(Status gameStatus, List<BoardCell> boardCells, string gameHistory, User user)
+        public ServerGameMessage(Status gameStatus, List<BoardCell> boardCells, string gameHistory, Player user)
         {
             Status = gameStatus;
             BoardCells = boardCells;

@@ -3,7 +3,7 @@ using System;
 
 namespace TicTacToeGame.Client.Models
 {
-    public class User(string userSymbolName, bool isActived, Guid id)
+    public class Player(string userSymbolName, bool isActived, Guid id)
     {
         public Guid Id { get; set; } = id;
         public string UserSymbolName { get; set; } = userSymbolName;
