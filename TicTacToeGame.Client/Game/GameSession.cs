@@ -7,17 +7,17 @@ public class GameSession(IReadOnlyCollection<BoardCell> boardCells)
 {
     public IReadOnlyCollection<BoardCell> BoardCells { get; set; } = boardCells;
 
-    public Status Status { get; set; } = Status.Start;
+    public Status Status { get; private set; } = Status.Start;
 
     public GameHistory History { get; set; } = new();
 
     public void HandleAction(GameAction action)
     {
         History.AddAction(action);
-        UpdateGameStatus();
+        UpdateStatus();
     }
 
-    public void UpdateGameStatus()
+    public void UpdateStatus()
     {
         if (OutcomeDeterminer.IsWinner(BoardCells))
         {

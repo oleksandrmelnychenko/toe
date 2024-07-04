@@ -38,14 +38,6 @@ public class GameMaster
         HandleGameStatus();
     }
 
-    private void HandleGameStatus()
-    {
-        if (_activeGameSession!.Status == Status.PlayerTurn)
-        {
-            _userService.ChangeCurrentUser();
-        }
-    }
-
     public User GetCurrentUser()
     {
         return _userService.CurrentUser;
@@ -66,8 +58,16 @@ public class GameMaster
     public string GetHistory()
     {
         ArgumentNullException.ThrowIfNull(nameof(_activeGameSession));
-        return _activeGameSession!.History.HistoryField;
+        return _activeGameSession!.History.History;
     }
-    
+
+    private void HandleGameStatus()
+    {
+        if (_activeGameSession!.Status == Status.PlayerTurn)
+        {
+            _userService.ChangeCurrentUser();
+        }
+    }
+
     private static List<BoardCell> CreateNewBoard() => CellFactory.Build(CellsCount);
 }

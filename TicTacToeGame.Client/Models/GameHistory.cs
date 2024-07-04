@@ -6,29 +6,29 @@ namespace TicTacToeGame.Client.Models
 {
     public class GameHistory
     {
-        private List<GameAction> moves;
+        private List<GameAction> actions;
 
-        public string HistoryField { get; set; } = string.Empty;
+        public string History { get; set; } = string.Empty;
 
         public GameHistory()
         {
-            moves = new List<GameAction>();
+            actions = new List<GameAction>();
         }
 
         public void AddAction(GameAction gameAction)
         {
-            moves.Add(gameAction);
-            HistoryField = HistoryField + $"Player {gameAction.User.UserSymbolName} chose box {gameAction.BoxPosition}.\n";
+            actions.Add(gameAction);
+            History = History + $"Player {gameAction.User.UserSymbolName} chose box {gameAction.CellIndex}.\n";
         }
 
         public List<GameAction> GetAction()
         {
-            return moves;
+            return actions;
         }
 
         public void ClearHistory()
         {
-            moves.Clear();
+            actions.Clear();
         }
 
     }

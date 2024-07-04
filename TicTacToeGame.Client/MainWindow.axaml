@@ -29,9 +29,9 @@
 		</StackPanel>
 
 		<StackPanel VerticalAlignment="Center" Name="ButtonsField" DockPanel.Dock="Right" Width="350">
-			<TextBlock FontSize="24" HorizontalAlignment="Center" Margin="20" Text="{Binding GameStatusField}">
+			<TextBlock FontSize="24" HorizontalAlignment="Center" Margin="20" Text="{Binding GameStatus}">
 			</TextBlock>
-			<TextBox Height="300" Width="200" AcceptsReturn="True" Margin="20" TextWrapping="Wrap" Text="{Binding HistoryTextField}"/>
+			<TextBox Height="300" Width="200" AcceptsReturn="True" Margin="20" TextWrapping="Wrap" Text="{Binding ActionHistory}"/>
 			<Button HorizontalAlignment="Center" Name="RestartButton" Command="{Binding OnRestartCommand}">
 				Restart
 			</Button>

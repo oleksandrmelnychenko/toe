@@ -8,30 +8,28 @@ namespace TicTacToeGame.Client
 {
     public sealed class MainViewModel : ReactiveObject
     {
-        private string? _gameStatusField;
-        private string? _historyTextField;
-
-        public string? GameStatusField
-        {
-            get => _gameStatusField;
-            set => this.RaiseAndSetIfChanged(ref _gameStatusField, value);
-        }
-
-        public string? HistoryTextField
-        {
-            get => _historyTextField;
-            set => this.RaiseAndSetIfChanged(ref _historyTextField, value);
-        }
-
+        private string? _gameStatus;
+        private string? _actionHistory;
         private ObservableCollection<BoardCell> _boardBoardCells = null!;
+        private readonly GameMaster _gameMaster = new();
+
+        public string? GameStatus
+        {
+            get => _gameStatus;
+            set => this.RaiseAndSetIfChanged(ref _gameStatus, value);
+        }
+
+        public string? ActionHistory
+        {
+            get => _actionHistory;
+            set => this.RaiseAndSetIfChanged(ref _actionHistory, value);
+        }
 
         public ObservableCollection<BoardCell> BoardCells
         {
             get => _boardBoardCells;
             set => this.RaiseAndSetIfChanged(ref _boardBoardCells, value);
         }
-
-        private readonly GameMaster _gameMaster = new();
 
         public DelegateCommand<BoardCell> OnCellCommand { get; init; }
         public DelegateCommand OnRestartCommand { get; init; }
@@ -45,52 +43,56 @@ namespace TicTacToeGame.Client
 
             BoardCells = new ObservableCollection<BoardCell>(_gameMaster.GetActiveGameSessionBoard());
 
-            UpdateGameStatusField();
+            UpdateGameStatus();
         }
 
-        public void OnCellClickCommandHandler(BoardCell boardCell)
+        public void OnCellClickCommandHandler(BoardCell boardCell) =>
+            ApplyGameAction(boardCell);
+
+        public void OnRestartClickCommandHandler() =>
+            RestartGame();
+
+        public void UpdateHistory()
         {
-            UpdateBoardCell(boardCell);
-            _gameMaster.NewAction(boardCell);
-            UpdateGameStatusField();
-            UpdateHistoryTextField();
+            ActionHistory = _gameMaster.GetHistory();
         }
 
-        public void OnRestartClickCommandHandler()
+        //Цим методом просто оновлюю поле для статусу гри, хід юзера змінюю в GameMaster
+        public void UpdateGameStatus()
+        {
+            Status status = _gameMaster.GetStatus();
+            string username = _gameMaster.GetCurrentUser().UserSymbolName;
+
+            GameStatus = status switch
+            {
+                Status.PlayerTurn or Status.Start => GameStatusConst.PlayerTurn + " " + username,
+                Status.Draw => GameStatusConst.Draw,
+                Status.Finish => GameStatusConst.EndOfGame + " " + username,
+                _ => GameStatus
+            };
+        }
+
+        private void RestartGame()
         {
             _gameMaster.StartGame();
             BoardCells = new ObservableCollection<BoardCell>(_gameMaster.GetActiveGameSessionBoard());
-            UpdateGameStatusField();
+            UpdateGameStatus();
+        }
+
+        private void ApplyGameAction(BoardCell boardCell)
+        {
+            UpdateBoardCell(boardCell);
+            _gameMaster.NewAction(boardCell);
+            UpdateGameStatus();
+            UpdateHistory();
         }
 
         //Тут напевно неправильна реалізація, не зрозумів як оновлювати клітинку в GameSession так як там IReadOnlyCollection тому просто онвлюю в цьому методі
-        public void UpdateBoardCell(BoardCell boardCell)
+        private void UpdateBoardCell(BoardCell boardCell)
         {
             boardCell.IsDirty = true;
             boardCell.Value = _gameMaster.GetCurrentUser().UserSymbolName;
             _boardBoardCells[boardCell.Index] = boardCell;
-        }
-
-        public void UpdateHistoryTextField()
-        {
-            HistoryTextField = _gameMaster.GetHistory();
-        }
-
-        //Цим методом просто оновлюю поле для статусу гри, хід юзера змінюю в GameMaster
-        public void UpdateGameStatusField()
-        {
-            if (_gameMaster.GetStatus() == Status.PlayerTurn || _gameMaster.GetStatus() == Status.Start)
-            {
-                GameStatusField = GameStatusConst.PlayerTurn + " " + _gameMaster.GetCurrentUser().UserSymbolName;
-            }
-            else if (_gameMaster.GetStatus() == Status.Finish)
-            {
-                GameStatusField = GameStatusConst.EndOfGame + " " + _gameMaster.GetCurrentUser().UserSymbolName;
-            }
-            else if (_gameMaster.GetStatus() == Status.Draw)
-            {
-                GameStatusField = GameStatusConst.Draw;
-            }
         }
     }
 }
