@@ -14,7 +14,7 @@ namespace TicTacToeGame.Client.Net
         private TcpClient tcpClient;
         public Guid ClientId { get; init; }
 
-        public Player User { get; private set; }
+        public Player Player { get; private set; }
 
         private NetworkStream stream;
 
@@ -117,12 +117,12 @@ namespace TicTacToeGame.Client.Net
             }
 
             Debug.WriteLine($"Client {ClientId} is waiting for user info.");
-            while (User == null)
+            while (Player == null)
             {
                 var message = await ReadDataAsync();
                 if (message != null)
                 {
-                    User = ClientJsonDataSerializer.DeserializeUser(message);
+                    Player = ClientJsonDataSerializer.DeserializeUser(message);
                 }
             }
         }

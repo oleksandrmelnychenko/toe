@@ -1,6 +1,7 @@
 ﻿using Prism.Commands;
 using ReactiveUI;
 using System.Collections.ObjectModel;
+using System.Threading.Tasks;
 using Tic_tac_toe_Server.Net;
 using TicTacToeGame.Client.Constants;
 using TicTacToeGame.Client.Game;
@@ -10,35 +11,33 @@ namespace TicTacToeGame.Client
 {
     public sealed class MainViewModel : ReactiveObject
     {
-        private string? _gameStatusField = GameStatusConst.PlayerTurn + " X";
-        private string? _historyTextField;
+        private string? _gameStatus = GameStatusConst.PlayerTurn + " X";
+        private string? _actionHistory;
         private Net.Client client;
         private ushort cellsCount = 9;
-        public bool IsActive { get; set; } = false;
+
+        private ObservableCollection<BoardCell> _boardBoardCells = null!;
 
         private Status gameStatus;
 
-        public string? GameStatusField
+        public bool IsActiveBoard { get; set; }
+        public string? GameStatus
         {
-            get => _gameStatusField;
-            set => this.RaiseAndSetIfChanged(ref _gameStatusField, value);
+            get => _gameStatus;
+            set => this.RaiseAndSetIfChanged(ref _gameStatus, value);
         }
 
-        public string? HistoryTextField
+        public string? ActionHistory
         {
-            get => _historyTextField;
-            set => this.RaiseAndSetIfChanged(ref _historyTextField, value);
+            get => _actionHistory;
+            set => this.RaiseAndSetIfChanged(ref _actionHistory, value);
         }
-
-        private ObservableCollection<BoardCell> _boardBoardCells = null!;
 
         public ObservableCollection<BoardCell> BoardCells
         {
             get => _boardBoardCells;
             set => this.RaiseAndSetIfChanged(ref _boardBoardCells, value);
         }
-
-        private readonly GameMaster _gameMaster = new();
 
         public DelegateCommand<BoardCell> OnCellCommand { get; init; }
         public DelegateCommand OnRestartCommand { get; init; }
@@ -55,24 +54,19 @@ namespace TicTacToeGame.Client
             this.client.MessageReceived += Client_MessageReceived;
         }
 
-        public async void OnCellClickCommandHandler(BoardCell boardCell)
-        {
-            UpdateBoardCell(boardCell);
-            ClientGameMessage playerMove = new ClientGameMessage(client.ClientId, boardCell);
-            string moveJson = ClientJsonDataSerializer.SerializeMove(playerMove);
-            await client.SendDataAsync(moveJson);
-        }
+        public async void OnCellClickCommandHandler(BoardCell boardCell) =>
+            await ApplyGameAction(boardCell);
 
         public void OnRestartClickCommandHandler()
         {
             BoardCells = new ObservableCollection<BoardCell>(CellFactory.Build(cellsCount));
-            UpdateGameStatusField();
+            UpdateGameStatus();
         }
 
         public void UpdateBoardCell(BoardCell boardCell)
         {
             boardCell.IsDirty = true;
-            boardCell.Value = client.User.UserSymbolName;
+            boardCell.Value = client.Player.UserSymbolName;
             _boardBoardCells[boardCell.Index] = boardCell;
         }
 
@@ -80,7 +74,7 @@ namespace TicTacToeGame.Client
         {
             ServerGameMessage serverMessage = ClientJsonDataSerializer.DeserializeServerMessage(message);
             gameStatus = serverMessage.GameStatus;
-            HistoryTextField = serverMessage.GameHistory;
+            ActionHistory = serverMessage.GameHistory;
             for (int i = 0; i < _boardBoardCells.Count; i++)
             {
                 _boardBoardCells[i] = serverMessage.BoardCells[i];
@@ -91,44 +85,39 @@ namespace TicTacToeGame.Client
 
         public void UpdateUserData(ServerGameMessage serverMessage)
         {
-            if (client.User.Id == serverMessage.User.Id)
+            if (client.Player.Id == serverMessage.User.Id)
             {
-                client.User.IsActived = true;
+                client.Player.IsActived = true;
+                IsActiveBoard = true;
             }
             else
             {
-                client.User.IsActived = false;
+                client.Player.IsActived = false;
+                IsActiveBoard = false;
             }
 
-            UpdateGameStatusField();
+            UpdateGameStatus();
         }
 
-        private void Client_MessageReceived(object? sender, string message)
+        public void UpdateGameStatus()
         {
-            UpdateGameData(message);
-        }
+            Status status = gameStatus;
+            string symbol = GetCurrentGameSymbol();
 
-        public void UpdateGameStatusField()
-        {
-            if (gameStatus == Status.PlayerTurn || gameStatus == Status.Start)
+            GameStatus = status switch
             {
-                GameStatusField = GameStatusConst.PlayerTurn + " " + GetCurrentGameSymbol();
-            }
-            else if (gameStatus == Status.Finish)
-            {
-                GameStatusField = GameStatusConst.EndOfGame + " " + client.User.UserSymbolName;
-            }
-            else if (gameStatus == Status.Draw)
-            {
-                GameStatusField = GameStatusConst.Draw;
-            }
+                Status.PlayerTurn or Status.Start => GameStatusConst.PlayerTurn + " " + symbol,
+                Status.Draw => GameStatusConst.Draw,
+                Status.Finish => GameStatusConst.EndOfGame + " " + symbol,
+                _ => GameStatus
+            };
         }
 
         public string GetCurrentGameSymbol()
         {
-            if (client.User.UserSymbolName == SymbolsConst.SymbolX)
+            if (client.Player.UserSymbolName == SymbolsConst.SymbolX)
             {
-                if (client.User.IsActived)
+                if (client.Player.IsActived)
                 {
                     return SymbolsConst.SymbolX;
                 }
@@ -137,9 +126,9 @@ namespace TicTacToeGame.Client
                     return SymbolsConst.SymbolO;
                 }
             }
-            else if (client.User.UserSymbolName == SymbolsConst.SymbolO)
+            else if (client.Player.UserSymbolName == SymbolsConst.SymbolO)
             {
-                if (client.User.IsActived)
+                if (client.Player.IsActived)
                 {
                     return SymbolsConst.SymbolO;
                 }
@@ -153,6 +142,20 @@ namespace TicTacToeGame.Client
                 return "unknown player!";
             }
         }
+
+        private async Task ApplyGameAction(BoardCell boardCell)
+        {
+            UpdateBoardCell(boardCell);
+            ClientGameMessage playerMove = new ClientGameMessage(client.ClientId, boardCell);
+            string moveJson = ClientJsonDataSerializer.SerializeMove(playerMove);
+            await client.SendDataAsync(moveJson);
+        }
+
+        private void Client_MessageReceived(object? sender, string message)
+        {
+            UpdateGameData(message);
+        }
+
     }
 
 }

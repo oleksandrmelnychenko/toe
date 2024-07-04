@@ -8,7 +8,7 @@ namespace TicTacToeGame.Client.Models
     {
         private List<GameAction> moves;
 
-        public string HistoryField { get; set; } = string.Empty;
+        public string ActionHistory { get; set; } = string.Empty;
 
         public GameHistory()
         {
@@ -18,7 +18,7 @@ namespace TicTacToeGame.Client.Models
         public void AddAction(GameAction gameAction)
         {
             moves.Add(gameAction);
-            HistoryField = HistoryField + $"Player {gameAction.User.UserSymbolName} chose box {gameAction.BoxPosition}.\n";
+            ActionHistory = ActionHistory + $"Player {gameAction.User.UserSymbolName} chose box {gameAction.BoxPosition}.\n";
         }
 
         public List<GameAction> GetAction()

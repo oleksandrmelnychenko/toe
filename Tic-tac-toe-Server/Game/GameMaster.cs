@@ -71,7 +71,7 @@ public class GameMaster
     public string GetHistory()
     {
         ArgumentNullException.ThrowIfNull(nameof(_activeGameSession));
-        return _activeGameSession!.History.HistoryField;
+        return _activeGameSession!.History.ActionHistory;
     }
     
     private static List<BoardCell> CreateNewBoard() => CellFactory.Build(CellsCount);

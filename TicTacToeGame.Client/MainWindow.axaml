@@ -27,8 +27,8 @@
 						<Button Width="200" Height="200" Command="{Binding #Root.((vm:MainViewModel)DataContext).OnCellClickCommandHandler}" CommandParameter="{Binding .}">
 							<Button.IsEnabled>
 								<MultiBinding Converter="{StaticResource MultiBoolToBoolConverter}">
-									<Binding Path="IsDirty"/>
-									<Binding Path="#Root.((vm:MainViewModel)DataContext).IsActive"/>
+									<Binding Path="!IsDirty"/>
+									<Binding Path="#Root.((vm:MainViewModel)DataContext).IsActiveBoard"/>
 								</MultiBinding>
 							</Button.IsEnabled>
 							<TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="128" Text="{Binding Value}"></TextBlock>
@@ -39,9 +39,9 @@
 		</StackPanel>
 
 		<StackPanel VerticalAlignment="Center" Name="ButtonsField" DockPanel.Dock="Right" Width="350">
-			<TextBlock FontSize="24" HorizontalAlignment="Center" Margin="20" Text="{Binding GameStatusField}">
+			<TextBlock FontSize="24" HorizontalAlignment="Center" Margin="20" Text="{Binding GameStatus}">
 			</TextBlock>
-			<TextBox Height="300" Width="200" AcceptsReturn="True" Margin="20" TextWrapping="Wrap" Text="{Binding HistoryTextField}"/>
+			<TextBox Height="300" Width="200" AcceptsReturn="True" Margin="20" TextWrapping="Wrap" Text="{Binding ActionHistory}"/>
 			<Button HorizontalAlignment="Center" Name="RestartButton" Command="{Binding OnRestartCommand}">
 				Restart
 			</Button>
