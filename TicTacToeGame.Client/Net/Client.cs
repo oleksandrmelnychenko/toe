@@ -5,6 +5,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
+using TicTacToeGame.Client.Models;
 
 namespace TicTacToeGame.Client.Net
 {
@@ -12,6 +13,8 @@ namespace TicTacToeGame.Client.Net
     {
         private TcpClient tcpClient;
         public Guid ClientId { get; init; }
+
+        public User User { get; private set; }
 
         private NetworkStream stream;
 
@@ -104,5 +107,25 @@ namespace TicTacToeGame.Client.Net
                 }
             }
         }
+
+        public async Task ListenForUserInfoAsync()
+        {
+            if (!tcpClient.Connected)
+            {
+                Debug.WriteLine($"Client {ClientId} is not connected to the server.");
+                return;
+            }
+
+            Debug.WriteLine($"Client {ClientId} is waiting for user info.");
+            while (User == null)
+            {
+                var message = await ReadDataAsync();
+                if (message != null)
+                {
+                    User = ClientJsonDataSerializer.DeserializeUser(message);
+                }
+            }
+        }
+
     }
 }

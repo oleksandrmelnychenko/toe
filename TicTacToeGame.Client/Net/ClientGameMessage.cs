@@ -7,10 +7,5 @@ using TicTacToeGame.Client.Game;
 
 namespace TicTacToeGame.Client.Net
 {
-    public class PlayerMove(Guid guid, BoardCell cell)
-    {
-        public Guid Id { get; set; } = guid;
-
-        public BoardCell Cell { get; set; } = cell;
-    }
+    public record ClientGameMessage(Guid Guid, BoardCell Cell);
 }

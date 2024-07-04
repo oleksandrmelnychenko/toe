@@ -2,6 +2,7 @@
 using System.Net;
 using System.Text;
 using Tic_tac_toe_Server.Logging;
+using Tic_tac_toe_Server.Game;
 
 namespace Tic_tac_toe_Server
 {
@@ -10,12 +11,8 @@ namespace Tic_tac_toe_Server
         static void Main(string[] args)
         {
             ConsoleLogger consoleLogger = new ConsoleLogger();
-            TicTacToeServer.Server server = new TicTacToeServer.Server(IPAddress.Parse("127.0.0.1"), 8888, consoleLogger);
-            server.StartServerAsync().GetAwaiter().GetResult();
-            while (server.IsActive == true)
-            {
-                server.ListenClientsAsync().GetAwaiter().GetResult();
-            }
+            MainGame game = new MainGame(consoleLogger);
+            game.StartMainGame().GetAwaiter().GetResult();
         }
     }
 }

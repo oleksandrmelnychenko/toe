@@ -3,7 +3,7 @@ using System.IO;
 
 namespace TicTacToeGame.Client.Symbols
 {
-    internal static class SymbolPath
+    public static class SymbolPath
     {
         private static readonly string BasePath = Directory.GetParent(Environment.CurrentDirectory).Parent.Parent.FullName;
 

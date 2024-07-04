@@ -5,7 +5,7 @@ using Tic_tac_toe_Server.Logging;
 using TicTacToeGame.Client.Game;
 using TicTacToeGame.Client.Net;
 
-namespace TicTacToeServer
+namespace Tic_tac_toe_Server.Net
 {
     public class Server
     {
@@ -17,20 +17,22 @@ namespace TicTacToeServer
         private const int clientsNumber = 2;
         private List<TcpClient> clients = new List<TcpClient>(clientsNumber);
 
+        public event EventHandler<string> MessageReceived;
+
         public Server(IPAddress address, int port, ILogger logger)
         {
             this.logger = logger;
             listener = new TcpListener(address, port);
         }
 
-        public async Task StartServerAsync()
+        public async Task StartServerAsync(UserService userService)
         {
             try
             {
                 listener.Start();
                 IsActive = true;
                 logger.LogMessage("\nServer started.\n");
-                await AcceptClientsAsync();
+                await AcceptClientsAsync(userService);
             }
             catch (Exception ex)
             {
@@ -53,7 +55,7 @@ namespace TicTacToeServer
         }
 
         //Accept clients while clients.Count < 2
-        public async Task AcceptClientsAsync()
+        public async Task AcceptClientsAsync(UserService userService)
         {
             try
             {
@@ -61,6 +63,7 @@ namespace TicTacToeServer
                 {
                     TcpClient client = await listener.AcceptTcpClientAsync();
                     clients.Add(client);
+                    await SendDataToClientAsync(client, ServerJsonDataSerializer.SerializeUser(userService._users[clients.Count - 1]));
                     logger.LogMessage("\nClient connected.\n");
                 }
                 logger.LogMessage("\nAll clients connected.\n");
@@ -115,11 +118,12 @@ namespace TicTacToeServer
 
                     var message = Encoding.UTF8.GetString(buffer, 0, received);
                     //Console.WriteLine($"Received message: {message}");
-                    message = ProcessMessage(message);
+                    //message = ProcessMessage(message);
 
                     if (!string.IsNullOrEmpty(message))
                     {
-                        await SendDataToClientsAsync(message);
+                        MessageReceived?.Invoke(this, message);
+                        //await SendDataToClientsAsync(message);
                     }
                 }
             }
@@ -138,6 +142,9 @@ namespace TicTacToeServer
             }
         }
 
+        /// <summary>
+        ///     SendDataToClientsAsync sends data to all clients
+        /// </summary>
         public async Task SendDataToClientsAsync(string message)
         {
             var bytes = Encoding.UTF8.GetBytes(message + "\n");
@@ -164,10 +171,30 @@ namespace TicTacToeServer
             }
         }
 
-        private string ProcessMessage(string message)
+        /// <summary>
+        ///     SendDataToClientsAsync sends data to one client
+        /// </summary>
+        public async Task SendDataToClientAsync(TcpClient client, string message)
         {
-            PlayerMove move = JsonDataSerializer.DeserializeMove(message);
-            return $"{message}";
+            var bytes = Encoding.UTF8.GetBytes(message + "\n");
+
+            if (client.Connected)
+            {
+                try
+                {
+                    await client.GetStream().WriteAsync(bytes, 0, bytes.Length);
+                    logger.LogMessage("\nData has been sent to the client\n");
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError($"\nServer cannot send data: {ex}\n");
+                    client.Close();
+                }
+            }
+            else
+            {
+                logger.LogWarning("\nClient is not connected to the server.\n");
+            }
         }
     }
 }

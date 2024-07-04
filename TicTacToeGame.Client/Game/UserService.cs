@@ -8,7 +8,7 @@ namespace TicTacToeGame.Client.Game
 {
     public class UserService
     {
-        private readonly User[] _users = new User[2];
+        public readonly User[] _users = new User[2];
         private int _currentUserIndex;
 
         public User CurrentUser => _users[_currentUserIndex];
@@ -20,8 +20,8 @@ namespace TicTacToeGame.Client.Game
 
         private void InitializeUsers()
         {
-            _users[0] = new User(new Bitmap(SymbolPath.XPath), SymbolsConst.SymbolX, true);
-            _users[1] = new User(new Bitmap(SymbolPath.OPath), SymbolsConst.SymbolO, false);
+            _users[0] = new User(SymbolsConst.SymbolX, true, Guid.NewGuid());
+            _users[1] = new User(SymbolsConst.SymbolO, false, Guid.NewGuid());
 
             _currentUserIndex = 0;
         }
