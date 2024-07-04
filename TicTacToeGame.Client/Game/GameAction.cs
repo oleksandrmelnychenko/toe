@@ -3,7 +3,7 @@ using TicTacToeGame.Client.Models;
 
 namespace TicTacToeGame.Client.Game;
 
-public record GameAction(User User, int CellIndex)
+public record GameAction(Player User, int CellIndex)
 {
     public DateTime ActionTime { get; set; } = DateTime.Now;
 

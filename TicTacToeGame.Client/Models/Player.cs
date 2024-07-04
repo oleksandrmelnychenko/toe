@@ -2,7 +2,7 @@
 
 namespace TicTacToeGame.Client.Models
 {
-    public class User(Bitmap userSymbol, string userSymbolName, bool isActived)
+    public class Player(Bitmap userSymbol, string userSymbolName, bool isActived)
     {
         public Bitmap UserSymbol { get; set; } = userSymbol;
         public string UserSymbolName { get; set; } = userSymbolName;
