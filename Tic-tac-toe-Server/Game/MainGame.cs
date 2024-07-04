@@ -30,7 +30,6 @@ namespace Tic_tac_toe_Server.Game
             Server.MessageReceived += Client_MessageReceived;
         }
 
-        //Можлива проблема з тим що сервер стартує після того як дані розсилаються
         public async Task StartMainGame()
         {
             _gameMaster.StartGame();

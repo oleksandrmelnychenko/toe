@@ -1,5 +1,6 @@
 ﻿using Prism.Commands;
 using ReactiveUI;
+using System;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 using Tic_tac_toe_Server.Net;
@@ -95,7 +96,6 @@ namespace TicTacToeGame.Client
                 client.Player.IsActived = false;
                 IsActiveBoard = false;
             }
-
             UpdateGameStatus();
         }
 
