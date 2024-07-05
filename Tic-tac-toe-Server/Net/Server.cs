@@ -4,20 +4,29 @@ using System.Text;
 using Tic_tac_toe_Server.Logging;
 using TicTacToeGame.Client.Game;
 using TicTacToeGame.Client.Net;
+using Tmds.DBus.Protocol;
 
 namespace Tic_tac_toe_Server.Net
 {
     public class Server
     {
-        public TcpListener listener;
-        public bool IsActive { get; private set; } = false;
-
         private ILogger logger;
 
         private const int clientsNumber = 2;
+
         private List<TcpClient> clients = new List<TcpClient>(clientsNumber);
 
+        private TcpListener listener;
+
+        private bool IsAllClientConnected = false;
+
+        private PlayerManager playerManager;
+
+        public bool IsActive { get; private set; } = false;
+
         public event EventHandler<string> MessageReceived;
+
+        public event EventHandler ClientDisconect;
 
         public Server(IPAddress address, int port, ILogger logger)
         {
@@ -25,14 +34,14 @@ namespace Tic_tac_toe_Server.Net
             listener = new TcpListener(address, port);
         }
 
-        public async Task StartServerAsync(PlayerManager userService)
+        public async Task StartServerAsync()
         {
             try
             {
                 listener.Start();
                 IsActive = true;
-                logger.LogMessage("\nServer started.\n");
-                await AcceptClientsAsync(userService);
+                logger.LogMessage("Server started.\n");
+                await AcceptClientsAsync();
             }
             catch (Exception ex)
             {
@@ -54,8 +63,13 @@ namespace Tic_tac_toe_Server.Net
             }
         }
 
+        public void SetPlayerManager(PlayerManager playerManager)
+        {
+            this.playerManager = playerManager;
+        }
+
         //Accept clients while clients.Count < 2
-        public async Task AcceptClientsAsync(PlayerManager userService)
+        public async Task AcceptClientsAsync()
         {
             try
             {
@@ -63,10 +77,11 @@ namespace Tic_tac_toe_Server.Net
                 {
                     TcpClient client = await listener.AcceptTcpClientAsync();
                     clients.Add(client);
-                    await SendDataToClientAsync(client, ServerJsonDataSerializer.SerializePlayer(userService.Players[clients.Count - 1]));
+                    await SendDataToClientAsync(client, ServerJsonDataSerializer.SerializePlayer(playerManager.Players[clients.Count - 1]));
                     logger.LogMessage("\nClient connected.\n");
                 }
-                logger.LogMessage("\nAll clients connected.\n");
+                logger.LogSuccess("\nAll clients connected.\n");
+                IsAllClientConnected = true;
             }
             catch (Exception ex)
             {

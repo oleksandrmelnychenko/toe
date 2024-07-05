@@ -29,13 +29,15 @@ namespace Tic_tac_toe_Server.Game
             _logger = logger;
             Server = new Server(IPAddress.Parse(AddressConstants.IPAddress), AddressConstants.Port, logger);
             Server.MessageReceived += Client_MessageReceived;
+            Server.ClientDisconect += ClientDisconect;
         }
 
         public async Task StartMainGame()
         {
             _gameMaster.StartNewGameSession();
             BoardCells = _gameMaster.GetActiveGameSessionBoard();
-            await Server.StartServerAsync(_gameMaster.GetPlayerService());
+            Server.SetPlayerManager(_gameMaster.GetPlayerService());
+            await Server.StartServerAsync();
             await SetStartData();
             while (Server.IsActive == true)
             {
@@ -103,6 +105,10 @@ namespace Tic_tac_toe_Server.Game
         private void Client_MessageReceived(object? sender, string message)
         {
             HandleClientMessage(message).GetAwaiter().GetResult();
+        }
+
+        private void ClientDisconect(object? sender, EventArgs eventArgs)
+        {
         }
     }
 }

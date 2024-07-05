@@ -20,6 +20,13 @@ namespace Tic_tac_toe_Server.Logging
             Console.WriteLine(message);
         }
 
+        public void LogSuccess(string message)
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine(message);
+            Console.ResetColor();
+        }
+
         public void LogWarning(string message)
         {
             Console.ForegroundColor = ConsoleColor.Yellow;

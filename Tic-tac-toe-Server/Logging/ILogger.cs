@@ -13,5 +13,7 @@ namespace Tic_tac_toe_Server.Logging
         void LogError(string message);
 
         void LogWarning(string message);
+
+        void LogSuccess(string message);
     }
 }
