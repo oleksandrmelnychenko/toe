@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Tic-tac-toe-Server")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+164da0875bec3780a0b31322abc641bb5e10fdd2")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+c62ca9846adc0098f267859ab74ff22ab4d0438b")]
 [assembly: System.Reflection.AssemblyProductAttribute("Tic-tac-toe-Server")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Tic-tac-toe-Server")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

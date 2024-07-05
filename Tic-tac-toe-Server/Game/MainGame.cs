@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Net;
 using Tic_tac_toe_Server.Constants;
 using Tic_tac_toe_Server.Logging;
 using Tic_tac_toe_Server.Net;
@@ -33,7 +28,7 @@ namespace Tic_tac_toe_Server.Game
         public async Task StartMainGame()
         {
             _gameMaster.StartGame();
-            BoardCells = new List<BoardCell>(_gameMaster.GetActiveGameSessionBoard());
+            BoardCells = _gameMaster.GetActiveGameSessionBoard().ToList();
             await Server.StartServerAsync(_gameMaster.GetUserService());
             await SetStartData();
             while (Server.IsActive == true)
@@ -41,13 +36,6 @@ namespace Tic_tac_toe_Server.Game
                 Server.ListenClientsAsync().GetAwaiter().GetResult();
             }
         }
-
-
-        private void Client_MessageReceived(object? sender, string message)
-        {
-            UpdateGameDataAsync(message).GetAwaiter().GetResult();
-        }
-
 
         public async Task UpdateGameDataAsync(string jsonMessage)
         {
@@ -82,10 +70,16 @@ namespace Tic_tac_toe_Server.Game
 
             string startDataJson = ServerJsonDataSerializer.SerializeServerMessage(serverGameMessage);
 
-            if(!string.IsNullOrEmpty(startDataJson))
+            if (!string.IsNullOrEmpty(startDataJson))
             {
                 await Server.SendDataToClientsAsync(startDataJson);
             }
+        }
+
+
+        private void Client_MessageReceived(object? sender, string message)
+        {
+            UpdateGameDataAsync(message).GetAwaiter().GetResult();
         }
 
     }

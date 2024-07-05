@@ -5,7 +5,7 @@ namespace TicTacToeGame.Client.Game;
 
 public class GameSession(IReadOnlyCollection<BoardCell> boardCells)
 {
-    public IReadOnlyCollection<BoardCell> BoardCells { get; set; } = boardCells;
+    public IReadOnlyCollection<BoardCell> BoardCells { get; private set; } = boardCells;
 
     public Status Status { get; set; } = Status.Start;
 
