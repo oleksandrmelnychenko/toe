@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Tic_tac_toe_Server.Player;
 using TicTacToeGame.Client.Game;
 using TicTacToeGame.Client.Models;
 
@@ -11,7 +12,7 @@ namespace Tic_tac_toe_Server.Game
 
         private GameSession? _activeGameSession;
 
-        private PlayerManager _playerService = new(new TwoPlayersInitializator());
+        private PlayerManager _playerService = new(2);
 
         /// <summary>
         ///     The GameMaster class represents the game master that manages the Tic Tac Toe game.
@@ -47,7 +48,7 @@ namespace Tic_tac_toe_Server.Game
             }
         }
 
-        public Player GetCurrentPlayer()
+        public PlayerBase GetCurrentPlayer()
         {
             return _playerService.CurrentPlayer;
         }

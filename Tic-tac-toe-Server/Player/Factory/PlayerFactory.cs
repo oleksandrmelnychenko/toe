@@ -1,24 +1,27 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using TicTacToeGame.Client.Constants;
 
 namespace Tic_tac_toe_Server.Player.Factory
 {
-    internal class PlayerFactory : PlayerFactoryBase
+    internal class PlayerFactory
     {
-        protected PlayerFactory()
+        private PlayerFactory()
         {
 
         }
 
-        public override List<PlayerBase> CreatePlayers(int count)
+        public static List<Player> CreatePlayers(int count)
         {
-            var players = new List<PlayerBase>();
+            var players = new List<Player>();
             for (int i = 0; i < count; i++)
             {
-                players.Add(new Player());
+                if(i % 2 == 0)
+                {
+                    players.Add(new Player(SymbolsConst.SymbolX, true));
+                }
+                else
+                {
+                    players.Add(new Player(SymbolsConst.SymbolO, false));
+                }
             }
             return players;
         }

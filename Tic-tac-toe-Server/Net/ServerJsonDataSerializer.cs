@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using Tic_tac_toe_Server.Net;
 using TicTacToeGame.Client.Game;
-using TicTacToeGame.Client.Models;
+using Tic_tac_toe_Server.Player;
 
 namespace TicTacToeGame.Client.Net
 {
@@ -24,7 +24,7 @@ namespace TicTacToeGame.Client.Net
             return JsonConvert.SerializeObject(serverGameMessage);
         }
 
-        public static string SerializePlayer(Player user)
+        public static string SerializePlayer(PlayerBase user)
         {
             return JsonConvert.SerializeObject(user);
         }

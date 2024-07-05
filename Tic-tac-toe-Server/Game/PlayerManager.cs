@@ -1,27 +1,25 @@
-﻿using Tic_tac_toe_Server.Game.Interfaces;
-using TicTacToeGame.Client.Models;
+﻿using Tic_tac_toe_Server.Player;
+using Tic_tac_toe_Server.Player.Factory;
 
-namespace TicTacToeGame.Client.Game
+namespace Tic_tac_toe_Server.Game
 {
     public class PlayerManager
     {
         private int _currentPlayerIndex;
-        private IPlayerInitializator _playerInitializator;
 
-        private Player[] _players;
+        private List<PlayerBase> _players;
 
-        public Player[] Players
+        public List<PlayerBase> Players
         {
             get => _players;
             private set => _players = value;
         }
 
-        public Player CurrentPlayer => _players[_currentPlayerIndex];
+        public PlayerBase CurrentPlayer => _players[_currentPlayerIndex];
 
-        public PlayerManager(IPlayerInitializator playerInitializator)
+        public PlayerManager(int count)
         {
-            _playerInitializator = playerInitializator;
-            _players = _playerInitializator.InitializePlayers();
+            _players = PlayerFactory.CreatePlayers(count);
         }
 
         public void ChangeCurrentPlayer()

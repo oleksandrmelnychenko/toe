@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using TicTacToeGame.Client.Game;
 using TicTacToeGame.Client.Models;
+using Tic_tac_toe_Server.Player;
 
 namespace Tic_tac_toe_Server.Net
 {
@@ -15,9 +16,9 @@ namespace Tic_tac_toe_Server.Net
 
         public string GameHistory { get; set; }
 
-        public Player? Player { get; set; }
+        public PlayerBase? Player { get; set; }
 
-        public ServerGameMessage(Status gameStatus, List<BoardCell> boardCells, string gameHistory, Player player)
+        public ServerGameMessage(Status gameStatus, List<BoardCell> boardCells, string gameHistory, PlayerBase player)
         {
             Status = gameStatus;
             BoardCells = boardCells;

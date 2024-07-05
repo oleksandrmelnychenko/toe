@@ -1,9 +1,8 @@
-﻿using System;
-using TicTacToeGame.Client.Models;
+﻿using Tic_tac_toe_Server.Player;
 
 namespace Tic_tac_toe_Server.Game
 {
-    public record GameAction(Player Player, int BoxPosition)
+    public record GameAction(PlayerBase Player, int BoxPosition)
     {
         public DateTime ActionTime { get; set; } = DateTime.Now;
 

@@ -6,10 +6,13 @@ using System.Threading.Tasks;
 
 namespace Tic_tac_toe_Server.Player
 {
-    internal class Player : PlayerBase
+    public class Player : PlayerBase
     {
-        public string PlayerSymbolName { get; set; }
-
-        public bool IsActived { get; set; }
+        public Player(string symbolName, bool isActive)
+        {
+            PlayerSymbolName = symbolName;
+            Id = Guid.NewGuid();
+            IsActived = isActive;
+        }
     }
 }
