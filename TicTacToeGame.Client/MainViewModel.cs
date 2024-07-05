@@ -64,7 +64,7 @@ namespace TicTacToeGame.Client
         public void UpdateBoardCell(BoardCell boardCell)
         {
             boardCell.IsDirty = true;
-            boardCell.Value = client.Player.UserSymbolName;
+            boardCell.Value = client.Player.PlayerSymbolName;
             _boardBoardCells[boardCell.Index] = boardCell;
         }
 
@@ -78,12 +78,12 @@ namespace TicTacToeGame.Client
                 _boardBoardCells[i] = serverMessage.BoardCells[i];
             }
 
-            UpdateUserData(serverMessage);
+            UpdatePlayerData(serverMessage);
         }
 
-        public void UpdateUserData(ServerGameMessage serverMessage)
+        public void UpdatePlayerData(ServerGameMessage serverMessage)
         {
-            if (client.Player.Id == serverMessage.User.Id)
+            if (client.Player.Id == serverMessage.Player.Id)
             {
                 client.Player.IsActived = true;
                 IsActiveBoard = true;
@@ -112,7 +112,7 @@ namespace TicTacToeGame.Client
 
         public string GetCurrentGameSymbol()
         {
-            if (client.Player.UserSymbolName == SymbolsConst.SymbolX)
+            if (client.Player.PlayerSymbolName == SymbolsConst.SymbolX)
             {
                 if (client.Player.IsActived)
                 {
@@ -123,7 +123,7 @@ namespace TicTacToeGame.Client
                     return SymbolsConst.SymbolO;
                 }
             }
-            else if (client.Player.UserSymbolName == SymbolsConst.SymbolO)
+            else if (client.Player.PlayerSymbolName == SymbolsConst.SymbolO)
             {
                 if (client.Player.IsActived)
                 {

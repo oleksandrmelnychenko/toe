@@ -31,7 +31,7 @@
 									<Binding Path="#Root.((vm:MainViewModel)DataContext).IsActiveBoard"/>
 								</MultiBinding>
 							</Button.IsEnabled>
-							<TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="128" Text="{Binding Value}"></TextBlock>
+							<TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="164" Text="{Binding Value}"></TextBlock>
 						</Button>
 					</DataTemplate>
 				</ItemsControl.ItemTemplate>

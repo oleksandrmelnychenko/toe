@@ -15,14 +15,14 @@ namespace Tic_tac_toe_Server.Net
 
         public string GameHistory { get; set; }
 
-        public Player? User { get; set; }
+        public Player? Player { get; set; }
 
-        public ServerGameMessage(Status gameStatus, List<BoardCell> boardCells, string gameHistory, Player user)
+        public ServerGameMessage(Status gameStatus, List<BoardCell> boardCells, string gameHistory, Player player)
         {
             Status = gameStatus;
             BoardCells = boardCells;
             GameHistory = gameHistory;
-            User = user;
+            Player = player;
         }
     }
 }

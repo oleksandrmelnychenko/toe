@@ -35,7 +35,7 @@ namespace Tic_tac_toe_Server.Game
         {
             _gameMaster.StartNewGameSession();
             BoardCells = _gameMaster.GetActiveGameSessionBoard();
-            await Server.StartServerAsync(_gameMaster.GetUserService());
+            await Server.StartServerAsync(_gameMaster.GetPlayerService());
             await SetStartData();
             while (Server.IsActive == true)
             {
@@ -60,7 +60,7 @@ namespace Tic_tac_toe_Server.Game
         public async Task SetStartData()
         {
             Status status = Status.Start;
-            ServerGameMessage serverGameMessage = new ServerGameMessage(status, BoardCells, _gameMaster.GetHistory(), _gameMaster.GetCurrentUser());
+            ServerGameMessage serverGameMessage = new ServerGameMessage(status, BoardCells, _gameMaster.GetHistory(), _gameMaster.GetCurrentPlayer());
 
             string startDataJson = ServerJsonDataSerializer.SerializeServerMessage(serverGameMessage);
 
@@ -93,7 +93,7 @@ namespace Tic_tac_toe_Server.Game
 
         private async Task SendNewGameData()
         {
-            ServerGameMessage serverGameMessage = new ServerGameMessage(_gameMaster.GetStatus(), BoardCells, _gameMaster.GetHistory(), _gameMaster.GetCurrentUser());
+            ServerGameMessage serverGameMessage = new ServerGameMessage(_gameMaster.GetStatus(), BoardCells, _gameMaster.GetHistory(), _gameMaster.GetCurrentPlayer());
 
             string boardCellsJson = ServerJsonDataSerializer.SerializeServerMessage(serverGameMessage);
 

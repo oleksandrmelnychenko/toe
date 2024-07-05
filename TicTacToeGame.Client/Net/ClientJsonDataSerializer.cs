@@ -24,14 +24,14 @@ namespace TicTacToeGame.Client.Net
             return JsonConvert.DeserializeObject<ServerGameMessage>(serverMessage)!;
         }
 
-        public static Player DeserializePlayer(string userMessage)
+        public static Player DeserializePlayer(string playerMessage)
         {
-            if (string.IsNullOrEmpty(userMessage))
+            if (string.IsNullOrEmpty(playerMessage))
             {
                 Debug.WriteLine($"Null data recived.");
                 return null;
             }
-            return JsonConvert.DeserializeObject<Player>(userMessage)!;
+            return JsonConvert.DeserializeObject<Player>(playerMessage)!;
         }
     }
 }

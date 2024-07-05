@@ -1,48 +1,32 @@
-﻿using Avalonia.Media.Imaging;
-using System;
-using TicTacToeGame.Client.Constants;
+﻿using Tic_tac_toe_Server.Game.Interfaces;
 using TicTacToeGame.Client.Models;
-using TicTacToeGame.Client.Symbols;
 
 namespace TicTacToeGame.Client.Game
 {
     public class PlayerManager
     {
-        public readonly Player[] _users = new Player[2];
-        private int _currentUserIndex;
+        private int _currentPlayerIndex;
+        private IPlayerInitializator _playerInitializator;
 
-        public Player CurrentUser => _users[_currentUserIndex];
+        private Player[] _players;
 
-        public PlayerManager()
+        public Player[] Players
         {
-            InitializeUsers();
+            get => _players;
+            private set => _players = value;
         }
 
-        private void InitializeUsers()
-        {
-            _users[0] = new Player(SymbolsConst.SymbolX, true, Guid.NewGuid());
-            _users[1] = new Player(SymbolsConst.SymbolO, false, Guid.NewGuid());
+        public Player CurrentPlayer => _players[_currentPlayerIndex];
 
-            _currentUserIndex = 0;
+        public PlayerManager(IPlayerInitializator playerInitializator)
+        {
+            _playerInitializator = playerInitializator;
+            _players = _playerInitializator.InitializePlayers();
         }
 
-        public void ChangeCurrentUser()
+        public void ChangeCurrentPlayer()
         {
-            _currentUserIndex = _currentUserIndex == 0 ? 1 : 0;
-        }
-
-        public void SwapUsersSymbols()
-        {
-            if (_users[0].UserSymbolName == SymbolsConst.SymbolX)
-            {
-                _users[0].UserSymbolName = SymbolsConst.SymbolO;
-                _users[1].UserSymbolName = SymbolsConst.SymbolX;
-            }
-            else
-            {
-                _users[0].UserSymbolName = SymbolsConst.SymbolX;
-                _users[1].UserSymbolName = SymbolsConst.SymbolO;
-            }
+            _currentPlayerIndex = _currentPlayerIndex == 0 ? 1 : 0;
         }
     }
 }

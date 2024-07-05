@@ -108,7 +108,7 @@ namespace TicTacToeGame.Client.Net
             }
         }
 
-        public async Task ListenForUserInfoAsync()
+        public async Task ListenForPlayerInfoAsync()
         {
             if (!tcpClient.Connected)
             {
@@ -116,7 +116,7 @@ namespace TicTacToeGame.Client.Net
                 return;
             }
 
-            Debug.WriteLine($"Client {ClientId} is waiting for user info.");
+            Debug.WriteLine($"Client {ClientId} is waiting for player info.");
             while (Player == null)
             {
                 var message = await ReadDataAsync();

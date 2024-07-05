@@ -8,5 +8,5 @@ using TicTacToeGame.Client.Models;
 
 namespace Tic_tac_toe_Server.Net
 {
-    public record ServerGameMessage(Status Status, List<BoardCell> BoardCells, string GameHistory, Player User);
+    public record ServerGameMessage(Status Status, List<BoardCell> BoardCells, string GameHistory, Player Player);
 }

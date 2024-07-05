@@ -18,7 +18,7 @@ namespace Tic_tac_toe_Server.Game
         public void AddAction(GameAction gameAction)
         {
             moves.Add(gameAction);
-            ActionHistory = ActionHistory + $"Player {gameAction.User.UserSymbolName} chose box {gameAction.BoxPosition}.\n";
+            ActionHistory = ActionHistory + $"Player {gameAction.Player.PlayerSymbolName} chose box {gameAction.BoxPosition}.\n";
         }
 
         public List<GameAction> GetAction()
