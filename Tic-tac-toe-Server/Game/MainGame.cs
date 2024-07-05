@@ -1,5 +1,4 @@
-﻿using System.Collections.ObjectModel;
-using System.Net;
+﻿using System.Net;
 using Tic_tac_toe_Server.Constants;
 using Tic_tac_toe_Server.Logging;
 using Tic_tac_toe_Server.Net;
@@ -32,7 +31,7 @@ namespace Tic_tac_toe_Server.Game
             Server.ClientDisconect += ClientDisconect;
         }
 
-        public async Task StartMainGame()
+        public async Task Start()
         {
             _gameMaster.StartNewGameSession();
             BoardCells = _gameMaster.GetActiveGameSessionBoard();
@@ -76,7 +75,7 @@ namespace Tic_tac_toe_Server.Game
         {
             ClientGameMessage clientGameMessage = ServerJsonDataSerializer.DeserializePlayer(jsonMessage);
 
-            if(clientGameMessage.RestartRequest == true)
+            if (clientGameMessage.RestartRequest == true)
             {
                 _gameMaster.StartNewGameSession();
                 BoardCells = _gameMaster.GetActiveGameSessionBoard();

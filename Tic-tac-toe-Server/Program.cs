@@ -12,7 +12,7 @@ namespace Tic_tac_toe_Server
         {
             ConsoleLogger consoleLogger = new ConsoleLogger();
             MainGame game = new MainGame(consoleLogger);
-            game.StartMainGame().GetAwaiter().GetResult();
+            game.Start().GetAwaiter().GetResult();
         }
     }
 }
