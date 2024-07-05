@@ -1,78 +1,80 @@
 using System;
 using System.Collections.Generic;
+using TicTacToeGame.Client.Game;
 using TicTacToeGame.Client.Models;
 
-namespace TicTacToeGame.Client.Game;
-
-public class GameMaster
+namespace Tic_tac_toe_Server.Game
 {
-    private const ushort CellsCount = 9;
-
-    private GameSession? _activeGameSession;
-
-    private PlayerManager _userService = new();
-
-    /// <summary>
-    ///     The GameMaster class represents the game master that manages the Tic Tac Toe game.
-    /// </summary>
-    public GameMaster()
+    public class GameMaster
     {
-        
-    }
+        private const ushort CellsCount = 9;
 
-    /// <summary>
-    ///     Starts a new Tic Tac Toe game session.
-    /// </summary>
-    public void StartGame()
-    {
-        _activeGameSession = new GameSession(CreateNewBoard());
-    }
+        private GameSession? _activeGameSession;
 
-    public void NewAction(BoardCell boardCell)
-    {
-        ArgumentNullException.ThrowIfNull(nameof(_activeGameSession));
-        GameAction action = new(_userService.CurrentUser, boardCell.Index);
+        private PlayerManager _userService = new();
 
-        _activeGameSession!.HandleAction(action);
-
-        HandleGameStatus();
-    }
-
-    private void HandleGameStatus()
-    {
-        if (_activeGameSession!.Status == Status.PlayerTurn)
+        /// <summary>
+        ///     The GameMaster class represents the game master that manages the Tic Tac Toe game.
+        /// </summary>
+        public GameMaster()
         {
-            _userService.ChangeCurrentUser();
+
         }
-    }
 
-    public Player GetCurrentUser()
-    {
-        return _userService.CurrentUser;
-    }
+        /// <summary>
+        ///     Starts a new Tic Tac Toe game session.
+        /// </summary>
+        public void StartNewGameSession()
+        {
+            _activeGameSession = new GameSession(CreateNewBoard());
+        }
 
-    public PlayerManager GetUserService()
-    {
-        return _userService;
-    }
+        public void NewAction(BoardCell boardCell)
+        {
+            ArgumentNullException.ThrowIfNull(nameof(_activeGameSession));
+            GameAction action = new(_userService.CurrentUser, boardCell.Index);
 
-    public IReadOnlyCollection<BoardCell> GetActiveGameSessionBoard()
-    {
-        ArgumentNullException.ThrowIfNull(nameof(_activeGameSession));
-        return _activeGameSession!.BoardCells;
-    }
+            _activeGameSession!.HandleAction(action);
 
-    public Status GetStatus()
-    {
-        ArgumentNullException.ThrowIfNull(nameof(_activeGameSession));
-        return _activeGameSession!.Status;
-    }
+            HandleGameStatus();
+        }
 
-    public string GetHistory()
-    {
-        ArgumentNullException.ThrowIfNull(nameof(_activeGameSession));
-        return _activeGameSession!.History.ActionHistory;
+        private void HandleGameStatus()
+        {
+            if (_activeGameSession!.Status == Status.PlayerTurn)
+            {
+                _userService.ChangeCurrentUser();
+            }
+        }
+
+        public Player GetCurrentUser()
+        {
+            return _userService.CurrentUser;
+        }
+
+        public PlayerManager GetUserService()
+        {
+            return _userService;
+        }
+
+        public List<BoardCell> GetActiveGameSessionBoard()
+        {
+            ArgumentNullException.ThrowIfNull(nameof(_activeGameSession));
+            return _activeGameSession!.BoardCells;
+        }
+
+        public Status GetStatus()
+        {
+            ArgumentNullException.ThrowIfNull(nameof(_activeGameSession));
+            return _activeGameSession!.Status;
+        }
+
+        public string GetHistory()
+        {
+            ArgumentNullException.ThrowIfNull(nameof(_activeGameSession));
+            return _activeGameSession!.History.ActionHistory;
+        }
+
+        private static List<BoardCell> CreateNewBoard() => CellFactory.Build(CellsCount);
     }
-    
-    private static List<BoardCell> CreateNewBoard() => CellFactory.Build(CellsCount);
 }

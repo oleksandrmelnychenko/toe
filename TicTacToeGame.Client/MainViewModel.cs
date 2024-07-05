@@ -58,11 +58,8 @@ namespace TicTacToeGame.Client
         public async void OnCellClickCommandHandler(BoardCell boardCell) =>
             await ApplyGameAction(boardCell);
 
-        public void OnRestartClickCommandHandler()
-        {
-            BoardCells = new ObservableCollection<BoardCell>(CellFactory.Build(cellsCount));
-            UpdateGameStatus();
-        }
+        public async void OnRestartClickCommandHandler() =>
+            await RestartRequest();
 
         public void UpdateBoardCell(BoardCell boardCell)
         {
@@ -74,7 +71,7 @@ namespace TicTacToeGame.Client
         public void UpdateGameData(string message)
         {
             ServerGameMessage serverMessage = ClientJsonDataSerializer.DeserializeServerMessage(message);
-            gameStatus = serverMessage.GameStatus;
+            gameStatus = serverMessage.Status;
             ActionHistory = serverMessage.GameHistory;
             for (int i = 0; i < _boardBoardCells.Count; i++)
             {
@@ -146,9 +143,16 @@ namespace TicTacToeGame.Client
         private async Task ApplyGameAction(BoardCell boardCell)
         {
             UpdateBoardCell(boardCell);
-            ClientGameMessage playerMove = new ClientGameMessage(client.ClientId, boardCell);
-            string moveJson = ClientJsonDataSerializer.SerializeMove(playerMove);
+            ClientGameMessage playerMove = new ClientGameMessage(client.ClientId, boardCell, false);
+            string moveJson = ClientJsonDataSerializer.SerializeAction(playerMove);
             await client.SendDataAsync(moveJson);
+        }
+
+        private async Task RestartRequest()
+        {
+            ClientGameMessage restartRequest = new ClientGameMessage(client.ClientId, null!, true);
+            string requestJson = ClientJsonDataSerializer.SerializeAction(restartRequest);
+            await client.SendDataAsync(requestJson);
         }
 
         private void Client_MessageReceived(object? sender, string message)

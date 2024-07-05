@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using System.Collections.ObjectModel;
+using System.Net;
 using Tic_tac_toe_Server.Constants;
 using Tic_tac_toe_Server.Logging;
 using Tic_tac_toe_Server.Net;
@@ -9,14 +10,19 @@ namespace Tic_tac_toe_Server.Game
 {
     internal class MainGame
     {
-        public Server Server { get; set; }
-
-        public List<BoardCell> BoardCells { get; set; }
-
         private GameMaster _gameMaster { get; set; } = new();
 
         private ILogger _logger;
 
+        private List<BoardCell> _boardCells = null!;
+
+        public Server Server { get; set; }
+
+        public List<BoardCell> BoardCells
+        {
+            get => _boardCells;
+            set => _boardCells = value;
+        }
 
         public MainGame(ILogger logger)
         {
@@ -27,35 +33,23 @@ namespace Tic_tac_toe_Server.Game
 
         public async Task StartMainGame()
         {
-            _gameMaster.StartGame();
-            BoardCells = _gameMaster.GetActiveGameSessionBoard().ToList();
+            _gameMaster.StartNewGameSession();
+            BoardCells = _gameMaster.GetActiveGameSessionBoard();
             await Server.StartServerAsync(_gameMaster.GetUserService());
             await SetStartData();
             while (Server.IsActive == true)
             {
-                Server.ListenClientsAsync().GetAwaiter().GetResult();
+                await Server.ListenClientsAsync();
             }
         }
 
-        public async Task UpdateGameDataAsync(string jsonMessage)
+        public async Task HandleClientMessage(string jsonMessage)
         {
             if (!string.IsNullOrEmpty(jsonMessage))
             {
-                ClientGameMessage clientGameMessage = ServerJsonDataSerializer.DeserializeMove(jsonMessage);
+                UpdateGameData(jsonMessage);
 
-                BoardCell cell = clientGameMessage.Cell;
-
-                Guid clientId = clientGameMessage.Guid;
-
-                BoardCells[cell.Index] = cell;
-
-                _gameMaster.NewAction(cell);
-
-                ServerGameMessage serverGameMessage = new ServerGameMessage(_gameMaster.GetStatus(), BoardCells, _gameMaster.GetHistory(), _gameMaster.GetCurrentUser());
-
-                string boardCellsJson = ServerJsonDataSerializer.SerializeServerMessage(serverGameMessage);
-
-                await Server.SendDataToClientsAsync(boardCellsJson);
+                await SendNewGameData();
             }
             else
             {
@@ -76,11 +70,39 @@ namespace Tic_tac_toe_Server.Game
             }
         }
 
+        private void UpdateGameData(string jsonMessage)
+        {
+            ClientGameMessage clientGameMessage = ServerJsonDataSerializer.DeserializePlayer(jsonMessage);
+
+            if(clientGameMessage.RestartRequest == true)
+            {
+                _gameMaster.StartNewGameSession();
+                BoardCells = _gameMaster.GetActiveGameSessionBoard();
+            }
+            else
+            {
+                BoardCell cell = clientGameMessage.Cell;
+
+                Guid clientId = clientGameMessage.Guid;
+
+                BoardCells[cell.Index] = cell;
+
+                _gameMaster.NewAction(cell);
+            }
+        }
+
+        private async Task SendNewGameData()
+        {
+            ServerGameMessage serverGameMessage = new ServerGameMessage(_gameMaster.GetStatus(), BoardCells, _gameMaster.GetHistory(), _gameMaster.GetCurrentUser());
+
+            string boardCellsJson = ServerJsonDataSerializer.SerializeServerMessage(serverGameMessage);
+
+            await Server.SendDataToClientsAsync(boardCellsJson);
+        }
 
         private void Client_MessageReceived(object? sender, string message)
         {
-            UpdateGameDataAsync(message).GetAwaiter().GetResult();
+            HandleClientMessage(message).GetAwaiter().GetResult();
         }
-
     }
 }

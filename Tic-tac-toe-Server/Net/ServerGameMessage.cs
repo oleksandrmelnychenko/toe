@@ -17,12 +17,6 @@ namespace Tic_tac_toe_Server.Net
 
         public Player? User { get; set; }
 
-        public ServerGameMessage(Status gameStatus, List<BoardCell> boardCells, string gameHistory)
-        {
-            Status = gameStatus;
-            BoardCells = boardCells;
-            GameHistory = gameHistory;
-        }
         public ServerGameMessage(Status gameStatus, List<BoardCell> boardCells, string gameHistory, Player user)
         {
             Status = gameStatus;

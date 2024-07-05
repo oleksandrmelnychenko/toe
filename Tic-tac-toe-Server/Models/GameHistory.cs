@@ -2,7 +2,7 @@
 using System.ComponentModel;
 using TicTacToeGame.Client.Game;
 
-namespace TicTacToeGame.Client.Models
+namespace Tic_tac_toe_Server.Game
 {
     public class GameHistory
     {

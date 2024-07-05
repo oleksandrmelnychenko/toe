@@ -63,7 +63,7 @@ namespace Tic_tac_toe_Server.Net
                 {
                     TcpClient client = await listener.AcceptTcpClientAsync();
                     clients.Add(client);
-                    await SendDataToClientAsync(client, ServerJsonDataSerializer.SerializeUser(userService._users[clients.Count - 1]));
+                    await SendDataToClientAsync(client, ServerJsonDataSerializer.SerializePlayer(userService._users[clients.Count - 1]));
                     logger.LogMessage("\nClient connected.\n");
                 }
                 logger.LogMessage("\nAll clients connected.\n");

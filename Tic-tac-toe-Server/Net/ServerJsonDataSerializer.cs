@@ -9,12 +9,7 @@ namespace TicTacToeGame.Client.Net
 {
     public static class ServerJsonDataSerializer
     {
-        public static string SerializeMove(ClientGameMessage move)
-        {
-            return JsonConvert.SerializeObject(move);
-        }
-
-        public static ClientGameMessage DeserializeMove(string move)
+        public static ClientGameMessage DeserializePlayer(string move)
         {
             if (string.IsNullOrEmpty(move))
             {
@@ -29,17 +24,7 @@ namespace TicTacToeGame.Client.Net
             return JsonConvert.SerializeObject(serverGameMessage);
         }
 
-        public static ServerGameMessage DeserializeServerMessage(string serverMessage)
-        {
-            if (string.IsNullOrEmpty(serverMessage))
-            {
-                Debug.WriteLine($"Null data recived.");
-                return null;
-            }
-            return JsonConvert.DeserializeObject<ServerGameMessage>(serverMessage)!;
-        }
-
-        public static string SerializeUser(Player user)
+        public static string SerializePlayer(Player user)
         {
             return JsonConvert.SerializeObject(user);
         }

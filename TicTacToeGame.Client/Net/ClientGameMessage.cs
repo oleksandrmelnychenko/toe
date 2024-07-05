@@ -7,5 +7,5 @@ using TicTacToeGame.Client.Game;
 
 namespace TicTacToeGame.Client.Net
 {
-    public record ClientGameMessage(Guid Guid, BoardCell Cell);
+    public record ClientGameMessage(Guid Guid, BoardCell Cell, bool RestartRequest);
 }

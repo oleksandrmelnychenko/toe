@@ -122,7 +122,7 @@ namespace TicTacToeGame.Client.Net
                 var message = await ReadDataAsync();
                 if (message != null)
                 {
-                    Player = ClientJsonDataSerializer.DeserializeUser(message);
+                    Player = ClientJsonDataSerializer.DeserializePlayer(message);
                 }
             }
         }
