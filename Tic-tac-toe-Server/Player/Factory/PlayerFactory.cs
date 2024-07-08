@@ -9,9 +9,9 @@ namespace Tic_tac_toe_Server.Player.Factory
 
         }
 
-        public static List<Player> CreatePlayers(int count)
+        public static List<PlayerBase> CreatePlayers(int count)
         {
-            var players = new List<Player>();
+            var players = new List<PlayerBase>();
             for (int i = 0; i < count; i++)
             {
                 if(i % 2 == 0)
