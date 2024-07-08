@@ -68,7 +68,6 @@ namespace Tic_tac_toe_Server.Net
             this.playerManager = playerManager;
         }
 
-        //Accept clients while clients.Count < 2
         public async Task AcceptClientsAsync()
         {
             try
@@ -77,8 +76,15 @@ namespace Tic_tac_toe_Server.Net
                 {
                     TcpClient client = await listener.AcceptTcpClientAsync();
                     clients.Add(client);
-                    await SendDataToClientAsync(client, ServerJsonDataSerializer.SerializePlayer(playerManager.Players[clients.Count - 1]));
-                    logger.LogMessage("\nClient connected.\n");
+
+                    var player = playerManager.Players[clients.Count - 1];
+                    var serializedPlayer = ServerJsonDataSerializer.SerializePlayer(player);
+
+                    logger.LogMessage($"Sending initial data to client {clients.Count}: {serializedPlayer}");
+
+                    await SendDataToClientAsync(client, serializedPlayer);
+
+                    logger.LogMessage($"Client {clients.Count} connected and initial data sent.");
                 }
                 logger.LogSuccess("\nAll clients connected.\n");
                 IsAllClientConnected = true;
@@ -88,6 +94,7 @@ namespace Tic_tac_toe_Server.Net
                 logger.LogError($"\nAn error occurred while accepting clients: {ex.Message}\n");
             }
         }
+
 
         //Listen messages from clients
         public async Task ListenClientsAsync()

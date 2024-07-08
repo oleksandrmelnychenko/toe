@@ -12,7 +12,7 @@ namespace TicTacToeGame.Client.Net
     public class Client
     {
         private TcpClient tcpClient;
-        public Guid ClientId { get; init; }
+        public Guid ClientId { get; private set; }
 
         public Player Player { get; private set; }
 

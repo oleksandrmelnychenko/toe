@@ -2,6 +2,7 @@
 using ReactiveUI;
 using System;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using Tic_tac_toe_Server.Net;
 using TicTacToeGame.Client.Constants;
@@ -21,7 +22,14 @@ namespace TicTacToeGame.Client
 
         private Status gameStatus;
 
-        public bool IsActiveBoard { get; set; }
+        private bool isActiveBoard;
+
+        public bool IsActiveBoard
+        {
+            get => isActiveBoard;
+            set => this.RaiseAndSetIfChanged(ref isActiveBoard, value);
+        }
+
         public string? GameStatus
         {
             get => _gameStatus;
@@ -70,20 +78,30 @@ namespace TicTacToeGame.Client
 
         public void UpdateGameData(string message)
         {
-            ServerGameMessage serverMessage = ClientJsonDataSerializer.DeserializeServerMessage(message);
+            ServerToClientConfig serverMessage = ClientJsonDataSerializer.DeserializeServerMessage(message);
             gameStatus = serverMessage.Status;
             ActionHistory = serverMessage.GameHistory;
-            for (int i = 0; i < _boardBoardCells.Count; i++)
+
+            if (serverMessage.CellIndex.HasValue)
             {
-                _boardBoardCells[i] = serverMessage.BoardCells[i];
+                ushort cellIndex = serverMessage.CellIndex.Value;
+                Symbol symbol = serverMessage.Symbol ?? Symbol.Empty;
+
+                _boardBoardCells[cellIndex] = new BoardCell(
+                    cellIndex,
+                    GetSymbolValue(symbol),
+                    isDirty: true
+                );
             }
 
             UpdatePlayerData(serverMessage);
         }
 
-        public void UpdatePlayerData(ServerGameMessage serverMessage)
+        
+
+        public void UpdatePlayerData(ServerToClientConfig serverMessage)
         {
-            if (client.Player.Id == serverMessage.Player.Id)
+            if (client.Player.Id == serverMessage.CurrentPlayerId)
             {
                 client.Player.IsActived = true;
                 IsActiveBoard = true;
@@ -140,18 +158,39 @@ namespace TicTacToeGame.Client
             }
         }
 
+        private string GetSymbolValue(Symbol symbol)
+        {
+            if (symbol == Symbol.X)
+            {
+                return Constants.SymbolsConst.SymbolX;
+            }
+            else if(symbol == Symbol.O)
+            {
+                return Constants.SymbolsConst.SymbolO;
+            }
+            else
+            {
+                return " ";
+            }
+        }
+
+        private void UpdateCell(ref BoardCell cell, bool isDirty, string value)
+        {
+            cell = new(cell.Index, value, isDirty);
+        }
+
         private async Task ApplyGameAction(BoardCell boardCell)
         {
             UpdateBoardCell(boardCell);
-            ClientGameMessage playerMove = new ClientGameMessage(client.ClientId, boardCell, false);
-            string moveJson = ClientJsonDataSerializer.SerializeAction(playerMove);
-            await client.SendDataAsync(moveJson);
+            ClientToServerConfig clientToServerConfig = new ClientToServerConfig(boardCell.Index, false, client.ClientId);
+            string actionJson = ClientJsonDataSerializer.SerializeAction(clientToServerConfig);
+            await client.SendDataAsync(actionJson);
         }
 
         private async Task RestartRequest()
         {
-            ClientGameMessage restartRequest = new ClientGameMessage(client.ClientId, null!, true);
-            string requestJson = ClientJsonDataSerializer.SerializeAction(restartRequest);
+            ClientToServerConfig clientToServerConfig = new ClientToServerConfig(10, true, client.ClientId);
+            string requestJson = ClientJsonDataSerializer.SerializeAction(clientToServerConfig);
             await client.SendDataAsync(requestJson);
         }
 

@@ -9,19 +9,19 @@ namespace TicTacToeGame.Client.Net
 {
     public static class ClientJsonDataSerializer
     {
-        public static string SerializeAction(ClientGameMessage move)
+        public static string SerializeAction(ClientToServerConfig config)
         {
-            return JsonConvert.SerializeObject(move);
+            return JsonConvert.SerializeObject(config);
         }
 
-        public static ServerGameMessage DeserializeServerMessage(string serverMessage)
+        public static ServerToClientConfig DeserializeServerMessage(string serverMessage)
         {
             if (string.IsNullOrEmpty(serverMessage))
             {
                 Debug.WriteLine($"Null data recived.");
                 return null;
             }
-            return JsonConvert.DeserializeObject<ServerGameMessage>(serverMessage)!;
+            return JsonConvert.DeserializeObject<ServerToClientConfig>(serverMessage)!;
         }
 
         public static Player DeserializePlayer(string playerMessage)

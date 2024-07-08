@@ -1,10 +1,14 @@
-﻿using System.Net;
+﻿using Microsoft.CodeAnalysis;
+using System.Diagnostics;
+using System.Net;
 using Tic_tac_toe_Server.Constants;
 using Tic_tac_toe_Server.Logging;
 using Tic_tac_toe_Server.Net;
 using Tic_tac_toe_Server.Player.Factory;
 using TicTacToeGame.Client.Game;
 using TicTacToeGame.Client.Net;
+
+
 
 namespace Tic_tac_toe_Server.Game
 {
@@ -49,9 +53,10 @@ namespace Tic_tac_toe_Server.Game
         {
             if (!string.IsNullOrEmpty(jsonMessage))
             {
-                UpdateGameData(jsonMessage);
+                ClientToServerConfig clientGameMessage = ServerJsonDataSerializer.DeserializeAction(jsonMessage);
+                UpdateGameData(clientGameMessage);
 
-                await SendNewGameData();
+                await SendNewGameData(BoardCells[clientGameMessage.CellIndex]);
             }
             else
             {
@@ -62,30 +67,28 @@ namespace Tic_tac_toe_Server.Game
         public async Task SetStartData()
         {
             Status status = Status.Start;
-            ServerGameMessage serverGameMessage = new ServerGameMessage(status, BoardCells, _gameMaster.GetHistory(), _gameMaster.GetCurrentPlayer());
+            Net.ServerToClientConfig serverConfig = new(status, _gameMaster.GetCurrentPlayer().Id, null, null, _gameMaster.GetHistory());
 
-            string startDataJson = ServerJsonDataSerializer.SerializeServerMessage(serverGameMessage);
+            string serverConfigJson = ServerJsonDataSerializer.SerializeServerMessage(serverConfig);
 
-            if (!string.IsNullOrEmpty(startDataJson))
+            _logger.LogWarning($"{_gameMaster.GetCurrentPlayer().Id} the main client in game!!!");
+
+            if (!string.IsNullOrEmpty(serverConfigJson))
             {
-                await Server.SendDataToClientsAsync(startDataJson);
+                await Server.SendDataToClientsAsync(serverConfigJson);
             }
         }
 
-        private void UpdateGameData(string jsonMessage)
+        private void UpdateGameData(ClientToServerConfig clientGameMessage)
         {
-            ClientGameMessage clientGameMessage = ServerJsonDataSerializer.DeserializePlayer(jsonMessage);
-
-            if (clientGameMessage.RestartRequest == true)
+            if (clientGameMessage.IsRestart == true)
             {
                 _gameMaster.StartNewGameSession();
                 BoardCells = _gameMaster.GetActiveGameSessionBoard();
             }
             else
             {
-                BoardCell cell = clientGameMessage.Cell;
-
-                Guid clientId = clientGameMessage.Guid;
+                BoardCell cell = new(clientGameMessage.CellIndex, _gameMaster.GetCurrentPlayer().PlayerSymbolName, true);
 
                 BoardCells[cell.Index] = cell;
 
@@ -93,13 +96,34 @@ namespace Tic_tac_toe_Server.Game
             }
         }
 
-        private async Task SendNewGameData()
+        private ushort GetNewCellIndex(ClientToServerConfig config)
         {
-            ServerGameMessage serverGameMessage = new ServerGameMessage(_gameMaster.GetStatus(), BoardCells, _gameMaster.GetHistory(), _gameMaster.GetCurrentPlayer());
+            return config.CellIndex;
+        }
 
-            string boardCellsJson = ServerJsonDataSerializer.SerializeServerMessage(serverGameMessage);
+        private async Task SendNewGameData(BoardCell newCell)
+        {
+            Net.ServerToClientConfig serverConfig = new Net.ServerToClientConfig(_gameMaster.GetStatus(), _gameMaster.GetCurrentPlayer().Id, newCell.Index, GetCellSymbol(newCell), _gameMaster.GetHistory());
 
-            await Server.SendDataToClientsAsync(boardCellsJson);
+            string serverConfigJson = ServerJsonDataSerializer.SerializeServerMessage(serverConfig);
+
+            await Server.SendDataToClientsAsync(serverConfigJson);
+        }
+
+        private Symbol GetCellSymbol(BoardCell cell)
+        {
+            if(cell.Value == "X")
+            {
+                return Symbol.X;
+            }
+            else if(cell.Value == "O")
+            {
+                return Symbol.O;
+            }
+            else
+            {
+                return Symbol.Empty;
+            }
         }
 
         private void Client_MessageReceived(object? sender, string message)
