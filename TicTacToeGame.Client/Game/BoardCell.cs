@@ -5,11 +5,11 @@ namespace TicTacToeGame.Client.Game
     public record BoardCell
     {
         public ushort Index { get; init; }
-        public string? Value { get; set; }
+        public Symbol? Value { get; set; }
         public bool IsDirty { get; set; }
 
         [JsonConstructor]
-        public BoardCell(ushort index, string? value = null, bool isDirty = false)
+        public BoardCell(ushort index, Symbol? value = null, bool isDirty = false)
         {
             Index = index;
             Value = value;

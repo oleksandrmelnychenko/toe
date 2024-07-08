@@ -1,4 +1,5 @@
 ﻿using TicTacToeGame.Client.Constants;
+using TicTacToeGame.Client.Game;
 
 namespace Tic_tac_toe_Server.Player.Factory
 {
@@ -16,11 +17,11 @@ namespace Tic_tac_toe_Server.Player.Factory
             {
                 if(i % 2 == 0)
                 {
-                    players.Add(new Player(SymbolsConst.SymbolX, true));
+                    players.Add(new Player(Symbol.X, true));
                 }
                 else
                 {
-                    players.Add(new Player(SymbolsConst.SymbolO, false));
+                    players.Add(new Player(Symbol.O, false));
                 }
             }
             return players;

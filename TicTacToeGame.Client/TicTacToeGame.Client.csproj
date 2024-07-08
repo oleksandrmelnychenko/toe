@@ -20,6 +20,7 @@
     <None Remove="ViewModel\**" />
   </ItemGroup>
   <ItemGroup>
+    <None Remove="Symbols\Empty.png" />
     <None Remove="Symbols\O.png" />
     <None Remove="Symbols\X.png" />
   </ItemGroup>
@@ -40,7 +41,23 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Resource Include="Symbols\Empty.png" />
     <Resource Include="Symbols\O.png" />
     <Resource Include="Symbols\X.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Symbols\Resource1.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resource1.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Symbols\Resource1.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resource1.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
   </ItemGroup>
 </Project>

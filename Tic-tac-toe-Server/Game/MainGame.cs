@@ -112,11 +112,22 @@ namespace Tic_tac_toe_Server.Game
 
         private Symbol GetCellSymbol(BoardCell cell)
         {
-            if(cell.Value == "X")
+            TicTacToeGame.Client.Game.Symbol symbol;
+
+            if(cell.Value.HasValue)
+            {
+                symbol = cell.Value.Value;
+            }
+            else
+            {
+                return Symbol.Empty;
+            }
+
+            if(symbol == TicTacToeGame.Client.Game.Symbol.X)
             {
                 return Symbol.X;
             }
-            else if(cell.Value == "O")
+            else if((symbol == TicTacToeGame.Client.Game.Symbol.O))
             {
                 return Symbol.O;
             }

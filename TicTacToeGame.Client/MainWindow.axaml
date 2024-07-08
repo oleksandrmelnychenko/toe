@@ -4,14 +4,15 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:client="clr-namespace:TicTacToeGame.Client"
         xmlns:game="clr-namespace:TicTacToeGame.Client.Game"
-		xmlns:vm="using:TicTacToeGame.Client"
-		mc:Ignorable="d" Width="900" Height="620" WindowStartupLocation="CenterScreen" CanResize="False"
-		x:DataType="client:MainViewModel"
-		x:Class="TicTacToeGame.Client.MainWindow"
-		Title="Tic_tac_toe">
+        xmlns:vm="using:TicTacToeGame.Client"
+        mc:Ignorable="d" Width="900" Height="620" WindowStartupLocation="CenterScreen" CanResize="False"
+        x:DataType="client:MainViewModel"
+        x:Class="TicTacToeGame.Client.MainWindow"
+        Title="Tic_tac_toe">
 
 	<Window.Resources>
 		<game:MultiBoolToBoolConverter x:Key="MultiBoolToBoolConverter"/>
+		<game:SymbolToImageConverter x:Key="SymbolToImageConverter"/>
 	</Window.Resources>
 
 	<DockPanel x:Name="Root">
@@ -31,7 +32,7 @@
 									<Binding Path="#Root.((vm:MainViewModel)DataContext).IsActiveBoard"/>
 								</MultiBinding>
 							</Button.IsEnabled>
-							<TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="164" Text="{Binding Value}"></TextBlock>
+							<Image Source="{Binding Value, Converter={StaticResource SymbolToImageConverter}}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="164" Height="164"/>
 						</Button>
 					</DataTemplate>
 				</ItemsControl.ItemTemplate>
@@ -39,8 +40,7 @@
 		</StackPanel>
 
 		<StackPanel VerticalAlignment="Center" Name="ButtonsField" DockPanel.Dock="Right" Width="350">
-			<TextBlock FontSize="24" HorizontalAlignment="Center" Margin="20" Text="{Binding GameStatus}">
-			</TextBlock>
+			<TextBlock FontSize="24" HorizontalAlignment="Center" Margin="20" Text="{Binding GameStatus}"/>
 			<TextBox Height="300" Width="200" AcceptsReturn="True" Margin="20" TextWrapping="Wrap" Text="{Binding ActionHistory}"/>
 			<Button HorizontalAlignment="Center" Name="RestartButton" Command="{Binding OnRestartCommand}">
 				Restart
