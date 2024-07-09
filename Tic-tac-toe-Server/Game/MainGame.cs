@@ -40,7 +40,7 @@ namespace Tic_tac_toe_Server.Game
             BoardCells = _gameMaster.GetActiveGameSessionBoard();
             Server.SetPlayerManager(_gameMaster.GetPlayerService());
             await Server.StartServerAsync();
-            await SetStartData();
+            await SetStartData(Status.Start);
             while (Server.IsActive == true)
             {
                 await Server.ListenClientsAsync();
@@ -52,9 +52,18 @@ namespace Tic_tac_toe_Server.Game
             if (!string.IsNullOrEmpty(jsonMessage))
             {
                 ClientToServerConfig clientGameMessage = ServerJsonDataSerializer.DeserializeAction(jsonMessage);
-                UpdateGameData(clientGameMessage);
 
-                await SendNewGameData(BoardCells[clientGameMessage.CellIndex]);
+                if(clientGameMessage.IsRestart == true)
+                {
+                    _gameMaster.StartNewGameSession();
+                    BoardCells = _gameMaster.GetActiveGameSessionBoard();
+                    await SetStartData(Status.Restart);
+                }
+                else
+                {
+                    UpdateGameData(clientGameMessage);
+                    await SendNewGameData(BoardCells[clientGameMessage.CellIndex]);
+                }
             }
             else
             {
@@ -62,9 +71,8 @@ namespace Tic_tac_toe_Server.Game
             }
         }
 
-        public async Task SetStartData()
+        public async Task SetStartData(Status status)
         {
-            Status status = Status.Start;
             Net.ServerToClientConfig serverConfig = new(status, _gameMaster.GetCurrentPlayer().Id, null, _gameMaster.GetCurrentPlayer().PlayerSymbolName, _gameMaster.GetCurrentPlayer().PlayerSymbolName, _gameMaster.GetHistory());
 
             string serverConfigJson = ServerJsonDataSerializer.SerializeServerMessage(serverConfig);
@@ -77,19 +85,11 @@ namespace Tic_tac_toe_Server.Game
 
         private void UpdateGameData(ClientToServerConfig clientGameMessage)
         {
-            if (clientGameMessage.IsRestart == true)
-            {
-                _gameMaster.StartNewGameSession();
-                BoardCells = _gameMaster.GetActiveGameSessionBoard();
-            }
-            else
-            {
-                BoardCell cell = new(clientGameMessage.CellIndex, (TicTacToeGame.Client.Game.Symbol?)_gameMaster.GetCurrentPlayer().PlayerSymbolName, true);
+            BoardCell cell = new(clientGameMessage.CellIndex, (TicTacToeGame.Client.Game.Symbol?)_gameMaster.GetCurrentPlayer().PlayerSymbolName, true);
 
-                BoardCells[cell.Index] = cell;
+            BoardCells[cell.Index] = cell;
 
-                _gameMaster.NewAction(cell);
-            }
+            _gameMaster.NewAction(cell);
         }
 
         private ushort GetNewCellIndex(ClientToServerConfig config)

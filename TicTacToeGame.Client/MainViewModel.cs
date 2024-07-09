@@ -20,7 +20,6 @@ namespace TicTacToeGame.Client
 
         private ObservableCollection<BoardCell> _boardBoardCells = null!;
 
-        private Status gameStatus;
 
         private bool isActiveBoard;
 
@@ -72,8 +71,12 @@ namespace TicTacToeGame.Client
         public void UpdateGameData(string message)
         {
             ServerToClientConfig serverMessage = ClientJsonDataSerializer.DeserializeServerMessage(message);
-            gameStatus = serverMessage.Status;
             ActionHistory = serverMessage.GameHistory;
+
+            if(serverMessage.Status == Status.Restart)
+            {
+                Restart();
+            }
 
             if (serverMessage.CellIndex.HasValue)
             {
@@ -92,21 +95,13 @@ namespace TicTacToeGame.Client
             UpdateGameStatus(serverMessage.Status, serverMessage.CurrentPlayerSymbol);
         }
 
-        
+        private void Restart()
+        {
+            BoardCells = new ObservableCollection<BoardCell>(CellFactory.Build(cellsCount));
+        }
 
         private void UpdatePlayerData(ServerToClientConfig serverMessage)
-        {
-            if (client.ClientId == serverMessage.CurrentPlayerId)
-            {
-                //client.Player.IsActived = true;
-                IsActiveBoard = true;
-            }
-            else
-            {
-                //client.Player.IsActived = false;
-                IsActiveBoard = false;
-            }
-        }
+            => IsActiveBoard = client.ClientId == serverMessage.CurrentPlayerId ? true : false;
 
         private void UpdateGameStatus(Status status, Symbol symbol)
         {
@@ -119,30 +114,8 @@ namespace TicTacToeGame.Client
             };
         }
 
-        private string GetSymbolValue(Symbol symbol)
-        {
-            if (symbol == Symbol.X)
-            {
-                return Constants.SymbolsConst.SymbolX;
-            }
-            else if(symbol == Symbol.O)
-            {
-                return Constants.SymbolsConst.SymbolO;
-            }
-            else
-            {
-                return " ";
-            }
-        }
-
-        private void UpdateCell(ref BoardCell cell, bool isDirty, Symbol value)
-        {
-            cell = new(cell.Index, value, isDirty);
-        }
-
         private async Task ApplyGameAction(BoardCell boardCell)
         {
-            //UpdateBoardCell(boardCell);
             ClientToServerConfig clientToServerConfig = new ClientToServerConfig(boardCell.Index, false, client.ClientId);
             string actionJson = ClientJsonDataSerializer.SerializeAction(clientToServerConfig);
             await client.SendDataAsync(actionJson);

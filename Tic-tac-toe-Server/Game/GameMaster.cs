@@ -10,6 +10,8 @@ namespace Tic_tac_toe_Server.Game
     {
         private const ushort CellsCount = 9;
 
+        private PlayerManager _playerManager = new(2);
+
         private GameSession? _activeGameSession;
 
         /// <summary>
@@ -25,7 +27,7 @@ namespace Tic_tac_toe_Server.Game
         /// </summary>
         public void StartNewGameSession()
         {
-            _activeGameSession = new GameSession(CreateNewBoard());
+            _activeGameSession = new GameSession(CreateNewBoard(), _playerManager);
         }
 
         public PlayerBase GetCurrentPlayer()

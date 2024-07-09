@@ -6,9 +6,9 @@ using Tic_tac_toe_Server.Player;
 
 namespace Tic_tac_toe_Server.Game
 {
-    public class GameSession(List<BoardCell> boardCells)
+    public class GameSession(List<BoardCell> boardCells, PlayerManager playerManager)
     {
-        private PlayerManager _playerService = new(2);
+        private PlayerManager _playerService = playerManager;
 
         //Тут змінив тип на ліст, тому що чомусь не оновлюється IReadOnlyCollection хоча ніби роблю посилання на один об'єкт і в гілці main це працює, можливо це через те що там ObservableCollection
         public List<BoardCell> BoardCells { get; private set; } = boardCells;
