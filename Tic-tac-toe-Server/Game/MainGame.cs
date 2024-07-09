@@ -1,22 +1,20 @@
-﻿using Microsoft.CodeAnalysis;
-using System.Diagnostics;
-using System.Net;
+﻿using System.Net;
 using Tic_tac_toe_Server.Constants;
 using Tic_tac_toe_Server.Logging;
 using Tic_tac_toe_Server.Net;
-using Tic_tac_toe_Server.Player.Factory;
 using TicTacToeGame.Client.Game;
 using TicTacToeGame.Client.Net;
 
 
-
-namespace Tic_tac_toe_Server.Game
+namespace Tic_tac_toe_Server.Game 
 {
-    internal class MainGame
+    internal class MainGame : IDisposable
     {
         private GameMaster _gameMaster { get; set; } = new();
 
         private ILogger _logger;
+
+        private bool _disposed = false;
 
         private List<BoardCell> _boardCells = null!;
 
@@ -112,7 +110,7 @@ namespace Tic_tac_toe_Server.Game
         {
             TicTacToeGame.Client.Game.Symbol symbol;
 
-            if(cell.Value.HasValue)
+            if (cell.Value.HasValue)
             {
                 symbol = cell.Value.Value;
             }
@@ -121,11 +119,11 @@ namespace Tic_tac_toe_Server.Game
                 return Symbol.Empty;
             }
 
-            if(symbol == TicTacToeGame.Client.Game.Symbol.X)
+            if (symbol == TicTacToeGame.Client.Game.Symbol.X)
             {
                 return Symbol.X;
             }
-            else if((symbol == TicTacToeGame.Client.Game.Symbol.O))
+            else if ((symbol == TicTacToeGame.Client.Game.Symbol.O))
             {
                 return Symbol.O;
             }
@@ -142,6 +140,31 @@ namespace Tic_tac_toe_Server.Game
 
         private void ClientDisconect(object? sender, EventArgs eventArgs)
         {
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!_disposed)
+            {
+                if (disposing)
+                {
+                    Server.MessageReceived -= Client_MessageReceived;
+                    Server.ClientDisconect -= ClientDisconect;
+
+                    if(Server != null)
+                    {
+                        Server?.Dispose();
+                    }
+                }
+
+                _disposed = true;
+            }
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
         }
     }
 }

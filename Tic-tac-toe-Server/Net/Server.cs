@@ -8,9 +8,11 @@ using TicTacToeGame.Client.Net;
 
 namespace Tic_tac_toe_Server.Net
 {
-    public class Server
+    public class Server : IDisposable
     {
         private ILogger logger;
+
+        private bool _disposed;
 
         private const int clientsNumber = 2;
 
@@ -217,6 +219,30 @@ namespace Tic_tac_toe_Server.Net
             {
                 logger.LogWarning("\nClient is not connected to the server.\n");
             }
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if(!_disposed)
+            {
+                if(disposing)
+                {
+                    foreach(var client in clients)
+                    {
+                        client.Close();
+                        client.Dispose();
+                    }
+                    clients.Clear();
+
+                    this.StopServer();
+                }
+            }
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
         }
     }
 }

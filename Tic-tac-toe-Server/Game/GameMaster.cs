@@ -12,8 +12,6 @@ namespace Tic_tac_toe_Server.Game
 
         private GameSession? _activeGameSession;
 
-        private PlayerManager _playerService = new(2);
-
         /// <summary>
         ///     The GameMaster class represents the game master that manages the Tic Tac Toe game.
         /// </summary>
@@ -30,32 +28,24 @@ namespace Tic_tac_toe_Server.Game
             _activeGameSession = new GameSession(CreateNewBoard());
         }
 
+        public PlayerBase GetCurrentPlayer()
+        {
+            ArgumentNullException.ThrowIfNull(nameof(_activeGameSession));
+            return _activeGameSession!.GetCurrentPlayer();
+        }
+
         public void NewAction(BoardCell boardCell)
         {
             ArgumentNullException.ThrowIfNull(nameof(_activeGameSession));
-            GameAction action = new(_playerService.CurrentPlayer, boardCell.Index);
+            GameAction action = new(_activeGameSession!.GetCurrentPlayer(), boardCell.Index);
 
             _activeGameSession!.HandleAction(action);
-
-            HandleGameStatus();
-        }
-
-        private void HandleGameStatus()
-        {
-            if (_activeGameSession!.Status == Status.PlayerTurn)
-            {
-                _playerService.ChangeCurrentPlayer();
-            }
-        }
-
-        public PlayerBase GetCurrentPlayer()
-        {
-            return _playerService.CurrentPlayer;
         }
 
         public PlayerManager GetPlayerService()
         {
-            return _playerService;
+            ArgumentNullException.ThrowIfNull(nameof(_activeGameSession));
+            return _activeGameSession!.GetPlayerService();
         }
 
         public List<BoardCell> GetActiveGameSessionBoard()
