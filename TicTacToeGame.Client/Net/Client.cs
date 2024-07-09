@@ -11,21 +11,19 @@ namespace TicTacToeGame.Client.Net
 {
     public class Client
     {
-        private TcpClient tcpClient;
-        public Guid ClientId { get; private set; }
-
-        public Player Player { get; private set; }
-
         private NetworkStream stream;
 
         private IPEndPoint remoteEndPoint;
+
+        private TcpClient tcpClient;
+
+        public Guid ClientId { get; private set; }
 
         public event EventHandler<string> MessageReceived;
 
         public Client(IPAddress address, int port)
         {
             tcpClient = new TcpClient();
-            ClientId = Guid.NewGuid();
             remoteEndPoint = new IPEndPoint(address, port);
         }
 
@@ -35,11 +33,11 @@ namespace TicTacToeGame.Client.Net
             {
                 await tcpClient.ConnectAsync(remoteEndPoint);
                 stream = tcpClient.GetStream();
-                Debug.WriteLine($"Client {ClientId} connected to server");
+                Debug.WriteLine($"Client connected to server");
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"Client {ClientId} cannot connect to server: {ex}");
+                Debug.WriteLine($"Client cannot connect to server: {ex}");
             }
         }
 
@@ -73,7 +71,6 @@ namespace TicTacToeGame.Client.Net
                     byte[] buffer = new byte[1024];
                     var received = await stream.ReadAsync(buffer, 0, buffer.Length);
                     var message = Encoding.UTF8.GetString(buffer, 0, received);
-                    Debug.WriteLine($"Client {ClientId} received message");
                     return message;
                 }
                 catch (Exception ex)
@@ -112,17 +109,18 @@ namespace TicTacToeGame.Client.Net
         {
             if (!tcpClient.Connected)
             {
-                Debug.WriteLine($"Client {ClientId} is not connected to the server.");
+                Debug.WriteLine($"Client is not connected to the server.");
                 return;
             }
 
-            Debug.WriteLine($"Client {ClientId} is waiting for player info.");
-            while (Player == null)
+            Debug.WriteLine($"Client is waiting for player info.");
+            while (ClientId == Guid.Empty)
             {
                 var message = await ReadDataAsync();
                 if (message != null)
                 {
-                    Player = ClientJsonDataSerializer.DeserializePlayer(message);
+                    ClientId = ClientJsonDataSerializer.DeserializePlayer(message).Id;
+                    Debug.WriteLine($"Client {ClientId} get client id.");
                 }
             }
         }

@@ -9,5 +9,5 @@ using TicTacToeGame.Client.Game;
 
 namespace Tic_tac_toe_Server.Net
 {
-    public record ServerToClientConfig(Status Status, Guid CurrentPlayerId, ushort? CellIndex, Game.Symbol? Symbol, string GameHistory);
+    public record ServerToClientConfig(Status Status, Guid CurrentPlayerId, ushort? CellIndex, Game.Symbol CellSymbol, Game.Symbol CurrentPlayerSymbol, string GameHistory);
 }

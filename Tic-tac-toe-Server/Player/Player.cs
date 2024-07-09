@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using TicTacToeGame.Client.Game;
+using Tic_tac_toe_Server.Game;
 
 namespace Tic_tac_toe_Server.Player
 {

@@ -1,4 +1,4 @@
-﻿using TicTacToeGame.Client.Game;
+﻿using Tic_tac_toe_Server.Game;
 
 namespace Tic_tac_toe_Server.Player
 {

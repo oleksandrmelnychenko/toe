@@ -69,13 +69,6 @@ namespace TicTacToeGame.Client
         public async void OnRestartClickCommandHandler() =>
             await RestartRequest();
 
-        public void UpdateBoardCell(BoardCell boardCell)
-        {
-            boardCell.IsDirty = true;
-            boardCell.Value = client.Player.PlayerSymbolName;
-            _boardBoardCells[boardCell.Index] = boardCell;
-        }
-
         public void UpdateGameData(string message)
         {
             ServerToClientConfig serverMessage = ClientJsonDataSerializer.DeserializeServerMessage(message);
@@ -85,7 +78,7 @@ namespace TicTacToeGame.Client
             if (serverMessage.CellIndex.HasValue)
             {
                 ushort cellIndex = serverMessage.CellIndex.Value;
-                Symbol symbol = serverMessage.Symbol ?? Symbol.Empty;
+                Symbol symbol = serverMessage.CellSymbol ?? Symbol.Empty;
 
                 _boardBoardCells[cellIndex] = new BoardCell(
                     cellIndex,
@@ -95,30 +88,28 @@ namespace TicTacToeGame.Client
             }
 
             UpdatePlayerData(serverMessage);
+
+            UpdateGameStatus(serverMessage.Status, serverMessage.CurrentPlayerSymbol);
         }
 
         
 
-        public void UpdatePlayerData(ServerToClientConfig serverMessage)
+        private void UpdatePlayerData(ServerToClientConfig serverMessage)
         {
-            if (client.Player.Id == serverMessage.CurrentPlayerId)
+            if (client.ClientId == serverMessage.CurrentPlayerId)
             {
-                client.Player.IsActived = true;
+                //client.Player.IsActived = true;
                 IsActiveBoard = true;
             }
             else
             {
-                client.Player.IsActived = false;
+                //client.Player.IsActived = false;
                 IsActiveBoard = false;
             }
-            UpdateGameStatus();
         }
 
-        public void UpdateGameStatus()
+        private void UpdateGameStatus(Status status, Symbol symbol)
         {
-            Status status = gameStatus;
-            string symbol = GetCurrentGameSymbol();
-
             GameStatus = status switch
             {
                 Status.PlayerTurn or Status.Start => GameStatusConst.PlayerTurn + " " + symbol,
@@ -126,36 +117,6 @@ namespace TicTacToeGame.Client
                 Status.Finish => GameStatusConst.EndOfGame + " " + symbol,
                 _ => GameStatus
             };
-        }
-
-        public string GetCurrentGameSymbol()
-        {
-            if (client.Player.PlayerSymbolName == Symbol.X)
-            {
-                if (client.Player.IsActived)
-                {
-                    return SymbolsConst.SymbolX;
-                }
-                else
-                {
-                    return SymbolsConst.SymbolO;
-                }
-            }
-            else if (client.Player.PlayerSymbolName == Symbol.O)
-            {
-                if (client.Player.IsActived)
-                {
-                    return SymbolsConst.SymbolO;
-                }
-                else
-                {
-                    return SymbolsConst.SymbolX;
-                }
-            }
-            else
-            {
-                return "unknown player!";
-            }
         }
 
         private string GetSymbolValue(Symbol symbol)
@@ -181,7 +142,7 @@ namespace TicTacToeGame.Client
 
         private async Task ApplyGameAction(BoardCell boardCell)
         {
-            UpdateBoardCell(boardCell);
+            //UpdateBoardCell(boardCell);
             ClientToServerConfig clientToServerConfig = new ClientToServerConfig(boardCell.Index, false, client.ClientId);
             string actionJson = ClientJsonDataSerializer.SerializeAction(clientToServerConfig);
             await client.SendDataAsync(actionJson);

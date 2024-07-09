@@ -67,11 +67,9 @@ namespace Tic_tac_toe_Server.Game
         public async Task SetStartData()
         {
             Status status = Status.Start;
-            Net.ServerToClientConfig serverConfig = new(status, _gameMaster.GetCurrentPlayer().Id, null, null, _gameMaster.GetHistory());
+            Net.ServerToClientConfig serverConfig = new(status, _gameMaster.GetCurrentPlayer().Id, null, _gameMaster.GetCurrentPlayer().PlayerSymbolName, _gameMaster.GetCurrentPlayer().PlayerSymbolName, _gameMaster.GetHistory());
 
             string serverConfigJson = ServerJsonDataSerializer.SerializeServerMessage(serverConfig);
-
-            _logger.LogWarning($"{_gameMaster.GetCurrentPlayer().Id} the main client in game!!!");
 
             if (!string.IsNullOrEmpty(serverConfigJson))
             {
@@ -88,7 +86,7 @@ namespace Tic_tac_toe_Server.Game
             }
             else
             {
-                BoardCell cell = new(clientGameMessage.CellIndex, _gameMaster.GetCurrentPlayer().PlayerSymbolName, true);
+                BoardCell cell = new(clientGameMessage.CellIndex, (TicTacToeGame.Client.Game.Symbol?)_gameMaster.GetCurrentPlayer().PlayerSymbolName, true);
 
                 BoardCells[cell.Index] = cell;
 
@@ -103,7 +101,7 @@ namespace Tic_tac_toe_Server.Game
 
         private async Task SendNewGameData(BoardCell newCell)
         {
-            Net.ServerToClientConfig serverConfig = new Net.ServerToClientConfig(_gameMaster.GetStatus(), _gameMaster.GetCurrentPlayer().Id, newCell.Index, GetCellSymbol(newCell), _gameMaster.GetHistory());
+            Net.ServerToClientConfig serverConfig = new Net.ServerToClientConfig(_gameMaster.GetStatus(), _gameMaster.GetCurrentPlayer().Id, newCell.Index, GetCellSymbol(newCell), _gameMaster.GetCurrentPlayer().PlayerSymbolName, _gameMaster.GetHistory());
 
             string serverConfigJson = ServerJsonDataSerializer.SerializeServerMessage(serverConfig);
 
