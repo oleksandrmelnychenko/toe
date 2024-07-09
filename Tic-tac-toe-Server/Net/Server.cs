@@ -235,6 +235,8 @@ namespace Tic_tac_toe_Server.Net
                     clients.Clear();
 
                     this.StopServer();
+
+                    listener.Dispose();
                 }
             }
         }

@@ -65,7 +65,7 @@ namespace TicTacToeGame.Client
         public async void OnRestartClickCommandHandler() =>
             await RestartRequest();
 
-        public void UpdateGameData(string message)
+        private void UpdateGameData(string message)
         {
             ServerToClientConfig serverMessage = ClientJsonDataSerializer.DeserializeServerMessage(message);
 
@@ -140,8 +140,6 @@ namespace TicTacToeGame.Client
         }
 
         private void Client_MessageReceived(object? sender, string message)
-        {
-            UpdateGameData(message);
-        }
+            => UpdateGameData(message);
     }
 }
