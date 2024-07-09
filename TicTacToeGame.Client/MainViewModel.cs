@@ -68,29 +68,43 @@ namespace TicTacToeGame.Client
         public void UpdateGameData(string message)
         {
             ServerToClientConfig serverMessage = ClientJsonDataSerializer.DeserializeServerMessage(message);
-            ActionHistory = serverMessage.GameHistory;
 
-            if(serverMessage.Status == Status.Restart)
-            {
-                Restart();
-            }
+            UpdateActionHistory(serverMessage.GameHistory);
+            HandleRestartStatus(serverMessage.Status);
 
             if (serverMessage.CellIndex.HasValue)
             {
-                ushort cellIndex = serverMessage.CellIndex.Value;
-                Symbol symbol = serverMessage.CellSymbol ?? Symbol.Empty;
-
-                _boardBoardCells[cellIndex] = new BoardCell(
-                    cellIndex,
-                    symbol,
-                    isDirty: true
-                );
+                UpdateBoardCell(serverMessage.CellIndex.Value, serverMessage.CellSymbol);
             }
 
             UpdatePlayerData(serverMessage);
-
             UpdateGameStatus(serverMessage.Status, serverMessage.CurrentPlayerSymbol);
         }
+
+        private void UpdateActionHistory(string history)
+        {
+            ActionHistory = history;
+        }
+
+        private void HandleRestartStatus(Status status)
+        {
+            if (status == Status.Restart)
+            {
+                Restart();
+            }
+        }
+
+        private void UpdateBoardCell(ushort cellIndex, Symbol? cellSymbol)
+        {
+            Symbol symbol = cellSymbol ?? Symbol.Empty;
+
+            _boardBoardCells[cellIndex] = new BoardCell(
+                cellIndex,
+                symbol,
+                isDirty: true
+            );
+        }
+
 
         private void Restart()
         {
