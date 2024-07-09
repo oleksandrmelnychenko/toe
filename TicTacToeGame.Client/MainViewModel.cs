@@ -1,10 +1,7 @@
 ﻿using Prism.Commands;
 using ReactiveUI;
-using System;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.Threading.Tasks;
-using Tic_tac_toe_Server.Net;
 using TicTacToeGame.Client.Constants;
 using TicTacToeGame.Client.Game;
 using TicTacToeGame.Client.Net;
