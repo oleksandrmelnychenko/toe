@@ -1,7 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using Tic_tac_toe_Server.Game;
-using TicTacToeGame.Client.Game;
+﻿using TicTacToeGame.Client.Game;
 
 namespace Tic_tac_toe_Server.Game
 {

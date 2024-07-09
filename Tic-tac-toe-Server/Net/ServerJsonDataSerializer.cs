@@ -1,8 +1,5 @@
 ﻿using Newtonsoft.Json;
-using System.Collections.Generic;
 using System.Diagnostics;
-using Tic_tac_toe_Server.Net;
-using TicTacToeGame.Client.Game;
 using Tic_tac_toe_Server.Player;
 using TicTacToeGame.Client.Net;
 
@@ -25,9 +22,9 @@ namespace Tic_tac_toe_Server.Net
             return JsonConvert.SerializeObject(serverToClientConfig);
         }
 
-        public static string SerializePlayer(PlayerBase user)
+        public static string SerializePlayerId(Guid userId)
         {
-            return JsonConvert.SerializeObject(user);
+            return JsonConvert.SerializeObject(userId);
         }
     }
 }

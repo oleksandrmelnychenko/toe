@@ -10,6 +10,7 @@ namespace Tic_tac_toe_Server.Player.Factory
 
         }
 
+        //Якось трохи по дурному ніби зробив, але ідея в тому щоб чередувати через одного гравця з символом X i O,
         public static List<PlayerBase> CreatePlayers(int count)
         {
             var players = new List<PlayerBase>();

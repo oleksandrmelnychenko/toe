@@ -92,11 +92,6 @@ namespace Tic_tac_toe_Server.Game
             _gameMaster.NewAction(cell);
         }
 
-        private ushort GetNewCellIndex(ClientToServerConfig config)
-        {
-            return config.CellIndex;
-        }
-
         private async Task SendNewGameData(BoardCell newCell)
         {
             Net.ServerToClientConfig serverConfig = new Net.ServerToClientConfig(_gameMaster.GetStatus(), _gameMaster.GetCurrentPlayer().Id, newCell.Index, GetCellSymbol(newCell), _gameMaster.GetCurrentPlayer().PlayerSymbolName, _gameMaster.GetHistory());

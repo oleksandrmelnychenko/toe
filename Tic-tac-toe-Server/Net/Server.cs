@@ -80,11 +80,11 @@ namespace Tic_tac_toe_Server.Net
                     clients.Add(client);
 
                     var player = playerManager.Players[clients.Count - 1];
-                    var serializedPlayer = ServerJsonDataSerializer.SerializePlayer(player);
+                    var serializedPlayerId = ServerJsonDataSerializer.SerializePlayerId(player.Id);
 
-                    logger.LogMessage($"Sending initial data to client {clients.Count}: {serializedPlayer}");
+                    logger.LogMessage($"Sending initial data to client {clients.Count}: {serializedPlayerId}");
 
-                    await SendDataToClientAsync(client, serializedPlayer);
+                    await SendDataToClientAsync(client, serializedPlayerId);
 
                     logger.LogMessage($"Client {clients.Count} connected and initial data sent.");
                 }

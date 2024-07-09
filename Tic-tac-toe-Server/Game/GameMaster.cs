@@ -1,8 +1,5 @@
-using System;
-using System.Collections.Generic;
 using Tic_tac_toe_Server.Player;
 using TicTacToeGame.Client.Game;
-using TicTacToeGame.Client.Models;
 
 namespace Tic_tac_toe_Server.Game
 {

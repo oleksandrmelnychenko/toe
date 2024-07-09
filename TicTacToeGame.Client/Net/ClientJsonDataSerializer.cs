@@ -1,9 +1,6 @@
 ﻿using Newtonsoft.Json;
-using System.Collections.Generic;
+using System;
 using System.Diagnostics;
-using Tic_tac_toe_Server.Net;
-using TicTacToeGame.Client.Game;
-using TicTacToeGame.Client.Models;
 
 namespace TicTacToeGame.Client.Net
 {
@@ -24,14 +21,14 @@ namespace TicTacToeGame.Client.Net
             return JsonConvert.DeserializeObject<ServerToClientConfig>(serverMessage)!;
         }
 
-        public static Player DeserializePlayer(string playerMessage)
+        public static Guid DeserializePlayerId(string playerMessage)
         {
             if (string.IsNullOrEmpty(playerMessage))
             {
                 Debug.WriteLine($"Null data recived.");
-                return null;
+                return Guid.Empty;
             }
-            return JsonConvert.DeserializeObject<Player>(playerMessage)!;
+            return JsonConvert.DeserializeObject<Guid>(playerMessage)!;
         }
     }
 }

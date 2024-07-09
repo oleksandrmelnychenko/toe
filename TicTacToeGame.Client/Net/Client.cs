@@ -121,7 +121,7 @@ namespace TicTacToeGame.Client.Net
                 var message = await ReadDataAsync();
                 if (message != null)
                 {
-                    ClientId = ClientJsonDataSerializer.DeserializePlayer(message).Id;
+                    ClientId = ClientJsonDataSerializer.DeserializePlayerId(message);
                     Debug.WriteLine($"Client {ClientId} get client id.");
                 }
             }
