@@ -4,6 +4,7 @@ using Tic_tac_toe_Server.Logging;
 using Tic_tac_toe_Server.Net;
 using TicTacToeGame.Client.Game;
 using TicTacToeGame.Client.Net;
+using Tmds.DBus.Protocol;
 
 
 namespace Tic_tac_toe_Server.Game 
@@ -31,7 +32,7 @@ namespace Tic_tac_toe_Server.Game
             _logger = logger;
             Server = new Server(IPAddress.Parse(AddressConstants.IPAddress), AddressConstants.Port, logger);
             Server.MessageReceived += Client_MessageReceived;
-            Server.ClientDisconect += ClientDisconect;
+            Server.AllClientsReconnected += Client_Reconnected;
         }
 
         public async Task Start()
@@ -55,9 +56,7 @@ namespace Tic_tac_toe_Server.Game
 
                 if(clientGameMessage.IsRestart == true)
                 {
-                    _gameMaster.StartNewGameSession();
-                    BoardCells = _gameMaster.GetActiveGameSessionBoard();
-                    await SetStartData(Status.Restart);
+                    await RestartGame();
                 }
                 else
                 {
@@ -81,6 +80,13 @@ namespace Tic_tac_toe_Server.Game
             {
                 await Server.SendDataToClientsAsync(serverConfigJson);
             }
+        }
+
+        private async Task RestartGame()
+        {
+            _gameMaster.StartNewGameSession();
+            BoardCells = _gameMaster.GetActiveGameSessionBoard();
+            await SetStartData(Status.Restart);
         }
 
         private void UpdateGameData(ClientToServerConfig clientGameMessage)
@@ -133,8 +139,9 @@ namespace Tic_tac_toe_Server.Game
             HandleClientMessage(message).GetAwaiter().GetResult();
         }
 
-        private void ClientDisconect(object? sender, EventArgs eventArgs)
+        private void Client_Reconnected(object? sender, EventArgs eventArgs)
         {
+            RestartGame().GetAwaiter().GetResult();
         }
 
         protected virtual void Dispose(bool disposing)
@@ -144,7 +151,6 @@ namespace Tic_tac_toe_Server.Game
                 if (disposing)
                 {
                     Server.MessageReceived -= Client_MessageReceived;
-                    Server.ClientDisconect -= ClientDisconect;
 
                     if(Server != null)
                     {

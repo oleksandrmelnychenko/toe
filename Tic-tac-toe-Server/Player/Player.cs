@@ -1,19 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Tic_tac_toe_Server.Game;
+﻿using Tic_tac_toe_Server.Game;
 
 namespace Tic_tac_toe_Server.Player
 {
     public class Player : PlayerBase
     {
-        public Player(Symbol symbolName, bool isActive)
+        public Player(Symbol symbolName, bool isActive, PlayerStatus status)
         {
             PlayerSymbolName = symbolName;
             Id = Guid.NewGuid();
             IsActived = isActive;
+            Status = status;
         }
     }
 }

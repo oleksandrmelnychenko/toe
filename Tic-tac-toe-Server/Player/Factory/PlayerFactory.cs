@@ -18,11 +18,11 @@ namespace Tic_tac_toe_Server.Player.Factory
             {
                 if(i % 2 == 0)
                 {
-                    players.Add(new Player(Symbol.X, true));
+                    players.Add(new Player(Symbol.X, true , PlayerStatus.Disconnected));
                 }
                 else
                 {
-                    players.Add(new Player(Symbol.O, false));
+                    players.Add(new Player(Symbol.O, false, PlayerStatus.Disconnected));
                 }
             }
             return players;

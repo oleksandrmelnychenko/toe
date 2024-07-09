@@ -3,8 +3,6 @@ using System.Net.Sockets;
 using System.Text;
 using Tic_tac_toe_Server.Game;
 using Tic_tac_toe_Server.Logging;
-using TicTacToeGame.Client.Game;
-using TicTacToeGame.Client.Net;
 
 namespace Tic_tac_toe_Server.Net
 {
@@ -16,7 +14,7 @@ namespace Tic_tac_toe_Server.Net
 
         private const int clientsNumber = 2;
 
-        private List<TcpClient> clients = new List<TcpClient>(clientsNumber);
+        private List<Client> clients = new List<Client>(clientsNumber);
 
         private TcpListener listener;
 
@@ -28,7 +26,7 @@ namespace Tic_tac_toe_Server.Net
 
         public event EventHandler<string> MessageReceived;
 
-        public event EventHandler ClientDisconect;
+        public event EventHandler AllClientsReconnected;
 
         public Server(IPAddress address, int port, ILogger logger)
         {
@@ -76,11 +74,14 @@ namespace Tic_tac_toe_Server.Net
             {
                 while (clients.Count < clientsNumber)
                 {
-                    TcpClient client = await listener.AcceptTcpClientAsync();
+                    TcpClient tcpClient = await listener.AcceptTcpClientAsync();
+                    Client client = new Client(tcpClient);
+
                     clients.Add(client);
 
-                    var player = playerManager.Players[clients.Count - 1];
-                    var serializedPlayerId = ServerJsonDataSerializer.SerializePlayerId(player.Id);
+                    playerManager.ConnectClientToPlayer(ref client);
+
+                    var serializedPlayerId = ServerJsonDataSerializer.SerializePlayerId(client.Id);
 
                     logger.LogMessage($"Sending initial data to client {clients.Count}: {serializedPlayerId}");
 
@@ -111,7 +112,7 @@ namespace Tic_tac_toe_Server.Net
             {
                 List<Task> clientTasks = new List<Task>();
 
-                foreach (TcpClient client in clients)
+                foreach (Client client in clients)
                 {
                     clientTasks.Add(HandleClientAsync(client));
                 }
@@ -125,14 +126,14 @@ namespace Tic_tac_toe_Server.Net
         }
 
         //When get message from one of the clients, processes it and sends it to all clients
-        private async Task HandleClientAsync(TcpClient client)
+        private async Task HandleClientAsync(Client client)
         {
             try
             {
                 NetworkStream stream = client.GetStream();
                 var buffer = new byte[1024];
 
-                while (client.Connected)
+                while (client.Connected && IsAllClientConnected)
                 {
                     int received = await stream.ReadAsync(buffer, 0, buffer.Length);
                     if (received == 0)
@@ -141,13 +142,10 @@ namespace Tic_tac_toe_Server.Net
                     }
 
                     var message = Encoding.UTF8.GetString(buffer, 0, received);
-                    //Console.WriteLine($"Received message: {message}");
-                    //message = ProcessMessage(message);
 
                     if (!string.IsNullOrEmpty(message))
                     {
                         MessageReceived?.Invoke(this, message);
-                        //await SendDataToClientsAsync(message);
                     }
                 }
             }
@@ -162,7 +160,21 @@ namespace Tic_tac_toe_Server.Net
             finally
             {
                 clients.Remove(client);
-                client.Close();
+
+                logger.LogWarning($"\nClient {client.Id} disconected!\n");
+
+                playerManager.DisconnectClientToPlayer(client.Id);
+           
+                client.Dispose();
+
+                IsAllClientConnected = false;
+
+                await AcceptClientsAsync();
+
+                //Супер костиль але чомусь в мене івент викликається одразу, через що дані передаються не коректно
+                Thread.Sleep(20);
+
+                AllClientsReconnected?.Invoke(this, EventArgs.Empty);
             }
         }
 
