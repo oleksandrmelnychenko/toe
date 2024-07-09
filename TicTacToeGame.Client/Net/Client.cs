@@ -9,9 +9,11 @@ using TicTacToeGame.Client.Models;
 
 namespace TicTacToeGame.Client.Net
 {
-    public class Client
+    public class Client : IDisposable
     {
         private NetworkStream stream;
+
+        private bool _disposed;
 
         private IPEndPoint remoteEndPoint;
 
@@ -125,5 +127,31 @@ namespace TicTacToeGame.Client.Net
             }
         }
 
+        protected virtual void Dispose(bool disposing)
+        {
+            if(!_disposed)
+            {
+                if(disposing)
+                {
+                    if(stream.CanRead)
+                    {
+                        stream.Close();
+                        stream.Dispose();
+                    }
+
+                    if(tcpClient.Connected)
+                    {
+                        tcpClient.Close();
+                        tcpClient.Dispose();
+                    }
+                }
+            }
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
     }
 }
