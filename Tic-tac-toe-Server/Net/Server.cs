@@ -68,6 +68,9 @@ namespace Tic_tac_toe_Server.Net
             this.playerManager = playerManager;
         }
 
+        /// <summary>
+        /// Waiting for clients to connect, after one of the clients connects, it sends the player's data
+        /// </summary>
         public async Task AcceptClientsAsync()
         {
             try
@@ -99,7 +102,9 @@ namespace Tic_tac_toe_Server.Net
         }
 
 
-        //Listen messages from clients
+        /// <summary>
+        /// Listens messages from customers
+        /// </summary>
         public async Task ListenClientsAsync()
         {
             if (!IsActive)
@@ -125,7 +130,10 @@ namespace Tic_tac_toe_Server.Net
             }
         }
 
-        //When get message from one of the clients, processes it and sends it to all clients
+        /// <summary>
+        /// Handles messages from customers
+        /// </summary>
+        /// <param name="client"></param>
         private async Task HandleClientAsync(Client client)
         {
             try

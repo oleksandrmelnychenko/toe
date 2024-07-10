@@ -5,7 +5,9 @@ VisualStudioVersion = 17.10.35013.160
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TicTacToeGame.Client", "TicTacToeGame.Client\TicTacToeGame.Client.csproj", "{5686AC01-8367-4535-A241-F7617B972D93}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tic-tac-toe-Server", "Tic-tac-toe-Server\Tic-tac-toe-Server.csproj", "{74D4C30B-DCC6-4D45-BE7A-798662BDC122}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tic-tac-toe-Server", "Tic-tac-toe-Server\Tic-tac-toe-Server.csproj", "{74D4C30B-DCC6-4D45-BE7A-798662BDC122}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tic-tac-toe-ServerTests", "Tic-tac-toe-ServerTests\Tic-tac-toe-ServerTests.csproj", "{CCF099EC-1AFB-4192-B6D7-2552FA5FEF7B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{74D4C30B-DCC6-4D45-BE7A-798662BDC122}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{74D4C30B-DCC6-4D45-BE7A-798662BDC122}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{74D4C30B-DCC6-4D45-BE7A-798662BDC122}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CCF099EC-1AFB-4192-B6D7-2552FA5FEF7B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CCF099EC-1AFB-4192-B6D7-2552FA5FEF7B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CCF099EC-1AFB-4192-B6D7-2552FA5FEF7B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CCF099EC-1AFB-4192-B6D7-2552FA5FEF7B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

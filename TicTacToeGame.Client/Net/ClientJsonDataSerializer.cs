@@ -8,27 +8,66 @@ namespace TicTacToeGame.Client.Net
     {
         public static string SerializeAction(ClientToServerConfig config)
         {
-            return JsonConvert.SerializeObject(config);
+            try
+            {
+                return JsonConvert.SerializeObject(config);
+            }
+            catch (JsonException ex)
+            {
+                Debug.WriteLine($"JSON serealization problem: {ex}");
+                return string.Empty;
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Serealization problem: {ex}");
+                return string.Empty;
+            }
         }
 
         public static ServerToClientConfig DeserializeServerMessage(string serverMessage)
         {
-            if (string.IsNullOrEmpty(serverMessage))
+            try
             {
-                Debug.WriteLine($"Null data recived.");
+                ServerToClientConfig config = JsonConvert.DeserializeObject<ServerToClientConfig>(serverMessage);
+                if (config == null)
+                {
+                    throw new InvalidOperationException("Deserialization resulted in null.");
+                }
+                return config;
+            }
+            catch (JsonException ex)
+            {
+                Debug.WriteLine($"JSON deserialization error: {ex.Message}");
                 return null;
             }
-            return JsonConvert.DeserializeObject<ServerToClientConfig>(serverMessage)!;
+            catch (InvalidOperationException ex)
+            {
+                Debug.WriteLine($"Deserialization error: {ex.Message}");
+                return null;
+            }
         }
 
         public static Guid DeserializePlayerId(string playerMessage)
         {
-            if (string.IsNullOrEmpty(playerMessage))
+            try
             {
-                Debug.WriteLine($"Null data recived.");
+                Guid id = JsonConvert.DeserializeObject<Guid>(playerMessage);
+                if (id == null)
+                {
+                    throw new InvalidOperationException("Deserialization resulted in null.");
+                }
+                return id;
+            }
+            catch (JsonException ex)
+            {
+                Debug.WriteLine($"JSON deserialization error: {ex.Message}");
                 return Guid.Empty;
             }
-            return JsonConvert.DeserializeObject<Guid>(playerMessage)!;
+            catch (InvalidOperationException ex)
+            {
+                Debug.WriteLine($"Deserialization error: {ex.Message}");
+                return Guid.Empty;
+            }
         }
     }
 }

@@ -53,6 +53,11 @@ namespace Tic_tac_toe_Server.Game
             if (!string.IsNullOrEmpty(jsonMessage))
             {
                 ClientToServerConfig clientGameMessage = ServerJsonDataSerializer.DeserializeAction(jsonMessage);
+                if (clientGameMessage == null)
+                {
+                    _logger.LogWarning("Client send invalid data!!!");
+                    return;
+                }
 
                 if(clientGameMessage.IsRestart == true)
                 {

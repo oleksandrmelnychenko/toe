@@ -1,6 +1,8 @@
 ﻿using Prism.Commands;
 using ReactiveUI;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
+using System.Net;
 using System.Threading.Tasks;
 using TicTacToeGame.Client.Constants;
 using TicTacToeGame.Client.Game;
@@ -47,12 +49,11 @@ namespace TicTacToeGame.Client
         public DelegateCommand<BoardCell> OnCellCommand { get; init; }
         public DelegateCommand OnRestartCommand { get; init; }
 
-        public MainViewModel(Net.Client client)
+        public MainViewModel()
         {
+            InitializeClient();
             OnCellCommand = new DelegateCommand<BoardCell>(OnCellClickCommandHandler);
             OnRestartCommand = new DelegateCommand(OnRestartClickCommandHandler);
-
-            this.client = client;
 
             BoardCells = new ObservableCollection<BoardCell>(CellFactory.Build(cellsCount));
 
@@ -68,6 +69,11 @@ namespace TicTacToeGame.Client
         private void UpdateGameData(string message)
         {
             ServerToClientConfig serverMessage = ClientJsonDataSerializer.DeserializeServerMessage(message);
+            if (serverMessage == null)
+            {
+                Debug.WriteLine("Server send ivalid data!!!");
+                return;
+            }
 
             UpdateActionHistory(serverMessage.GameHistory);
             HandleRestartStatus(serverMessage.Status);
@@ -129,6 +135,10 @@ namespace TicTacToeGame.Client
         {
             ClientToServerConfig clientToServerConfig = new ClientToServerConfig(boardCell.Index, false, client.ClientId);
             string actionJson = ClientJsonDataSerializer.SerializeAction(clientToServerConfig);
+            if (actionJson == null)
+            {
+
+            }
             await client.SendDataAsync(actionJson);
         }
 
@@ -138,6 +148,15 @@ namespace TicTacToeGame.Client
             string requestJson = ClientJsonDataSerializer.SerializeAction(clientToServerConfig);
             await client.SendDataAsync(requestJson);
         }
+
+        private async void InitializeClient()
+        {
+            client = new Net.Client(IPAddress.Parse("127.0.0.1"), 8888);
+            await client.ConnectAsync();
+            await client.ListenForPlayerInfoAsync();
+            await client.ListenForMessagesAsync();
+        }
+
 
         private void Client_MessageReceived(object? sender, string message)
             => UpdateGameData(message);
