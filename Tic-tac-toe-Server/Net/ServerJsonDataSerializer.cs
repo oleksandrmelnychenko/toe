@@ -23,12 +23,12 @@ namespace Tic_tac_toe_Server.Net
             catch (JsonException ex)
             {
                 Debug.WriteLine($"JSON deserialization error: {ex.Message}");
-                return null;
+                return default;
             }
             catch (InvalidOperationException ex)
             {
                 Debug.WriteLine($"Deserialization error: {ex.Message}");
-                return null;
+                return default;
             }
         }
 

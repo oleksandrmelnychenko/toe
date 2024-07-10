@@ -38,12 +38,12 @@ namespace TicTacToeGame.Client.Net
             catch (JsonException ex)
             {
                 Debug.WriteLine($"JSON deserialization error: {ex.Message}");
-                return null;
+                return default;
             }
             catch (InvalidOperationException ex)
             {
                 Debug.WriteLine($"Deserialization error: {ex.Message}");
-                return null;
+                return default;
             }
         }
 
@@ -52,9 +52,9 @@ namespace TicTacToeGame.Client.Net
             try
             {
                 Guid id = JsonConvert.DeserializeObject<Guid>(playerMessage);
-                if (id == null)
+                if (id == Guid.Empty)
                 {
-                    throw new InvalidOperationException("Deserialization resulted in null.");
+                    throw new InvalidOperationException("Deserialization result is empty.");
                 }
                 return id;
             }
