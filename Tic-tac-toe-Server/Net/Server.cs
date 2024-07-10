@@ -8,19 +8,19 @@ namespace Tic_tac_toe_Server.Net
 {
     public class Server : IDisposable
     {
-        private ILogger logger;
+        private ILogger _logger;
 
         private bool _disposed;
 
-        private const int clientsNumber = 2;
+        private const int _clientsNumber = 2;
 
-        private List<Client> clients = new List<Client>(clientsNumber);
+        private List<Client> _clients = new List<Client>(_clientsNumber);
 
-        private TcpListener listener;
+        private TcpListener _listener;
 
-        private bool IsAllClientConnected = false;
+        private bool _isAllClientConnected = false;
 
-        private PlayerManager playerManager;
+        private PlayerManager _playerManager;
 
         public bool IsActive { get; private set; } = false;
 
@@ -30,22 +30,22 @@ namespace Tic_tac_toe_Server.Net
 
         public Server(IPAddress address, int port, ILogger logger)
         {
-            this.logger = logger;
-            listener = new TcpListener(address, port);
+            this._logger = logger;
+            _listener = new TcpListener(address, port);
         }
 
         public async Task StartServerAsync()
         {
             try
             {
-                listener.Start();
+                _listener.Start();
                 IsActive = true;
-                logger.LogMessage("Server started.\n");
+                _logger.LogMessage("Server started.\n");
                 await AcceptClientsAsync();
             }
             catch (Exception ex)
             {
-                logger.LogError($"\nAn error occurred: {ex.Message}\n");
+                _logger.LogError($"\nAn error occurred: {ex.Message}\n");
             }
         }
 
@@ -53,19 +53,19 @@ namespace Tic_tac_toe_Server.Net
         {
             try
             {
-                listener.Stop();
+                _listener.Stop();
                 IsActive = false;
-                logger.LogMessage("\nServer stopped.\n");
+                _logger.LogMessage("\nServer stopped.\n");
             }
             catch (Exception ex)
             {
-                logger.LogError($"\nAn error occurred while stopping the server: {ex.Message}\n");
+                _logger.LogError($"\nAn error occurred while stopping the server: {ex.Message}\n");
             }
         }
 
         public void SetPlayerManager(PlayerManager playerManager)
         {
-            this.playerManager = playerManager;
+            this._playerManager = playerManager;
         }
 
         /// <summary>
@@ -75,29 +75,30 @@ namespace Tic_tac_toe_Server.Net
         {
             try
             {
-                while (clients.Count < clientsNumber)
+                throw new Exception();
+                while (_clients.Count < _clientsNumber)
                 {
-                    TcpClient tcpClient = await listener.AcceptTcpClientAsync();
+                    TcpClient tcpClient = await _listener.AcceptTcpClientAsync();
                     Client client = new Client(tcpClient);
 
-                    clients.Add(client);
+                    _clients.Add(client);
 
-                    playerManager.ConnectClientToPlayer(ref client);
+                    _playerManager.ConnectClientToPlayer(ref client);
 
                     var serializedPlayerId = ServerJsonDataSerializer.SerializePlayerId(client.Id);
 
-                    logger.LogMessage($"Sending initial data to client {clients.Count}: {serializedPlayerId}");
+                    _logger.LogMessage($"Sending initial data to client {_clients.Count}: {serializedPlayerId}");
 
                     await SendDataToClientAsync(client, serializedPlayerId);
 
-                    logger.LogMessage($"Client {clients.Count} connected and initial data sent.");
+                    _logger.LogMessage($"Client {_clients.Count} connected and initial data sent.");
                 }
-                logger.LogSuccess("\nAll clients connected.\n");
-                IsAllClientConnected = true;
+                _logger.LogSuccess("\nAll clients connected.\n");
+                _isAllClientConnected = true;
             }
             catch (Exception ex)
             {
-                logger.LogError($"\nAn error occurred while accepting clients: {ex.Message}\n");
+                _logger.LogError($"\nAn error occurred while accepting clients: {ex.Message}\n");
             }
         }
 
@@ -109,7 +110,7 @@ namespace Tic_tac_toe_Server.Net
         {
             if (!IsActive)
             {
-                logger.LogWarning("\nServer is not active.\n");
+                _logger.LogWarning("\nServer is not active.\n");
                 return;
             }
 
@@ -117,7 +118,7 @@ namespace Tic_tac_toe_Server.Net
             {
                 List<Task> clientTasks = new List<Task>();
 
-                foreach (Client client in clients)
+                foreach (Client client in _clients)
                 {
                     clientTasks.Add(HandleClientAsync(client));
                 }
@@ -126,7 +127,7 @@ namespace Tic_tac_toe_Server.Net
             }
             catch (Exception ex)
             {
-                logger.LogError($"\nGeneral problem with reading data from client: {ex.Message}\n");
+                _logger.LogError($"\nGeneral problem with reading data from client: {ex.Message}\n");
             }
         }
 
@@ -141,7 +142,7 @@ namespace Tic_tac_toe_Server.Net
                 NetworkStream stream = client.GetStream();
                 var buffer = new byte[1024];
 
-                while (client.Connected && IsAllClientConnected)
+                while (client.Connected && _isAllClientConnected)
                 {
                     int received = await stream.ReadAsync(buffer, 0, buffer.Length);
                     if (received == 0)
@@ -159,23 +160,23 @@ namespace Tic_tac_toe_Server.Net
             }
             catch (IOException ex)
             {
-                logger.LogError($"\nIO problem with reading data from client: {ex.Message}\n");
+                _logger.LogError($"\nIO problem with reading data from client: {ex.Message}\n");
             }
             catch (Exception ex)
             {
-                logger.LogError($"\nGeneral problem with reading data from client: {ex.Message}\n");
+                _logger.LogError($"\nGeneral problem with reading data from client: {ex.Message}\n");
             }
             finally
             {
-                clients.Remove(client);
+                _clients.Remove(client);
 
-                logger.LogWarning($"\nClient {client.Id} disconected!\n");
+                _logger.LogWarning($"\nClient {client.Id} disconected!\n");
 
-                playerManager.DisconnectClientToPlayer(client.Id);
+                _playerManager.DisconnectClientToPlayer(client.Id);
            
                 client.Dispose();
 
-                IsAllClientConnected = false;
+                _isAllClientConnected = false;
 
                 await AcceptClientsAsync();
 
@@ -194,24 +195,24 @@ namespace Tic_tac_toe_Server.Net
         {
             var bytes = Encoding.UTF8.GetBytes(message + "\n");
 
-            foreach (TcpClient client in clients)
+            foreach (TcpClient client in _clients)
             {
                 if (client.Connected)
                 {
                     try
                     {
                         await client.GetStream().WriteAsync(bytes, 0, bytes.Length);
-                        logger.LogMessage("\nData has been sent to the client\n");
+                        _logger.LogMessage("\nData has been sent to the client\n");
                     }
                     catch (Exception ex)
                     {
-                        logger.LogError($"\nServer cannot send data: {ex}\n");
+                        _logger.LogError($"\nServer cannot send data: {ex}\n");
                         client.Close();
                     }
                 }
                 else
                 {
-                    logger.LogWarning("\nClient is not connected to the server.\n");
+                    _logger.LogWarning("\nClient is not connected to the server.\n");
                 }
             }
         }
@@ -228,17 +229,17 @@ namespace Tic_tac_toe_Server.Net
                 try
                 {
                     await client.GetStream().WriteAsync(bytes, 0, bytes.Length);
-                    logger.LogMessage("\nData has been sent to the client\n");
+                    _logger.LogMessage("\nData has been sent to the client\n");
                 }
                 catch (Exception ex)
                 {
-                    logger.LogError($"\nServer cannot send data: {ex}\n");
+                    _logger.LogError($"\nServer cannot send data: {ex}\n");
                     client.Close();
                 }
             }
             else
             {
-                logger.LogWarning("\nClient is not connected to the server.\n");
+                _logger.LogWarning("\nClient is not connected to the server.\n");
             }
         }
 
@@ -248,16 +249,16 @@ namespace Tic_tac_toe_Server.Net
             {
                 if(disposing)
                 {
-                    foreach(var client in clients)
+                    foreach(var client in _clients)
                     {
                         client.Close();
                         client.Dispose();
                     }
-                    clients.Clear();
+                    _clients.Clear();
 
                     this.StopServer();
 
-                    listener.Dispose();
+                    _listener.Dispose();
                 }
             }
         }

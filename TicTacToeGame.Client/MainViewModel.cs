@@ -52,6 +52,7 @@ namespace TicTacToeGame.Client
         public MainViewModel()
         {
             InitializeClient();
+
             OnCellCommand = new DelegateCommand<BoardCell>(OnCellClickCommandHandler);
             OnRestartCommand = new DelegateCommand(OnRestartClickCommandHandler);
 

@@ -9,13 +9,13 @@ namespace TicTacToeGame.Client.Net
 {
     public class Client : IDisposable
     {
-        private NetworkStream stream;
+        private NetworkStream _stream;
 
         private bool _disposed;
 
-        private IPEndPoint remoteEndPoint;
+        private IPEndPoint _remoteEndPoint;
 
-        private TcpClient tcpClient;
+        private TcpClient _tcpClient;
 
         public Guid ClientId { get; private set; }
 
@@ -23,16 +23,16 @@ namespace TicTacToeGame.Client.Net
 
         public Client(IPAddress address, int port)
         {
-            tcpClient = new TcpClient();
-            remoteEndPoint = new IPEndPoint(address, port);
+            _tcpClient = new TcpClient();
+            _remoteEndPoint = new IPEndPoint(address, port);
         }
 
         public async Task ConnectAsync()
         {
             try
             {
-                await tcpClient.ConnectAsync(remoteEndPoint);
-                stream = tcpClient.GetStream();
+                await _tcpClient.ConnectAsync(_remoteEndPoint);
+                _stream = _tcpClient.GetStream();
                 Debug.WriteLine($"Client connected to server");
             }
             catch (Exception ex)
@@ -43,12 +43,12 @@ namespace TicTacToeGame.Client.Net
 
         public async Task SendDataAsync(string jsonMessage)
         {
-            if (tcpClient.Connected)
+            if (_tcpClient.Connected)
             {
                 try
                 {
                     var bytes = Encoding.UTF8.GetBytes(jsonMessage);
-                    await stream.WriteAsync(bytes, 0, bytes.Length);
+                    await _stream.WriteAsync(bytes, 0, bytes.Length);
                     Debug.WriteLine("Data has been sent to the server");
                 }
                 catch (Exception ex)
@@ -64,12 +64,12 @@ namespace TicTacToeGame.Client.Net
 
         private async Task<string> ReadDataAsync()
         {
-            if (tcpClient.Connected)
+            if (_tcpClient.Connected)
             {
                 try
                 {
                     byte[] buffer = new byte[1024];
-                    var received = await stream.ReadAsync(buffer, 0, buffer.Length);
+                    var received = await _stream.ReadAsync(buffer, 0, buffer.Length);
                     var message = Encoding.UTF8.GetString(buffer, 0, received);
                     return message;
                 }
@@ -88,14 +88,14 @@ namespace TicTacToeGame.Client.Net
 
         public async Task ListenForMessagesAsync()
         {
-            if (!tcpClient.Connected)
+            if (!_tcpClient.Connected)
             {
                 Debug.WriteLine($"Client {ClientId} is not connected to the server.");
                 return;
             }
 
             Debug.WriteLine($"Client {ClientId} is waiting for messages.");
-            while (tcpClient.Connected)
+            while (_tcpClient.Connected)
             {
                 var message = await ReadDataAsync();
                 if (!string.IsNullOrEmpty(message))
@@ -107,7 +107,7 @@ namespace TicTacToeGame.Client.Net
 
         public async Task ListenForPlayerInfoAsync()
         {
-            if (!tcpClient.Connected)
+            if (!_tcpClient.Connected)
             {
                 Debug.WriteLine($"Client is not connected to the server.");
                 return;
@@ -131,16 +131,16 @@ namespace TicTacToeGame.Client.Net
             {
                 if(disposing)
                 {
-                    if(stream.CanRead)
+                    if(_stream.CanRead)
                     {
-                        stream.Close();
-                        stream.Dispose();
+                        _stream.Close();
+                        _stream.Dispose();
                     }
 
-                    if(tcpClient.Connected)
+                    if(_tcpClient.Connected)
                     {
-                        tcpClient.Close();
-                        tcpClient.Dispose();
+                        _tcpClient.Close();
+                        _tcpClient.Dispose();
                     }
                 }
             }

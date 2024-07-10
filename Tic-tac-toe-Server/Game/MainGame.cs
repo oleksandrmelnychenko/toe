@@ -114,39 +114,26 @@ namespace Tic_tac_toe_Server.Game
 
         private Symbol GetCellSymbol(BoardCell cell)
         {
-            TicTacToeGame.Client.Game.Symbol symbol;
-
-            if (cell.Value.HasValue)
-            {
-                symbol = cell.Value.Value;
-            }
-            else
+            if (!cell.Value.HasValue)
             {
                 return Symbol.Empty;
             }
-
-            if (symbol == TicTacToeGame.Client.Game.Symbol.X)
+            return cell.Value.Value switch
             {
-                return Symbol.X;
-            }
-            else if ((symbol == TicTacToeGame.Client.Game.Symbol.O))
-            {
-                return Symbol.O;
-            }
-            else
-            {
-                return Symbol.Empty;
-            }
+                TicTacToeGame.Client.Game.Symbol.X => Symbol.X,
+                TicTacToeGame.Client.Game.Symbol.O => Symbol.O,
+                _ => Symbol.Empty,
+            };
         }
 
         private void Client_MessageReceived(object? sender, string message)
         {
-            HandleClientMessage(message).GetAwaiter().GetResult();
+            Task.Run(() => HandleClientMessage(message));
         }
 
         private void Client_Reconnected(object? sender, EventArgs eventArgs)
         {
-            RestartGame().GetAwaiter().GetResult();
+            Task.Run(RestartGame);
         }
 
         protected virtual void Dispose(bool disposing)
@@ -157,10 +144,7 @@ namespace Tic_tac_toe_Server.Game
                 {
                     Server.MessageReceived -= Client_MessageReceived;
 
-                    if(Server != null)
-                    {
-                        Server?.Dispose();
-                    }
+                    Server?.Dispose();
                 }
 
                 _disposed = true;
