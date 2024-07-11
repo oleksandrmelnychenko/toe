@@ -75,7 +75,6 @@ namespace Tic_tac_toe_Server.Net
         {
             try
             {
-                throw new Exception();
                 while (_clients.Count < _clientsNumber)
                 {
                     TcpClient tcpClient = await _listener.AcceptTcpClientAsync();
@@ -182,7 +181,7 @@ namespace Tic_tac_toe_Server.Net
 
                 //Супер костиль але чомусь в мене івент викликається одразу, під час виклику івент передаються рестартові дані,
                 //а в методі AcceptClientsAsync передаються дані ід клієнта, і вони змішуються в одному повідомленні через що і помилка.
-                //Thread.Sleep(20);
+                Thread.Sleep(20);
 
                 AllClientsReconnected?.Invoke(this, EventArgs.Empty);
             }
