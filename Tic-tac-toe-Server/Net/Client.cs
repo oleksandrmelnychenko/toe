@@ -1,21 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Sockets;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Net.Sockets;
 
 namespace Tic_tac_toe_Server.Net
 {
-    public class Client : TcpClient, IDisposable
+    public class Client
     {
-        public Guid Id { get; set; }
+        public Socket Socket { get; set; }
+        public Guid Id { get; private set; }
 
-        public Client(TcpClient tcpClient)
+        public Client()
         {
-            Client = tcpClient.Client;
             Id = Guid.NewGuid();
         }
-
     }
 }

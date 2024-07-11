@@ -1,19 +1,34 @@
-﻿using Tic_tac_toe_Server.Player;
+﻿using Tic_tac_toe_Server.Net;
+using Tic_tac_toe_Server.Player;
 using TicTacToeGame.Client.Game;
 
 namespace Tic_tac_toe_Server.Game
 {
-    public class GameSession(List<BoardCell> boardCells, PlayerManager playerManager)
+    public class GameSession
     {
-        private PlayerManager _playerService = playerManager;
+        private const ushort MaximumPlayerPerRoom = 2;
 
-        //Тут змінив тип на ліст, тому що чомусь не оновлюється IReadOnlyCollection хоча ніби роблю посилання на один об'єкт і в гілці main це працює, можливо це через те що там ObservableCollection
-        public List<BoardCell> BoardCells { get; private set; } = boardCells;
+        private PlayerManager _playerManager = new(MaximumPlayerPerRoom);
+
+        public bool IsFull { get; private set; } = false;
+
+        public List<BoardCell> BoardCells { get; private set; }
+
+        public Guid Id { get; private set; }
 
         public Status Status { get; set; } = Status.Start;
 
-
         public GameHistory History { get; set; } = new();
+
+        public GameSession()
+        {
+            BoardCells = CellFactory.Build(9);
+        }
+
+        public void AddPlayer(Client client)
+        {
+            IsFull = !_playerManager.ConnectClientToPlayer(client);
+        }
 
         public void HandleAction(GameAction action)
         {
@@ -23,37 +38,34 @@ namespace Tic_tac_toe_Server.Game
 
         public PlayerBase GetCurrentPlayer()
         {
-            return _playerService.CurrentPlayer;
+            return _playerManager.CurrentPlayer;
         }
-
 
         public void UpdateGameStatus()
         {
-            if (OutcomeDeterminer.IsWinner(BoardCells))
+            Status = OutcomeDeterminer.IsWinner(BoardCells) switch
             {
-                Status = Status.Finish;
-            }
-            else if (OutcomeDeterminer.IsDraw(BoardCells))
-            {
-                Status = Status.Draw;
-            }
-            else
-            {
-                Status = Status.PlayerTurn;
-            }
+                true => Status.Finish,
+                false => OutcomeDeterminer.IsDraw(BoardCells) switch
+                {
+                    true => Status.Draw,
+                    false => Status.PlayerTurn
+                }
+            };
 
             HandleGameStatus();
         }
-        public PlayerManager GetPlayerService()
+
+        public PlayerManager GetPlayerManager()
         {
-            return _playerService;
+            return _playerManager;
         }
 
         private void HandleGameStatus()
         {
             if (Status == Status.PlayerTurn)
             {
-                _playerService.ChangeCurrentPlayer();
+                _playerManager.ChangeCurrentPlayer();
             }
         }
     }

@@ -1,7 +1,6 @@
 ﻿using Tic_tac_toe_Server.Net;
 using Tic_tac_toe_Server.Player;
 using Tic_tac_toe_Server.Player.Factory;
-using TicTacToeGame.Client.Net;
 
 namespace Tic_tac_toe_Server.Game
 {
@@ -14,14 +13,14 @@ namespace Tic_tac_toe_Server.Game
         public List<PlayerBase> Players
         {
             get => _players;
-            private set => _players = value;
+            set => _players = value;
         }
 
         public PlayerBase CurrentPlayer => _players[_currentPlayerIndex];
 
-        public PlayerManager(int count)
+        public PlayerManager(ushort count)
         {
-            _players = PlayerFactory.CreatePlayers(count);
+            _players = PlayerFactory.Build(count);
         }
 
         public void ChangeCurrentPlayer()
@@ -29,23 +28,24 @@ namespace Tic_tac_toe_Server.Game
             _currentPlayerIndex = _currentPlayerIndex == 0 ? 1 : 0;
         }
 
-        public void ConnectClientToPlayer(ref Net.Client client)
+        public bool ConnectClientToPlayer(Client client)
         {
-            var player = Players.FirstOrDefault(p => p.Status == PlayerStatus.Disconnected);
-            if (player != null)
+            if(!IsSessionFull())
             {
+                var player = Players.FirstOrDefault(p => p.Status == PlayerStatus.Disconnected);
                 player.Status = PlayerStatus.Connected;
-                client.Id = player.Id;
+                player.Id = client.Id;
+                return true;
+            }
+            else
+            {
+                return false;
             }
         }
 
-        public void DisconnectClientToPlayer(Guid id)
+        private bool IsSessionFull()
         {
-            var player = Players.FirstOrDefault(p => p.Id == id);
-            if (player != null)
-            {
-                player.Status = PlayerStatus.Disconnected;
-            }
+            return !Players.Any(p => p.Status == PlayerStatus.Disconnected);
         }
     }
 }

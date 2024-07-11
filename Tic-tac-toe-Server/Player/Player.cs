@@ -7,7 +7,7 @@ namespace Tic_tac_toe_Server.Player
         public Player(Symbol symbolName, bool isActive, PlayerStatus status)
         {
             PlayerSymbolName = symbolName;
-            Id = Guid.NewGuid();
+            Id = Guid.Empty;
             IsActived = isActive;
             Status = status;
         }

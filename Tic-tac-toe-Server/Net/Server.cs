@@ -1,51 +1,39 @@
 ﻿using System.Net;
 using System.Net.Sockets;
-using System.Text;
-using Tic_tac_toe_Server.Game;
 using Tic_tac_toe_Server.Logging;
 
 namespace Tic_tac_toe_Server.Net
 {
-    public class Server : IDisposable
+    internal class Server
     {
-        private ILogger _logger;
+        private Socket _server;
 
-        private bool _disposed;
+        private IPEndPoint _ipEndPoint;
 
-        private const int _clientsNumber = 2;
+        private List<Client> _clients = new List<Client>();
 
-        private List<Client> _clients = new List<Client>(_clientsNumber);
+        private readonly object _clientLock = new();
 
-        private TcpListener _listener;
+        private readonly ILogger _logger;
 
-        private bool _isAllClientConnected = false;
-
-        private PlayerManager _playerManager;
-
-        public bool IsActive { get; private set; } = false;
-
-        public event EventHandler<string> MessageReceived;
-
-        public event EventHandler AllClientsReconnected;
-
-        public Server(IPAddress address, int port, ILogger logger)
+        public Server(IPEndPoint iPEndPoint, ILogger logger)
         {
-            this._logger = logger;
-            _listener = new TcpListener(address, port);
+            _logger = logger;
+            Initialize(ref iPEndPoint, ref _server);
         }
 
-        public async Task StartServerAsync()
+        public void StartServer()
         {
             try
             {
-                _listener.Start();
-                IsActive = true;
-                _logger.LogMessage("Server started.\n");
-                await AcceptClientsAsync();
+                _server.Listen();
+                _logger.LogSuccess("Server start successful.");
+                AcceptClientsAsync().GetAwaiter().GetResult();
             }
             catch (Exception ex)
             {
-                _logger.LogError($"\nAn error occurred: {ex.Message}\n");
+                _logger.LogError($"Exception: {ex.Message}");
+                _server.Dispose();
             }
         }
 
@@ -53,219 +41,78 @@ namespace Tic_tac_toe_Server.Net
         {
             try
             {
-                _listener.Stop();
-                IsActive = false;
-                _logger.LogMessage("\nServer stopped.\n");
+                _server.Shutdown(SocketShutdown.Both);
+                _server.Close();
+                _logger.LogSuccess("Server stop successful.");
             }
             catch (Exception ex)
             {
-                _logger.LogError($"\nAn error occurred while stopping the server: {ex.Message}\n");
+                _logger.LogError($"Exception: {ex.Message}");
+                _server.Dispose();
             }
         }
 
-        public void SetPlayerManager(PlayerManager playerManager)
-        {
-            this._playerManager = playerManager;
-        }
-
-        /// <summary>
-        /// Waiting for clients to connect, after one of the clients connects, it sends the player's data
-        /// </summary>
         public async Task AcceptClientsAsync()
         {
-            try
+            while (true)
             {
-                while (_clients.Count < _clientsNumber)
+                Client client = new();
+                client.Socket = await _server.AcceptAsync();
+                lock (_clientLock)
                 {
-                    TcpClient tcpClient = await _listener.AcceptTcpClientAsync();
-                    Client client = new Client(tcpClient);
-
                     _clients.Add(client);
-
-                    _playerManager.ConnectClientToPlayer(ref client);
-
-                    var serializedPlayerId = ServerJsonDataSerializer.SerializePlayerId(client.Id);
-
-                    _logger.LogMessage($"Sending initial data to client {_clients.Count}: {serializedPlayerId}");
-
-                    await SendDataToClientAsync(client, serializedPlayerId);
-
-                    _logger.LogMessage($"Client {_clients.Count} connected and initial data sent.");
                 }
-                _logger.LogSuccess("\nAll clients connected.\n");
-                _isAllClientConnected = true;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError($"\nAn error occurred while accepting clients: {ex.Message}\n");
             }
         }
 
-
-        /// <summary>
-        /// Listens messages from customers
-        /// </summary>
-        public async Task ListenClientsAsync()
+        private void Initialize(ref IPEndPoint iPEndPoint, ref Socket server)
         {
-            if (!IsActive)
+            server = new Socket(SocketType.Stream, ProtocolType.Tcp);
+
+            while (!_server.IsBound)
             {
-                _logger.LogWarning("\nServer is not active.\n");
-                return;
-            }
+                (bool isValid, string endPointValidationMessage) = EndPointValidation.IsValidEndPoint(iPEndPoint);
 
-            try
-            {
-                List<Task> clientTasks = new List<Task>();
-
-                foreach (Client client in _clients)
-                {
-                    clientTasks.Add(HandleClientAsync(client));
-                }
-
-                await Task.WhenAny(clientTasks);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError($"\nGeneral problem with reading data from client: {ex.Message}\n");
-            }
-        }
-
-        /// <summary>
-        /// Handles messages from customers
-        /// </summary>
-        /// <param name="client"></param>
-        private async Task HandleClientAsync(Client client)
-        {
-            try
-            {
-                NetworkStream stream = client.GetStream();
-                var buffer = new byte[1024];
-
-                while (client.Connected && _isAllClientConnected)
-                {
-                    int received = await stream.ReadAsync(buffer, 0, buffer.Length);
-                    if (received == 0)
-                    {
-                        break;
-                    }
-
-                    var message = Encoding.UTF8.GetString(buffer, 0, received);
-
-                    if (!string.IsNullOrEmpty(message))
-                    {
-                        MessageReceived?.Invoke(this, message);
-                    }
-                }
-            }
-            catch (IOException ex)
-            {
-                _logger.LogError($"\nIO problem with reading data from client: {ex.Message}\n");
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError($"\nGeneral problem with reading data from client: {ex.Message}\n");
-            }
-            finally
-            {
-                _clients.Remove(client);
-
-                _logger.LogWarning($"\nClient {client.Id} disconected!\n");
-
-                _playerManager.DisconnectClientToPlayer(client.Id);
-           
-                client.Dispose();
-
-                _isAllClientConnected = false;
-
-                await AcceptClientsAsync();
-
-                //Супер костиль але чомусь в мене івент викликається одразу, під час виклику івент передаються рестартові дані,
-                //а в методі AcceptClientsAsync передаються дані ід клієнта, і вони змішуються в одному повідомленні через що і помилка.
-                Thread.Sleep(20);
-
-                AllClientsReconnected?.Invoke(this, EventArgs.Empty);
-            }
-        }
-
-        /// <summary>
-        ///     SendDataToClientsAsync sends data to all clients
-        /// </summary>
-        public async Task SendDataToClientsAsync(string message)
-        {
-            var bytes = Encoding.UTF8.GetBytes(message + "\n");
-
-            foreach (TcpClient client in _clients)
-            {
-                if (client.Connected)
+                if (isValid)
                 {
                     try
                     {
-                        await client.GetStream().WriteAsync(bytes, 0, bytes.Length);
-                        _logger.LogMessage("\nData has been sent to the client\n");
+                        _server.Bind(iPEndPoint);
+                        _ipEndPoint = iPEndPoint;
+                        _logger.LogSuccess("Server binding successful.");
                     }
                     catch (Exception ex)
                     {
-                        _logger.LogError($"\nServer cannot send data: {ex}\n");
-                        client.Close();
+                        _logger.LogError(ex.Message);
+                        UpdateEndPoint(iPEndPoint);
+                        continue;
                     }
                 }
                 else
                 {
-                    _logger.LogWarning("\nClient is not connected to the server.\n");
+                    _logger.LogError(endPointValidationMessage);
+                    UpdateEndPoint(iPEndPoint);
+                    continue;
                 }
             }
         }
 
-        /// <summary>
-        ///     SendDataToClientsAsync sends data to one client
-        /// </summary>
-        public async Task SendDataToClientAsync(TcpClient client, string message)
+        private void UpdateEndPoint(IPEndPoint iPEndPoint)
         {
-            var bytes = Encoding.UTF8.GetBytes(message + "\n");
-
-            if (client.Connected)
+            _logger.LogMessage("Please enter new IP address:");
+            IPAddress ipAddress;
+            if (IPAddress.TryParse(Console.ReadLine(), out ipAddress))
             {
-                try
+                iPEndPoint.Address = ipAddress;
+
+                _logger.LogMessage("Please enter new port:");
+                int port;
+
+                if (int.TryParse(Console.ReadLine(), out port))
                 {
-                    await client.GetStream().WriteAsync(bytes, 0, bytes.Length);
-                    _logger.LogMessage("\nData has been sent to the client\n");
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError($"\nServer cannot send data: {ex}\n");
-                    client.Close();
+                    iPEndPoint.Port = port;
                 }
             }
-            else
-            {
-                _logger.LogWarning("\nClient is not connected to the server.\n");
-            }
-        }
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if(!_disposed)
-            {
-                if(disposing)
-                {
-                    foreach(var client in _clients)
-                    {
-                        client.Close();
-                        client.Dispose();
-                    }
-                    _clients.Clear();
-
-                    this.StopServer();
-
-                    _listener.Dispose();
-                }
-            }
-        }
-
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
         }
     }
 }

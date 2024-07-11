@@ -5,11 +5,9 @@ namespace Tic_tac_toe_Server.Game
 {
     public class GameMaster
     {
-        private const ushort CellsCount = 9;
-
         private PlayerManager _playerManager = new(2);
 
-        private GameSession? _activeGameSession;
+        private List<GameSession> _rooms;
 
         /// <summary>
         ///     The GameMaster class represents the game master that manages the Tic Tac Toe game.
@@ -24,47 +22,23 @@ namespace Tic_tac_toe_Server.Game
         /// </summary>
         public void StartNewGameSession()
         {
-            _activeGameSession = new GameSession(CreateNewBoard(), _playerManager);
+            _rooms.Add(new GameSession());
         }
 
-        public PlayerBase GetCurrentPlayer()
+        public void NewAction(BoardCell boardCell, Guid gameSessionId)
         {
-            ArgumentNullException.ThrowIfNull(nameof(_activeGameSession));
-            return _activeGameSession!.GetCurrentPlayer();
+            ArgumentNullException.ThrowIfNull(nameof(_rooms));
+            GameSession room = _rooms!.FirstOrDefault(r => r.Id == gameSessionId);
+            ArgumentNullException.ThrowIfNull(nameof(room));
+            GameAction action = new(room!.GetCurrentPlayer(), boardCell.Index);
+
+            room!.HandleAction(action);
         }
 
-        public void NewAction(BoardCell boardCell)
-        {
-            ArgumentNullException.ThrowIfNull(nameof(_activeGameSession));
-            GameAction action = new(_activeGameSession!.GetCurrentPlayer(), boardCell.Index);
-
-            _activeGameSession!.HandleAction(action);
-        }
-
-        public PlayerManager GetPlayerService()
-        {
-            ArgumentNullException.ThrowIfNull(nameof(_activeGameSession));
-            return _activeGameSession!.GetPlayerService();
-        }
-
-        public List<BoardCell> GetActiveGameSessionBoard()
-        {
-            ArgumentNullException.ThrowIfNull(nameof(_activeGameSession));
-            return _activeGameSession!.BoardCells;
-        }
-
-        public Status GetStatus()
-        {
-            ArgumentNullException.ThrowIfNull(nameof(_activeGameSession));
-            return _activeGameSession!.Status;
-        }
-
-        public string GetHistory()
-        {
-            ArgumentNullException.ThrowIfNull(nameof(_activeGameSession));
-            return _activeGameSession!.History.ActionHistory;
-        }
-
-        private static List<BoardCell> CreateNewBoard() => CellFactory.Build(CellsCount);
+        //public PlayerManager GetPlayerService()
+        //{
+        //    ArgumentNullException.ThrowIfNull(nameof(_rooms));
+        //    return _rooms!.GetPlayerService();
+        //}
     }
 }
