@@ -1,4 +1,5 @@
-﻿using Tic_tac_toe_Server.Net;
+﻿using Tic_tac_toe_Server.Logging;
+using Tic_tac_toe_Server.Net;
 using Tic_tac_toe_Server.Player;
 using TicTacToeGame.Client.Game;
 
@@ -8,7 +9,9 @@ namespace Tic_tac_toe_Server.Game
     {
         private const ushort MaximumPlayerPerRoom = 2;
 
-        private PlayerManager _playerManager = new(MaximumPlayerPerRoom);
+        private PlayerManager _playerManager;
+
+        private ILogger _logger;
 
         public bool IsFull { get; private set; } = false;
 
@@ -18,16 +21,29 @@ namespace Tic_tac_toe_Server.Game
 
         public Status Status { get; set; } = Status.Start;
 
-        public GameHistory History { get; set; } = new();
+        public ActionHistory History { get; set; } = new();
 
-        public GameSession()
+        public GameSession(ILogger logger)
         {
+            _logger = logger;
+            _playerManager = new(MaximumPlayerPerRoom, logger);
             BoardCells = CellFactory.Build(9);
         }
 
-        public void AddPlayer(Client client)
+        public bool AddPlayer(Guid clientId)
         {
-            IsFull = !_playerManager.ConnectClientToPlayer(client);
+            if (_playerManager.HasFreeSlots())
+            {
+                _playerManager.ConnectClientToPlayer(clientId);
+
+                IsFull = !_playerManager.HasFreeSlots();
+                return true;
+            }
+            else
+            {
+                _logger.LogWarning($"Session: {this.Id} full.");
+                return false;
+            }
         }
 
         public void HandleAction(GameAction action)

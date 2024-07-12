@@ -16,8 +16,7 @@ namespace Tic_tac_toe_Server
             IPEndPoint endPoint = new IPEndPoint(IPAddress.Parse(AddressConstants.IPAddress), AddressConstants.Port);
 
             Server server = new(endPoint, consoleLogger);
-
-            server.StartServer();
+            GameMaster gameMaster = new(server, consoleLogger);
         }
     }
 }

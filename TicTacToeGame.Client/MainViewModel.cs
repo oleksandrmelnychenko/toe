@@ -154,8 +154,8 @@ namespace TicTacToeGame.Client
         {
             client = new Net.Client(IPAddress.Parse("127.0.0.1"), 8888);
             await client.ConnectAsync();
-            await client.ListenForPlayerInfoAsync();
-            await client.ListenForMessagesAsync();
+            //await client.ListenForPlayerInfoAsync();
+            //await client.ListenForMessagesAsync();
         }
 
 

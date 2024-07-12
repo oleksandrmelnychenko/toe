@@ -4,7 +4,7 @@ using Tic_tac_toe_Server.Logging;
 
 namespace Tic_tac_toe_Server.Net
 {
-    internal class Server
+    public class Server
     {
         private Socket _server;
 
@@ -15,6 +15,8 @@ namespace Tic_tac_toe_Server.Net
         private readonly object _clientLock = new();
 
         private readonly ILogger _logger;
+
+        public event Action<Guid> ClientConnected;
 
         public Server(IPEndPoint iPEndPoint, ILogger logger)
         {
@@ -33,6 +35,8 @@ namespace Tic_tac_toe_Server.Net
             catch (Exception ex)
             {
                 _logger.LogError($"Exception: {ex.Message}");
+                _server.Shutdown(SocketShutdown.Both);
+                _server.Close();
                 _server.Dispose();
             }
         }
@@ -48,21 +52,37 @@ namespace Tic_tac_toe_Server.Net
             catch (Exception ex)
             {
                 _logger.LogError($"Exception: {ex.Message}");
+                _server.Shutdown(SocketShutdown.Both);
+                _server.Close();
                 _server.Dispose();
             }
         }
 
-        public async Task AcceptClientsAsync()
+        private async Task AcceptClientsAsync()
         {
             while (true)
             {
-                Client client = new();
-                client.Socket = await _server.AcceptAsync();
-                lock (_clientLock)
+                try
                 {
-                    _clients.Add(client);
+                    Client client = new();
+                    client.Socket = await _server.AcceptAsync();
+                    lock (_clientLock)
+                    {
+                        _clients.Add(client);
+                        OnClientConnected(client.Id);
+                        _logger.LogMessage($"Client {client.Id} connected.");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError($"Exception while accepting client: {ex.Message}");
                 }
             }
+        }
+
+        protected virtual void OnClientConnected(Guid clientId)
+        {
+            ClientConnected?.Invoke(clientId);
         }
 
         private void Initialize(ref IPEndPoint iPEndPoint, ref Socket server)

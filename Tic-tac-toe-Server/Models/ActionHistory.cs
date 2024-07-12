@@ -5,13 +5,13 @@ using Tic_tac_toe_Server.Player;
 
 namespace Tic_tac_toe_Server.Game
 {
-    public class GameHistory
+    public class ActionHistory
     {
         private List<GameAction> moves;
 
-        public string ActionHistory { get; set; } = string.Empty;
+        public string History { get; set; } = string.Empty;
 
-        public GameHistory()
+        public ActionHistory()
         {
             moves = new List<GameAction>();
         }
@@ -19,7 +19,7 @@ namespace Tic_tac_toe_Server.Game
         public void AddAction(GameAction gameAction)
         {
             moves.Add(gameAction);
-            ActionHistory = ActionHistory + $"Player {gameAction.Player.PlayerSymbolName} chose box {gameAction.BoxPosition}.\n";
+            History = History + $"Player {gameAction.Player.PlayerSymbolName} chose box {gameAction.BoxPosition}.\n";
         }
 
         public List<GameAction> GetAction()
