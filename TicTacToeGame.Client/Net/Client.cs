@@ -34,6 +34,8 @@ namespace TicTacToeGame.Client.Net
                 await _tcpClient.ConnectAsync(_remoteEndPoint);
                 _stream = _tcpClient.GetStream();
                 Debug.WriteLine($"Client connected to server");
+                await ListenForPlayerInfoAsync();
+                await SendDataAsync("Hello");
             }
             catch (Exception ex)
             {

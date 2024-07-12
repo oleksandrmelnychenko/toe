@@ -17,6 +17,11 @@ namespace Tic_tac_toe_Server
 
             Server server = new(endPoint, consoleLogger);
             GameMaster gameMaster = new(server, consoleLogger);
+
+            while(true)
+            {
+
+            }
         }
     }
 }
