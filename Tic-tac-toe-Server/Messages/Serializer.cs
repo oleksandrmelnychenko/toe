@@ -8,7 +8,8 @@ namespace Tic_tac_toe_Server.Messages
         {
             try
             {
-                string json = JsonConvert.SerializeObject(id);
+                PlayerInitializationConfig config = new PlayerInitializationConfig(id);
+                string json = JsonConvert.SerializeObject(config);
                 return new JsonValidationResult(true, json);
             }
             catch (JsonException ex)

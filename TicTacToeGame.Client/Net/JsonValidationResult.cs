@@ -4,10 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Tic_tac_toe_Server.Messages
+namespace TicTacToeGame.Client.Net
 {
-    public abstract record MessageBase
-    {
-        Type type;
-    }
+    public record JsonValidationResult(bool IsValid, string JsonMessage);
 }

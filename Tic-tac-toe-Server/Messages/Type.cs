@@ -6,8 +6,10 @@ using System.Threading.Tasks;
 
 namespace Tic_tac_toe_Server.Messages
 {
-    public abstract record MessageBase
+    public enum Type
     {
-        Type type;
+        PlayerInitialization,
+        NewGameSession,
+        NewGameData
     }
 }

@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using TicTacToeGame.Client.Constants;
 using TicTacToeGame.Client.Game;
 using TicTacToeGame.Client.Net;
+using TicTacToeGame.Client.Net.Messages;
 
 namespace TicTacToeGame.Client
 {
@@ -152,14 +153,16 @@ namespace TicTacToeGame.Client
 
         private async void InitializeClient()
         {
-            client = new Net.Client(IPAddress.Parse("127.0.0.1"), 8888);
+            IPEndPoint endPoint = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 8888);
+            client = new Net.Client(endPoint);
             await client.ConnectAsync();
             //await client.ListenForPlayerInfoAsync();
             //await client.ListenForMessagesAsync();
         }
 
-
-        private void Client_MessageReceived(object? sender, string message)
-            => UpdateGameData(message);
+        private void Client_MessageReceived(object? sender, MessageBase message)
+        {
+            message.Handle();
+        }
     }
 }

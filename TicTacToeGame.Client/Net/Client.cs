@@ -4,6 +4,8 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
+using TicTacToeGame.Client.Net.Messages;
+using Tmds.DBus.Protocol;
 
 namespace TicTacToeGame.Client.Net
 {
@@ -15,16 +17,21 @@ namespace TicTacToeGame.Client.Net
 
         private IPEndPoint _remoteEndPoint;
 
-        private TcpClient _tcpClient;
+        private Socket _tcpClient;
+
+        private ArraySegment<byte> _buffer;
 
         public Guid ClientId { get; private set; }
 
-        public event EventHandler<string> MessageReceived;
+        public event EventHandler<MessageBase> MessageReceived;
 
-        public Client(IPAddress address, int port)
+        public Client(IPEndPoint endPoint)
         {
-            _tcpClient = new TcpClient();
-            _remoteEndPoint = new IPEndPoint(address, port);
+            _buffer = new ArraySegment<byte>(new byte[256]);
+
+            _tcpClient = new Socket(SocketType.Stream, ProtocolType.Tcp);
+
+            SetEndPoint(endPoint);
         }
 
         public async Task ConnectAsync()
@@ -32,10 +39,10 @@ namespace TicTacToeGame.Client.Net
             try
             {
                 await _tcpClient.ConnectAsync(_remoteEndPoint);
-                _stream = _tcpClient.GetStream();
+                _stream = new NetworkStream(_tcpClient);
                 Debug.WriteLine($"Client connected to server");
-                await ListenForPlayerInfoAsync();
-                await SendDataAsync("Hello");
+
+                _ = Task.Run(() => StartReceive());
             }
             catch (Exception ex)
             {
@@ -64,66 +71,70 @@ namespace TicTacToeGame.Client.Net
             }
         }
 
-        private async Task<string> ReadDataAsync()
+        private void StartReceive()
         {
-            if (_tcpClient.Connected)
+            ReceiveAsyncLoop(null);
+        }
+
+        private void ReceiveAsyncLoop(IAsyncResult result)
+        {
+            try
             {
-                try
+                if (result != null)
                 {
-                    byte[] buffer = new byte[1024];
-                    var received = await _stream.ReadAsync(buffer, 0, buffer.Length);
-                    var message = Encoding.UTF8.GetString(buffer, 0, received);
-                    return message;
+                    int numberOfBytesRead = _tcpClient.EndReceive(result);
+                    if (numberOfBytesRead == 0)
+                    {
+                        this.Dispose();
+                        return;
+                    }
+
+                    var newSegment = new ArraySegment<byte>(_buffer.Array, _buffer.Offset, numberOfBytesRead);
+
+                    OnDataReceivedAsync(newSegment);
                 }
-                catch (Exception ex)
+
+                _tcpClient.BeginReceive(_buffer.Array, _buffer.Offset, _buffer.Count, SocketFlags.None, ReceiveAsyncLoop, null);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Socket error: {ex.Message}");
+            }
+        }
+
+        //Тре з цим шось зробити воно якесь супер інвалідське
+        private void OnDataReceivedAsync(ArraySegment<byte> newSegment)
+        {
+            string receivedText = Encoding.UTF8.GetString(newSegment.Array, newSegment.Offset, newSegment.Count);
+
+            MessageBase message = Serializer.ParseMessage(receivedText);
+            if(ClientId == Guid.Empty)
+            {
+                if(message.Type == Messages.Type.PlayerInitialization)
                 {
-                    Debug.WriteLine($"Client {ClientId} cannot read data from server: {ex}");
-                    return null;
+                    ClientId = ((PlayerInitializationMessage)message).PlayerId;
+                }
+                else
+                {
+                    return;
                 }
             }
             else
             {
-                Debug.WriteLine($"Client {ClientId} is not connected to the server.");
-                return null;
+                MessageReceived?.Invoke(this, message);
             }
         }
 
-        public async Task ListenForMessagesAsync()
+        private void SetEndPoint(IPEndPoint endPoint)
         {
-            if (!_tcpClient.Connected)
+            (bool isValidEndPoint, string endPointValidationMessage) = EndPointValidation.IsValidEndPoint(endPoint);
+            if (isValidEndPoint)
             {
-                Debug.WriteLine($"Client {ClientId} is not connected to the server.");
-                return;
+                _remoteEndPoint = endPoint;
             }
-
-            Debug.WriteLine($"Client {ClientId} is waiting for messages.");
-            while (_tcpClient.Connected)
+            else
             {
-                var message = await ReadDataAsync();
-                if (!string.IsNullOrEmpty(message))
-                {
-                    MessageReceived?.Invoke(this, message);
-                }
-            }
-        }
-
-        public async Task ListenForPlayerInfoAsync()
-        {
-            if (!_tcpClient.Connected)
-            {
-                Debug.WriteLine($"Client is not connected to the server.");
-                return;
-            }
-
-            Debug.WriteLine($"Client is waiting for player info.");
-            while (ClientId == Guid.Empty)
-            {
-                var message = await ReadDataAsync();
-                if (message != null)
-                {
-                    ClientId = ClientJsonDataSerializer.DeserializePlayerId(message);
-                    Debug.WriteLine($"Client {ClientId} get client id.");
-                }
+                Debug.WriteLine($"Remote end point is not valid!");
             }
         }
 
