@@ -1,5 +1,4 @@
-﻿using DynamicData;
-using System.Net;
+﻿using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using Tic_tac_toe_Server.Logging;
@@ -7,11 +6,13 @@ using Tic_tac_toe_Server.Messages;
 
 namespace Tic_tac_toe_Server.Net
 {
-    public class Server
+    public class Server : IDisposable
     {
         private readonly object _clientLock = new();
 
         private readonly ILogger _logger;
+
+        private bool _disposed = false;
 
         private Socket _server;
 
@@ -19,9 +20,9 @@ namespace Tic_tac_toe_Server.Net
 
         private List<Client> _clients = new List<Client>();
 
-        public event Action<Guid> ClientConnected;
+        public event Action<Guid> ClientConnected = delegate { };
 
-        public event Action<string> MessageRecived;
+        public event Action<string> MessageReceived = delegate { };
 
         public Server(IPEndPoint iPEndPoint, ILogger logger)
         {
@@ -35,7 +36,7 @@ namespace Tic_tac_toe_Server.Net
             {
                 _server.Listen();
                 _logger.LogSuccess("Server start successful.");
-                AcceptClientsAsync().GetAwaiter().GetResult();
+                Task.Run(() => AcceptClientsAsync());
             }
             catch (Exception ex)
             {
@@ -57,39 +58,15 @@ namespace Tic_tac_toe_Server.Net
             catch (Exception ex)
             {
                 _logger.LogError($"Exception: {ex.Message}");
-                _server.Shutdown(SocketShutdown.Both);
-                _server.Close();
                 _server.Dispose();
             }
         }
 
-        //public async Task ListenClientsAsync()
-        //{
-        //    if(!_server.IsBound)
-        //    {
-        //        _logger.LogWarning("Server is not bound to an endpoint.");
-        //    }
-
-        //    try
-        //    {
-        //        List<Task> clientTasks = new List<Task>();
-
-        //        foreach (Client client in _clients)
-        //        {
-        //            clientTasks.Add(client.StartReceiveAsync());
-        //        }
-
-        //        await Task.WhenAny(clientTasks);
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        _logger.LogError($"\nGeneral problem with reading data from client: {ex.Message}\n");
-        //    }
-        //}
-
-        public async Task SendDataToClients(List<Client> clients, string message)
+        public async Task SendDataToClients(List<Guid> clientsIds, string message)
         {
-            foreach(Client client in clients)
+            List<Client> clients = _clients.Where(c => clientsIds.Contains(c.Id)).ToList();
+
+            foreach (Client client in clients)
             {
                 var bytes = Encoding.UTF8.GetBytes(message + "\n");
 
@@ -138,7 +115,7 @@ namespace Tic_tac_toe_Server.Net
                     client.DataReceived += Client_DataReceived;
                     _logger.LogMessage($"Client {client.Id} connected.");
                     await SendInitializeClientDataAsync(client);
-                    await client.StartReceiveAsync();
+                    _ = Task.Run(() => client.StartReceiveAsync());
                 }
                 catch (Exception ex)
                 {
@@ -150,7 +127,14 @@ namespace Tic_tac_toe_Server.Net
         private void Client_DataReceived(object sender, string data)
         {
             Client client = (Client)sender;
-            _logger.LogMessage($"Received data from client {client.Id}: {data}");
+            try
+            {
+                MessageReceived?.Invoke(data);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Exception in MessageReceived handler: {ex.Message}");
+            }
         }
 
         private async Task SendInitializeClientDataAsync(Client client)
@@ -211,7 +195,7 @@ namespace Tic_tac_toe_Server.Net
         {
             var bytes = Encoding.UTF8.GetBytes(message + "\n");
 
-            if(client.Socket.Connected)
+            if (client.Socket.Connected)
             {
                 try
                 {
@@ -221,7 +205,7 @@ namespace Tic_tac_toe_Server.Net
 
                     _logger.LogMessage($"Message send to client: {client.Id}");
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     _logger.LogError(ex.Message);
                 }
@@ -249,5 +233,33 @@ namespace Tic_tac_toe_Server.Net
                 }
             }
         }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!_disposed)
+            {
+                if (disposing)
+                {
+                    foreach (var client in _clients)
+                    {
+                        client.DataReceived -= Client_DataReceived;
+                        client.Dispose();
+                    }
+
+                    if (_server.Connected)
+                    {
+                        _server.Shutdown(SocketShutdown.Both);
+                        _server.Dispose();
+                    }
+                }
+            }
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
     }
 }

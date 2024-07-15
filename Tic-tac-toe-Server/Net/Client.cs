@@ -3,14 +3,15 @@ using System.Text;
 
 namespace Tic_tac_toe_Server.Net
 {
-    public class Client
+    public class Client : IDisposable
     {
+        private bool _disposed;
         public Socket Socket { get; set; }
         public Guid Id { get; private set; }
 
         private ArraySegment<byte> _buffer;
 
-        public event EventHandler<string> DataReceived;
+        public event EventHandler<string> DataReceived = delegate { };
 
         public Client(Socket socket)
         {
@@ -19,27 +20,29 @@ namespace Tic_tac_toe_Server.Net
             _buffer = new ArraySegment<byte>(new byte[256]);
         }
 
-        public async Task StartReceiveAsync()
+        public void StartReceiveAsync()
         {
-            await ReceiveAsyncLoop();
+            ReceiveAsyncLoop(null);
         }
 
-        private async Task ReceiveAsyncLoop()
+        private void ReceiveAsyncLoop(IAsyncResult result)
         {
             try
             {
-                while (true)
+                if (result != null)
                 {
-                    int numberOfBytesRead = await Socket.ReceiveAsync(_buffer, SocketFlags.None);
+                    int numberOfBytesRead = Socket.EndReceive(result);
                     if (numberOfBytesRead == 0)
                     {
-                        Socket.Dispose();
                         return;
                     }
 
-                    var receivedData = new ArraySegment<byte>(_buffer.Array, _buffer.Offset, numberOfBytesRead);
-                    await OnDataReceivedAsync(receivedData);
+                    var newSegment = new ArraySegment<byte>(_buffer.Array, _buffer.Offset, numberOfBytesRead);
+
+                    OnDataReceivedAsync(newSegment);
                 }
+
+                Socket.BeginReceive(_buffer.Array, _buffer.Offset, _buffer.Count, SocketFlags.None, ReceiveAsyncLoop, null);
             }
             catch (Exception ex)
             {
@@ -47,10 +50,27 @@ namespace Tic_tac_toe_Server.Net
             }
         }
 
-        protected virtual async Task OnDataReceivedAsync(ArraySegment<byte> bytes)
+        protected virtual void OnDataReceivedAsync(ArraySegment<byte> bytes)
         {
             string receivedText = Encoding.UTF8.GetString(bytes.Array, bytes.Offset, bytes.Count);
             DataReceived?.Invoke(this, receivedText);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!_disposed)
+            {
+                if (disposing)
+                {
+                    Socket.Dispose();
+                }
+            }
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
         }
     }
 }

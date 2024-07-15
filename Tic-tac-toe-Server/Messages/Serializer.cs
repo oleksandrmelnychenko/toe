@@ -21,5 +21,22 @@ namespace Tic_tac_toe_Server.Messages
             }
         }
 
+        public static JsonValidationResult SerializeNewSession(NewSessionConfig config)
+        {
+            try
+            {
+                string json = JsonConvert.SerializeObject(config);
+                return new JsonValidationResult(true, json);
+            }
+            catch (JsonException ex)
+            {
+                return new JsonValidationResult(false, $"Serialization error: {ex.Message}");
+            }
+            catch (Exception ex)
+            {
+                return new JsonValidationResult(false, $"Unexpected error: {ex.Message}");
+            }
+        }
+
     }
 }

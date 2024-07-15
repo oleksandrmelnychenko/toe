@@ -1,7 +1,6 @@
 ﻿using Tic_tac_toe_Server.Logging;
-using Tic_tac_toe_Server.Net;
+using Tic_tac_toe_Server.Messages;
 using Tic_tac_toe_Server.Player;
-using TicTacToeGame.Client.Game;
 
 namespace Tic_tac_toe_Server.Game
 {
@@ -26,24 +25,45 @@ namespace Tic_tac_toe_Server.Game
         public GameSession(ILogger logger)
         {
             _logger = logger;
-            _playerManager = new(MaximumPlayerPerRoom, logger);
             BoardCells = CellFactory.Build(9);
+            _playerManager = new(MaximumPlayerPerRoom, logger);
         }
 
-        public bool AddPlayer(Guid clientId)
+        public void AddPlayer(Guid clientId)
         {
             if (_playerManager.HasFreeSlots())
             {
                 _playerManager.ConnectClientToPlayer(clientId);
 
                 IsFull = !_playerManager.HasFreeSlots();
-                return true;
             }
             else
             {
                 _logger.LogWarning($"Session: {this.Id} full.");
-                return false;
             }
+        }
+
+        /// <summary>
+        /// Sends the initial game data to players when the session is full.
+        /// </summary>
+        /// <returns>A tuple containing the initial game data and a list of player IDs to whom the data should be sent.</returns>
+        public NewSessionConfig GetStartSessionData()
+        {
+            NewSessionConfig config = new NewSessionConfig(Status, GetCurrentBoardSymbols(), _playerManager.CurrentPlayer.Id);
+
+            return config;
+        }
+
+        public List<Guid> GetSessionPlayers()
+        {
+            List<Guid> playersIds = new List<Guid>();
+
+            foreach (var player in _playerManager.Players)
+            {
+                playersIds.Add(player.Id);
+            }
+
+            return playersIds;
         }
 
         public void HandleAction(GameAction action)
@@ -83,6 +103,17 @@ namespace Tic_tac_toe_Server.Game
             {
                 _playerManager.ChangeCurrentPlayer();
             }
+        }
+
+        private List<Symbol> GetCurrentBoardSymbols()
+        {
+            List<Symbol> symbols = new List<Symbol>(BoardCells.Count);
+            foreach (BoardCell boardCell in BoardCells)
+            {
+                symbols.Add(boardCell.Value);
+            }
+
+            return symbols;
         }
     }
 }

@@ -1,4 +1,5 @@
 using Tic_tac_toe_Server.Logging;
+using Tic_tac_toe_Server.Messages;
 using Tic_tac_toe_Server.Net;
 using TicTacToeGame.Client.Game;
 
@@ -20,6 +21,7 @@ namespace Tic_tac_toe_Server.Game
             _server = server;
             _logger = logger;
             _server.ClientConnected += OnClientConnected;
+            _server.MessageReceived += OnMessageRecived;
             _server.StartServer();
         }
 
@@ -51,6 +53,8 @@ namespace Tic_tac_toe_Server.Game
                 GameSession gameSession = _rooms.FirstOrDefault(r => r.IsFull == false)!;
 
                 gameSession.AddPlayer(clientId);
+
+                SendInitialSessionData(gameSession);
             }
             else
             {
@@ -58,6 +62,30 @@ namespace Tic_tac_toe_Server.Game
 
                 gameSession.AddPlayer(clientId);
             }
+        }
+
+        private void SendInitialSessionData(GameSession gameSession)
+        {
+            if (gameSession.IsFull)
+            {
+                List<Guid> playersIds = gameSession.GetSessionPlayers();
+                NewSessionConfig config = gameSession.GetStartSessionData();
+                JsonValidationResult json = Serializer.SerializeNewSession(config);
+
+                if (json.IsValid)
+                {
+                    Task.Run(() => _server.SendDataToClients(playersIds, json.JsonMessage));
+                }
+                else
+                {
+                    _logger.LogError($"Invalid json format!");
+                }
+            }
+        }
+
+        private void OnMessageRecived(string message)
+        {
+            _logger.LogMessage(message);
         }
 
         private bool CheckForAvalibleSession() => _rooms.Any(r => r.IsFull == false);

@@ -1,4 +1,4 @@
-﻿using TicTacToeGame.Client.Game;
+﻿using Tic_tac_toe_Server.Game;
 
 namespace Tic_tac_toe_Server.Game
 {
@@ -8,8 +8,8 @@ namespace Tic_tac_toe_Server.Game
         {
             return GameWinningConditions.Combinations.Any(combination =>
             {
-                TicTacToeGame.Client.Game.Symbol? firstSymbol = boardCells.ElementAt(combination[0]).Value;
-                return firstSymbol.HasValue && firstSymbol != TicTacToeGame.Client.Game.Symbol.Empty &&
+                Symbol? firstSymbol = boardCells.ElementAt(combination[0]).Value;
+                return firstSymbol.HasValue && firstSymbol != Symbol.Empty &&
                        firstSymbol == boardCells.ElementAt(combination[1]).Value &&
                        firstSymbol == boardCells.ElementAt(combination[2]).Value;
             });
@@ -19,6 +19,7 @@ namespace Tic_tac_toe_Server.Game
             AreAllCellsFilled(boardCells) && !IsWinner(boardCells);
 
         private static bool AreAllCellsFilled(IReadOnlyCollection<BoardCell> boardCells) =>
-            boardCells.All(cell => cell.Value.HasValue && cell.Value != TicTacToeGame.Client.Game.Symbol.Empty);
+            boardCells.All(cell => cell.Value != Symbol.Empty);
+
     }
 }
