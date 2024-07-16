@@ -1,5 +1,5 @@
 ﻿using Tic_tac_toe_Server.Logging;
-using Tic_tac_toe_Server.Messages;
+using Tic_tac_toe_Server.Net.Messages;
 using Tic_tac_toe_Server.Player;
 
 namespace Tic_tac_toe_Server.Game
@@ -49,7 +49,7 @@ namespace Tic_tac_toe_Server.Game
         /// <returns>A NewSessionConfig containing the initial game data.</returns>
         public NewSessionConfig GetStartSessionData()
         {
-            NewSessionConfig config = new NewSessionConfig(Status, GetCurrentBoardSymbols(), _playerManager.CurrentPlayer.Id);
+            NewSessionConfig config = new NewSessionConfig(Status, _playerManager.CurrentPlayer.Id, _playerManager.CurrentPlayer.PlayerSymbolName);
 
             return config;
         }
@@ -66,9 +66,14 @@ namespace Tic_tac_toe_Server.Game
             return playersIds;
         }
 
-        public void HandleAction(GameAction action)
+        public void HandleAction(NewActionMessage action)
         {
-            History.AddAction(action);
+            BoardCell cell = new(action.CellIndex, _playerManager.CurrentPlayer.PlayerSymbolName, true);
+            BoardCells[cell.Index] = cell;
+
+            GameAction gameAction = new GameAction(_playerManager.GetPlayer(action.ClientId), action.CellIndex);
+            History.AddAction(gameAction);
+
             UpdateGameStatus();
         }
 
@@ -103,17 +108,6 @@ namespace Tic_tac_toe_Server.Game
             {
                 _playerManager.ChangeCurrentPlayer();
             }
-        }
-
-        private List<Symbol> GetCurrentBoardSymbols()
-        {
-            List<Symbol> symbols = new List<Symbol>(BoardCells.Count);
-            foreach (BoardCell boardCell in BoardCells)
-            {
-                symbols.Add(boardCell.Value);
-            }
-
-            return symbols;
         }
     }
 }

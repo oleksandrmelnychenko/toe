@@ -2,7 +2,6 @@
 using System.Net.Sockets;
 using System.Text;
 using Tic_tac_toe_Server.Logging;
-using Tic_tac_toe_Server.Messages;
 
 namespace Tic_tac_toe_Server.Net
 {

@@ -1,7 +1,8 @@
+using Avalonia.Media.TextFormatting.Unicode;
 using Tic_tac_toe_Server.Logging;
-using Tic_tac_toe_Server.Messages;
 using Tic_tac_toe_Server.Net;
-using TicTacToeGame.Client.Game;
+using Tic_tac_toe_Server.Net.Messages;
+using Tmds.DBus.Protocol;
 
 namespace Tic_tac_toe_Server.Game
 {
@@ -36,14 +37,17 @@ namespace Tic_tac_toe_Server.Game
             return gameSession;
         }
 
-        public void NewAction(BoardCell boardCell, Guid gameSessionId)
+        public void NewAction(NewActionMessage message)
         {
-            ArgumentNullException.ThrowIfNull(nameof(_rooms));
-            GameSession room = _rooms!.FirstOrDefault(r => r.Id == gameSessionId);
-            ArgumentNullException.ThrowIfNull(nameof(room));
-            GameAction action = new(room!.GetCurrentPlayer(), boardCell.Index);
-
-            room!.HandleAction(action);
+            (bool, GameSession) session = FindSessionByPlayerId(message.ClientId);
+            if(session.Item1)
+            {
+                session.Item2!.HandleAction(message);
+            }
+            else
+            {
+                _logger.LogError($"Cannot find a session with a player with the specified id!");
+            }
         }
 
         private void OnClientConnected(Guid clientId)
@@ -85,7 +89,21 @@ namespace Tic_tac_toe_Server.Game
 
         private void OnMessageRecived(string message)
         {
-            _logger.LogMessage(message);
+            MessageBase messageBase = Serializer.ParseMessage(message);
+            messageBase.Handle(this);
+        }
+
+        private (bool, GameSession) FindSessionByPlayerId(Guid playerId)
+        {
+            foreach (var room in _rooms)
+            {
+                if (room.GetPlayerManager().HasPlayer(playerId));
+                {
+                    return (true, room);
+                }
+            }
+
+            return (false, null);
         }
 
         private bool CheckForAvalibleSession() => _rooms.Any(r => r.IsFull == false);

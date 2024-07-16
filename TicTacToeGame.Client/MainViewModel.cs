@@ -1,5 +1,7 @@
 ﻿using Prism.Commands;
 using ReactiveUI;
+using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Net;
@@ -7,6 +9,7 @@ using System.Threading.Tasks;
 using TicTacToeGame.Client.Constants;
 using TicTacToeGame.Client.Game;
 using TicTacToeGame.Client.Net;
+using TicTacToeGame.Client.Net.Configs;
 using TicTacToeGame.Client.Net.Messages;
 using TicTacToeGame.Client.Net.Messages.ToGameMessages;
 
@@ -69,24 +72,34 @@ namespace TicTacToeGame.Client
         public async void OnRestartClickCommandHandler() =>
             await RestartRequest();
 
-        private void UpdateGameData(string message)
+        public void UpdateGameData(NewGameDataMessage serverMessage)
         {
-            ServerToClientConfig serverMessage = ClientJsonDataSerializer.DeserializeServerMessage(message);
             if (serverMessage == null)
             {
                 Debug.WriteLine("Server send ivalid data!!!");
                 return;
             }
 
+
             UpdateActionHistory(serverMessage.GameHistory);
             HandleRestartStatus(serverMessage.Status);
 
-            if (serverMessage.CellIndex.HasValue)
+            //Перевірку зробити
+            UpdateBoardCell(serverMessage.CellIndex, serverMessage.CellSymbol);
+
+            UpdatePlayerData(serverMessage.CurrentPlayerId);
+            UpdateGameStatus(serverMessage.Status, serverMessage.CurrentPlayerSymbol);
+        }
+
+        public void NewGameSession(NewGameSessionMessage serverMessage)
+        {
+            if (serverMessage == null)
             {
-                UpdateBoardCell(serverMessage.CellIndex.Value, serverMessage.CellSymbol);
+                Debug.WriteLine("Server send ivalid data!!!");
+                return;
             }
 
-            UpdatePlayerData(serverMessage);
+            UpdatePlayerData(serverMessage.CurrentPlayerId);
             UpdateGameStatus(serverMessage.Status, serverMessage.CurrentPlayerSymbol);
         }
 
@@ -120,8 +133,8 @@ namespace TicTacToeGame.Client
             BoardCells = new ObservableCollection<BoardCell>(CellFactory.Build(cellsCount));
         }
 
-        private void UpdatePlayerData(ServerToClientConfig serverMessage)
-            => IsActiveBoard = client.ClientId == serverMessage.CurrentPlayerId ? true : false;
+        private void UpdatePlayerData(Guid id)
+            => IsActiveBoard = client.ClientId == id ? true : false;
 
         private void UpdateGameStatus(Status status, Symbol symbol)
         {
@@ -136,20 +149,19 @@ namespace TicTacToeGame.Client
 
         private async Task ApplyGameAction(BoardCell boardCell)
         {
-            ClientToServerConfig clientToServerConfig = new ClientToServerConfig(boardCell.Index, false, client.ClientId);
-            string actionJson = ClientJsonDataSerializer.SerializeAction(clientToServerConfig);
-            if (actionJson == null)
+            NewActionConfig newActionConfig = new(boardCell.Index, client.ClientId);
+            JsonValidationResult actionJson = Serializer.SerializeNewAction(newActionConfig);
+            if (actionJson.IsValid)
             {
-
+                await client.SendDataAsync(actionJson.JsonMessage);
             }
-            await client.SendDataAsync(actionJson);
         }
 
         private async Task RestartRequest()
         {
-            ClientToServerConfig clientToServerConfig = new ClientToServerConfig(10, true, client.ClientId);
-            string requestJson = ClientJsonDataSerializer.SerializeAction(clientToServerConfig);
-            await client.SendDataAsync(requestJson);
+            //ClientToServerConfig clientToServerConfig = new ClientToServerConfig(10, true, client.ClientId);
+            //string requestJson = ClientJsonDataSerializer.SerializeAction(clientToServerConfig);
+            //await client.SendDataAsync(requestJson);
         }
 
         private async void InitializeClient()
@@ -161,9 +173,9 @@ namespace TicTacToeGame.Client
             //await client.ListenForMessagesAsync();
         }
 
-        private void Client_MessageReceived(object? sender, Net.Messages.ToGameBaseMessage message)
+        private void Client_MessageReceived(object? sender, MessageBase message)
         {
-            if(message is Net.Messages.ToGameMessages.ToGameBaseMessage toGameMessage)
+            if(message is ToGameBaseMessage toGameMessage)
             {
                 toGameMessage.Handle(this);
             }

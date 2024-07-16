@@ -26,7 +26,7 @@ namespace TicTacToeGame.Client.Net
 
         public Guid ClientId { get; private set; }
 
-        public event EventHandler<ToGameBaseMessage> MessageReceived;
+        public event EventHandler<MessageBase> MessageReceived;
 
         public Client(IPEndPoint endPoint)
         {
@@ -110,7 +110,7 @@ namespace TicTacToeGame.Client.Net
         {
             string receivedText = Encoding.UTF8.GetString(newSegment.Array, newSegment.Offset, newSegment.Count);
 
-            ToGameBaseMessage message = Serializer.ParseMessage(receivedText);
+            MessageBase message = Serializer.ParseMessage(receivedText);
             if (!IsInitialized)
             {
                 ClientInitialization(message);
@@ -121,7 +121,7 @@ namespace TicTacToeGame.Client.Net
             }
         }
 
-        private void ClientInitialization(ToGameBaseMessage message)
+        private void ClientInitialization(MessageBase message)
         {
             if (message is ClientInitializationMessage initMessage)
             {

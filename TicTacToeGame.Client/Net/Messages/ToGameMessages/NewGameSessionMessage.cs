@@ -4,14 +4,21 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TicTacToeGame.Client.Game;
 
 namespace TicTacToeGame.Client.Net.Messages.ToGameMessages
 {
-    internal class NewGameSessionMessage : ToGameBaseMessage
+    public class NewGameSessionMessage : ToGameBaseMessage
     {
+        public Status Status { get; set; }
+
+        public Guid CurrentPlayerId { get; set; }
+
+        public Symbol CurrentPlayerSymbol { get; set; }
+
         public override void Handle(MainViewModel mainViewModel)
         {
-            throw new NotImplementedException();
+            mainViewModel.NewGameSession(this);
         }
     }
 }

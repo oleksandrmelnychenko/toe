@@ -4,6 +4,7 @@
     {
         PlayerInitialization,
         NewGameSession,
-        NewGameData
+        NewGameData,
+        NewAction
     }
 }

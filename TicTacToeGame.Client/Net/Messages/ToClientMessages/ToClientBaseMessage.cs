@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace TicTacToeGame.Client.Net.Messages.ToClientMessages
 {
-    public abstract class ToClientBaseMessage : ToGameBaseMessage
+    public abstract class ToClientBaseMessage : MessageBase
     {
 
     }

@@ -47,6 +47,15 @@ namespace Tic_tac_toe_Server.Game
             return true;
         }
 
+        public bool HasPlayer(Guid playerId)
+        {
+            return _players.Any(p => p.Id == playerId);
+        }
+
+        public PlayerBase GetPlayer(Guid playerId)
+        {
+            return _players.FirstOrDefault(p => p.Id == playerId);
+        }
 
         public bool HasFreeSlots()
         {

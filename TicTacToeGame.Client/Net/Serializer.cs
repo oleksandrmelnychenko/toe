@@ -1,35 +1,64 @@
-﻿using System.Text.Json;
-using System;
-using TicTacToeGame.Client.Net.Messages;
+﻿using System;
 using Type = TicTacToeGame.Client.Net.Messages.Type;
 using TicTacToeGame.Client.Net.Messages.ToGameMessages;
 using TicTacToeGame.Client.Net.Messages.ToClientMessages;
+using TicTacToeGame.Client.Net.Messages;
+using Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
+using TicTacToeGame.Client.Net.Configs;
 
 namespace TicTacToeGame.Client.Net
 {
     internal static class Serializer
     {
-        public static Messages.ToGameBaseMessage ParseMessage(string json)
+        public static MessageBase ParseMessage(string json)
         {
-            var jsonObject = JsonDocument.Parse(json).RootElement;
-            bool parseResult = jsonObject.TryGetProperty("Type", out JsonElement typeElement);
-
-            if (typeElement.ValueKind == JsonValueKind.Number)
+            JObject jsonObject = JObject.Parse(json);
+            if (jsonObject.TryGetValue("Type", out JToken typeToken))
             {
-                Type messageType = (Type)typeElement.GetInt32();
-
-                return messageType switch
+                if (typeToken.Type == JTokenType.Integer)
                 {
-                    Type.PlayerInitialization => JsonSerializer.Deserialize<ClientInitializationMessage>(json)!,
-                    Type.NewGameSession => JsonSerializer.Deserialize<NewGameSessionMessage>(json)!,
-                    Type.NewGameData => JsonSerializer.Deserialize<NewGameDataMessage>(json)!,
-                    _ => throw new Exception()
-                };
+                    int typeInt = typeToken.ToObject<int>();
+                    Type messageType = (Type)typeInt;
+
+                    return messageType switch
+                    {
+                        Type.PlayerInitialization =>
+                            JsonConvert.DeserializeObject<ClientInitializationMessage>(json)!,
+                        Type.NewGameSession =>
+                            JsonConvert.DeserializeObject<NewGameSessionMessage>(json)!,
+                        Type.NewGameData =>
+                            JsonConvert.DeserializeObject<NewGameDataMessage>(json)!,
+                        _ => throw new Exception($"Unsupported message type: {typeInt}")
+                    };
+                }
+                else
+                {
+                    throw new InvalidOperationException($"Invalid message type: {json}");
+                }
             }
             else
             {
-                throw new InvalidOperationException($"Invalid message type: {json}");
+                throw new InvalidOperationException($"Missing 'Type' property in JSON: {json}");
             }
         }
+
+        public static JsonValidationResult SerializeNewAction(NewActionConfig config)
+        {
+            try
+            {
+                string json = JsonConvert.SerializeObject(config);
+                return new JsonValidationResult(true, json);
+            }
+            catch (JsonException ex)
+            {
+                return new JsonValidationResult(false, $"Serialization error: {ex.Message}");
+            }
+            catch (Exception ex)
+            {
+                return new JsonValidationResult(false, $"Unexpected error: {ex.Message}");
+            }
+        }
+
     }
 }
