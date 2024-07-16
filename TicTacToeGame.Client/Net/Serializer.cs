@@ -2,12 +2,14 @@
 using System;
 using TicTacToeGame.Client.Net.Messages;
 using Type = TicTacToeGame.Client.Net.Messages.Type;
+using TicTacToeGame.Client.Net.Messages.ToGameMessages;
+using TicTacToeGame.Client.Net.Messages.ToClientMessages;
 
 namespace TicTacToeGame.Client.Net
 {
     internal static class Serializer
     {
-        public static MessageBase ParseMessage(string json)
+        public static Messages.ToGameBaseMessage ParseMessage(string json)
         {
             var jsonObject = JsonDocument.Parse(json).RootElement;
             bool parseResult = jsonObject.TryGetProperty("Type", out JsonElement typeElement);
@@ -18,7 +20,7 @@ namespace TicTacToeGame.Client.Net
 
                 return messageType switch
                 {
-                    Type.PlayerInitialization => JsonSerializer.Deserialize<PlayerInitializationMessage>(json)!,
+                    Type.PlayerInitialization => JsonSerializer.Deserialize<ClientInitializationMessage>(json)!,
                     Type.NewGameSession => JsonSerializer.Deserialize<NewGameSessionMessage>(json)!,
                     Type.NewGameData => JsonSerializer.Deserialize<NewGameDataMessage>(json)!,
                     _ => throw new Exception()

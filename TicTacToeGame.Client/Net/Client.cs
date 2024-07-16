@@ -5,6 +5,7 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
 using TicTacToeGame.Client.Net.Messages;
+using TicTacToeGame.Client.Net.Messages.ToClientMessages;
 using Tmds.DBus.Protocol;
 
 namespace TicTacToeGame.Client.Net
@@ -21,12 +22,15 @@ namespace TicTacToeGame.Client.Net
 
         private ArraySegment<byte> _buffer;
 
+        public bool IsInitialized { get; private set; } = false;
+
         public Guid ClientId { get; private set; }
 
-        public event EventHandler<MessageBase> MessageReceived;
+        public event EventHandler<ToGameBaseMessage> MessageReceived;
 
         public Client(IPEndPoint endPoint)
         {
+
             _buffer = new ArraySegment<byte>(new byte[256]);
 
             _tcpClient = new Socket(SocketType.Stream, ProtocolType.Tcp);
@@ -102,26 +106,33 @@ namespace TicTacToeGame.Client.Net
             }
         }
 
-        //Тре з цим шось зробити воно якесь супер інвалідське
         private void OnDataReceivedAsync(ArraySegment<byte> newSegment)
         {
             string receivedText = Encoding.UTF8.GetString(newSegment.Array, newSegment.Offset, newSegment.Count);
 
-            MessageBase message = Serializer.ParseMessage(receivedText);
-            if(ClientId == Guid.Empty)
+            ToGameBaseMessage message = Serializer.ParseMessage(receivedText);
+            if (!IsInitialized)
             {
-                if(message.Type == Messages.Type.PlayerInitialization)
-                {
-                    ClientId = ((PlayerInitializationMessage)message).PlayerId;
-                }
-                else
-                {
-                    return;
-                }
+                ClientInitialization(message);
             }
             else
             {
                 MessageReceived?.Invoke(this, message);
+            }
+        }
+
+        private void ClientInitialization(ToGameBaseMessage message)
+        {
+            if (message is ClientInitializationMessage initMessage)
+            {
+                ClientId = initMessage.PlayerId;
+                IsInitialized = true;
+                Debug.WriteLine($"Client initialized with ID {ClientId}");
+            }
+            else
+            {
+                Debug.WriteLine("Received non-initialization message before initialization.");
+                return;
             }
         }
 

@@ -126,7 +126,6 @@ namespace Tic_tac_toe_Server.Net
 
         private void Client_DataReceived(object sender, string data)
         {
-            Client client = (Client)sender;
             try
             {
                 MessageReceived?.Invoke(data);

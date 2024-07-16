@@ -8,6 +8,7 @@ using TicTacToeGame.Client.Constants;
 using TicTacToeGame.Client.Game;
 using TicTacToeGame.Client.Net;
 using TicTacToeGame.Client.Net.Messages;
+using TicTacToeGame.Client.Net.Messages.ToGameMessages;
 
 namespace TicTacToeGame.Client
 {
@@ -160,9 +161,12 @@ namespace TicTacToeGame.Client
             //await client.ListenForMessagesAsync();
         }
 
-        private void Client_MessageReceived(object? sender, MessageBase message)
+        private void Client_MessageReceived(object? sender, Net.Messages.ToGameBaseMessage message)
         {
-            message.Handle();
+            if(message is Net.Messages.ToGameMessages.ToGameBaseMessage toGameMessage)
+            {
+                toGameMessage.Handle(this);
+            }
         }
     }
 }

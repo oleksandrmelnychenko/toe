@@ -46,7 +46,7 @@ namespace Tic_tac_toe_Server.Game
         /// <summary>
         /// Sends the initial game data to players when the session is full.
         /// </summary>
-        /// <returns>A tuple containing the initial game data and a list of player IDs to whom the data should be sent.</returns>
+        /// <returns>A NewSessionConfig containing the initial game data.</returns>
         public NewSessionConfig GetStartSessionData()
         {
             NewSessionConfig config = new NewSessionConfig(Status, GetCurrentBoardSymbols(), _playerManager.CurrentPlayer.Id);

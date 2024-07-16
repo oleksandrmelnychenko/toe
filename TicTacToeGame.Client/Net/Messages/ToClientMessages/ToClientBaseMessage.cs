@@ -4,10 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace TicTacToeGame.Client.Net.Messages
+namespace TicTacToeGame.Client.Net.Messages.ToClientMessages
 {
-    public abstract class ToGameBaseMessage
+    public abstract class ToClientBaseMessage : ToGameBaseMessage
     {
-        public Type Type { get; set; }
+
     }
 }
