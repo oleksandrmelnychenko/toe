@@ -1,4 +1,4 @@
-using Avalonia.Media.TextFormatting.Unicode;
+﻿using Avalonia.Media.TextFormatting.Unicode;
 using Tic_tac_toe_Server.Logging;
 using Tic_tac_toe_Server.Net;
 using Tic_tac_toe_Server.Net.Messages;
@@ -50,6 +50,12 @@ namespace Tic_tac_toe_Server.Game
                 _logger.LogError($"Cannot find a session with a player with the specified id!");
             }
         }
+        
+        //доробити рестарт
+        //public void RestartSession(RestartMessage restartMessage)
+        //{
+        //    GameSession session = _rooms.
+        //}
 
         private void OnClientConnected(Guid clientId)
         {

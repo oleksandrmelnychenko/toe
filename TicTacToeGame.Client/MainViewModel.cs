@@ -85,7 +85,7 @@ namespace TicTacToeGame.Client
 
             UpdateBoardCell(serverMessage.CellIndex, serverMessage.CellSymbol);
 
-            UpdatePlayerData(serverMessage.CurrentPlayerId);
+            UpdatePlayerData(serverMessage.CurrentPlayerId, serverMessage.Status);
             UpdateGameStatus(serverMessage.Status, serverMessage.CurrentPlayerSymbol);
         }
 
@@ -97,8 +97,8 @@ namespace TicTacToeGame.Client
                 return;
             }
 
-            UpdatePlayerData(serverMessage.CurrentPlayerId);
             UpdateGameStatus(serverMessage.Status, serverMessage.CurrentPlayerSymbol);
+            UpdatePlayerData(serverMessage.CurrentPlayerId, serverMessage.Status);
         }
 
         private void UpdateActionHistory(string history)
@@ -131,8 +131,8 @@ namespace TicTacToeGame.Client
             BoardCells = new ObservableCollection<BoardCell>(CellFactory.Build(cellsCount));
         }
 
-        private void UpdatePlayerData(Guid id)
-            => IsActiveBoard = client.ClientId == id ? true : false;
+        private void UpdatePlayerData(Guid id, Status status)
+            => IsActiveBoard = client.ClientId == id && (status != Status.Finish && status != Status.Draw) ? true : false;
 
         private void UpdateGameStatus(Status status, Symbol symbol)
         {
@@ -148,18 +148,26 @@ namespace TicTacToeGame.Client
         private async Task ApplyGameAction(BoardCell boardCell)
         {
             NewActionConfig newActionConfig = new(boardCell.Index, client.ClientId);
-            JsonValidationResult actionJson = Serializer.SerializeNewAction(newActionConfig);
+            JsonValidationResult actionJson = Serializer.Serialize<NewActionConfig>(newActionConfig);
             if (actionJson.IsValid)
             {
                 await client.SendDataAsync(actionJson.JsonMessage);
+            }
+            else
+            {
+                Debug.WriteLine($"Unexpected serialization error: {actionJson.JsonMessage}");
             }
         }
 
         private async Task RestartRequest()
         {
-            //ClientToServerConfig clientToServerConfig = new ClientToServerConfig(10, true, client.ClientId);
-            //string requestJson = ClientJsonDataSerializer.SerializeAction(clientToServerConfig);
-            //await client.SendDataAsync(requestJson);
+            RestartConfig restartConfig = new(client.ClientId);
+            JsonValidationResult restartJson = Serializer.Serialize<RestartConfig>(restartConfig);
+            if (restartJson.IsValid)
+            {
+                Debug.WriteLine($"Unexpected serialization error: {restartJson.JsonMessage}");
+            }
+
         }
 
         private async void InitializeClient()

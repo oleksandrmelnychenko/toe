@@ -43,7 +43,7 @@ namespace TicTacToeGame.Client.Net
             }
         }
 
-        public static JsonValidationResult SerializeNewAction(NewActionConfig config)
+        public static JsonValidationResult Serialize<T>(T config)
         {
             try
             {
