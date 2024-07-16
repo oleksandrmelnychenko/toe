@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using DynamicData.Diagnostics;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Tic_tac_toe_Server.Net.Messages;
 using TicTacToeGame.Client.Net.Messages.ToGameMessages;
@@ -54,6 +55,23 @@ namespace Tic_tac_toe_Server.Net
         }
 
         public static JsonValidationResult SerializeNewSession(NewSessionConfig config)
+        {
+            try
+            {
+                string json = JsonConvert.SerializeObject(config);
+                return new JsonValidationResult(true, json);
+            }
+            catch (JsonException ex)
+            {
+                return new JsonValidationResult(false, $"Serialization error: {ex.Message}");
+            }
+            catch (Exception ex)
+            {
+                return new JsonValidationResult(false, $"Unexpected error: {ex.Message}");
+            }
+        }
+
+        public static JsonValidationResult SerializeNewGameData(NewGameDataConfig config)
         {
             try
             {

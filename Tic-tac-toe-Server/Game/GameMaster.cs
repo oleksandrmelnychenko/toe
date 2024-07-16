@@ -2,6 +2,7 @@ using Avalonia.Media.TextFormatting.Unicode;
 using Tic_tac_toe_Server.Logging;
 using Tic_tac_toe_Server.Net;
 using Tic_tac_toe_Server.Net.Messages;
+using Tic_tac_toe_Server.Player;
 using Tmds.DBus.Protocol;
 
 namespace Tic_tac_toe_Server.Game
@@ -63,7 +64,7 @@ namespace Tic_tac_toe_Server.Game
             else
             {
                 GameSession gameSession = StartNewGameSession();
-
+                gameSession.MessageProcessed += On_SessionDataProcessed;
                 gameSession.AddPlayer(clientId);
             }
         }
@@ -104,6 +105,22 @@ namespace Tic_tac_toe_Server.Game
             }
 
             return (false, null);
+        }
+
+        private void On_SessionDataProcessed(object sender, NewGameDataConfig config)
+        {
+            GameSession gameSession = (GameSession)sender;
+
+            List<Guid> playersIds = gameSession.GetSessionPlayers();
+            JsonValidationResult jsonValidationResult = Serializer.SerializeNewGameData(config);
+            if (jsonValidationResult.IsValid)
+            {
+                Task.Run(() => _server.SendDataToClients(playersIds, jsonValidationResult.JsonMessage));
+            }
+            else
+            {
+                _logger.LogError($"Unexpected serialization error: {jsonValidationResult.JsonMessage}");
+            }
         }
 
         private bool CheckForAvalibleSession() => _rooms.Any(r => r.IsFull == false);

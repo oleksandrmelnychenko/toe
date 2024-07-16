@@ -20,7 +20,7 @@ namespace TicTacToeGame.Client.Net.Messages.ToGameMessages
 
         public Symbol CellSymbol { get; set; }
 
-        public string GameHistory { get; set; }
+        public string ActionHistory { get; set; }
 
         public override void Handle(MainViewModel mainViewModel)
         {

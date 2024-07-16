@@ -80,11 +80,9 @@ namespace TicTacToeGame.Client
                 return;
             }
 
-
-            UpdateActionHistory(serverMessage.GameHistory);
+            UpdateActionHistory(serverMessage.ActionHistory);
             HandleRestartStatus(serverMessage.Status);
 
-            //Перевірку зробити
             UpdateBoardCell(serverMessage.CellIndex, serverMessage.CellSymbol);
 
             UpdatePlayerData(serverMessage.CurrentPlayerId);

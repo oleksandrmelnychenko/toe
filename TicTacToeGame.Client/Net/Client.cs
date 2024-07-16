@@ -31,7 +31,7 @@ namespace TicTacToeGame.Client.Net
         public Client(IPEndPoint endPoint)
         {
 
-            _buffer = new ArraySegment<byte>(new byte[256]);
+            _buffer = new ArraySegment<byte>(new byte[512]);
 
             _tcpClient = new Socket(SocketType.Stream, ProtocolType.Tcp);
 

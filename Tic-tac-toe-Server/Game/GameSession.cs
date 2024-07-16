@@ -22,6 +22,8 @@ namespace Tic_tac_toe_Server.Game
 
         public ActionHistory History { get; set; } = new();
 
+        public event EventHandler<NewGameDataConfig> MessageProcessed = delegate { };
+
         public GameSession(ILogger logger)
         {
             _logger = logger;
@@ -62,27 +64,21 @@ namespace Tic_tac_toe_Server.Game
             {
                 playersIds.Add(player.Id);
             }
-
             return playersIds;
         }
 
         public void HandleAction(NewActionMessage action)
         {
-            BoardCell cell = new(action.CellIndex, _playerManager.CurrentPlayer.PlayerSymbolName, true);
-            BoardCells[cell.Index] = cell;
-
-            GameAction gameAction = new GameAction(_playerManager.GetPlayer(action.ClientId), action.CellIndex);
-            History.AddAction(gameAction);
-
-            UpdateGameStatus();
+            UpdateGameData(action);
+            MessageProcessed?.Invoke(this, CreateNewGameDataConfig(action));
         }
 
-        public PlayerBase GetCurrentPlayer()
+        public PlayerManager GetPlayerManager()
         {
-            return _playerManager.CurrentPlayer;
+            return _playerManager;
         }
 
-        public void UpdateGameStatus()
+        private void UpdateGameStatus()
         {
             Status = OutcomeDeterminer.IsWinner(BoardCells) switch
             {
@@ -97,17 +93,28 @@ namespace Tic_tac_toe_Server.Game
             HandleGameStatus();
         }
 
-        public PlayerManager GetPlayerManager()
-        {
-            return _playerManager;
-        }
-
         private void HandleGameStatus()
         {
             if (Status == Status.PlayerTurn)
             {
                 _playerManager.ChangeCurrentPlayer();
             }
+        }
+         
+        private NewGameDataConfig CreateNewGameDataConfig(NewActionMessage action)
+        {
+            return new(Status, BoardCells[action.CellIndex].Value, _playerManager.CurrentPlayer.PlayerSymbolName, action.CellIndex, _playerManager.CurrentPlayer.Id, History.History);
+        }
+
+        private void UpdateGameData(NewActionMessage action)
+        {
+            BoardCell cell = new(action.CellIndex, _playerManager.CurrentPlayer.PlayerSymbolName, true);
+            BoardCells[cell.Index] = cell;
+
+            GameAction gameAction = new GameAction(_playerManager.GetPlayer(action.ClientId), action.CellIndex);
+            History.AddAction(gameAction);
+
+            UpdateGameStatus();
         }
     }
 }

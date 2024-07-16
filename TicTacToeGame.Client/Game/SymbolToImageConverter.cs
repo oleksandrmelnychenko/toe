@@ -14,7 +14,6 @@ namespace TicTacToeGame.Client.Game
             {
                 switch (symbol)
                 {
-                    //"C:\\Projects\\Tic-tac-toe\\TicTacToeGame.Client\\Symbols\\X.png");
                     case Symbol.X:
                         return new Bitmap(SymbolPath.XPath);
                     case Symbol.O:

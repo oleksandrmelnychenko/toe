@@ -17,7 +17,7 @@ namespace Tic_tac_toe_Server.Net
         {
             Id = Guid.NewGuid();
             Socket = socket;
-            _buffer = new ArraySegment<byte>(new byte[256]);
+            _buffer = new ArraySegment<byte>(new byte[512]);
         }
 
         public void StartReceiveAsync()
