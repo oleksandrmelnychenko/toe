@@ -12,6 +12,8 @@ namespace Tic_tac_toe_Server.Game
 
         private Server _server;
 
+        public event Action<ConfigBase, List<Guid>> SubmitData = delegate { };
+
         /// <summary>
         ///     The GameMaster class represents the game master that manages the Tic Tac Toe game.
         /// </summary>
@@ -19,7 +21,6 @@ namespace Tic_tac_toe_Server.Game
         {
             _server = server;
             _logger = logger;
-            _server.MessageReceived += OnMessageRecived;
             _server.StartServer();
         }
 
@@ -61,7 +62,7 @@ namespace Tic_tac_toe_Server.Game
         {
             if (CheckForAvalibleSession())
             {
-                GameSession gameSession = _rooms.FirstOrDefault(r => r.IsFull == false)!;
+                GameSession gameSession = _rooms.First(r => !r.IsFull);
 
                 gameSession.AddPlayer(clientId);
 
@@ -94,7 +95,7 @@ namespace Tic_tac_toe_Server.Game
             }
         }
 
-        private void OnMessageRecived(string message)
+        public void OnMessageRecived(string message)
         {
             MessageBase messageBase = Serializer.ParseMessage(message);
             messageBase.Handle(this);
@@ -118,15 +119,7 @@ namespace Tic_tac_toe_Server.Game
             GameSession gameSession = (GameSession)sender;
 
             List<Guid> playersIds = gameSession.GetSessionPlayers();
-            JsonValidationResult jsonValidationResult = Serializer.Serialize(config);
-            if (jsonValidationResult.IsValid)
-            {
-                Task.Run(() => _server.SendDataToClients(playersIds, jsonValidationResult.JsonMessage));
-            }
-            else
-            {
-                _logger.LogError($"Unexpected serialization error: {jsonValidationResult.JsonMessage}");
-            }
+            SubmitData?.Invoke(config, playersIds);
         }
 
         private bool CheckForAvalibleSession() => _rooms.Any(r => r.IsFull == false);

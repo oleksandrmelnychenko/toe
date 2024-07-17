@@ -176,11 +176,9 @@ namespace TicTacToeGame.Client
 
         private async void InitializeClient()
         {
-            IPEndPoint endPoint = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 8888);
-            client = new Net.Client(endPoint);
-            await client.ConnectAsync();
-            //await client.ListenForPlayerInfoAsync();
-            //await client.ListenForMessagesAsync();
+            IPEndPoint endPoint = new IPEndPoint(IPAddress.Parse(NetworkAddressConfig.IPAddress), NetworkAddressConfig.Port);
+            client = new Net.Client();
+            await client.ConnectAsync(endPoint);
         }
 
         private void Client_MessageReceived(object? sender, MessageBase message)

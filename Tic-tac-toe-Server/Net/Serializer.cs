@@ -1,8 +1,6 @@
-﻿using DynamicData.Diagnostics;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Tic_tac_toe_Server.Net.Messages;
-using TicTacToeGame.Client.Net.Messages.ToGameMessages;
 
 namespace Tic_tac_toe_Server.Net
 {
@@ -24,8 +22,8 @@ namespace Tic_tac_toe_Server.Net
                             JsonConvert.DeserializeObject<NewActionMessage>(json)!,
                         Type.Restart =>
                             JsonConvert.DeserializeObject<RestartMessage>(json)!,
-                         Type.PlayerInitialized =>
-                            JsonConvert.DeserializeObject<PlayerInitializedMessage>(json)!,
+                        Type.PlayerInitialized =>
+                           JsonConvert.DeserializeObject<PlayerInitializedMessage>(json)!,
                         _ => throw new Exception($"Unsupported message type: {typeInt}")
                     };
                 }

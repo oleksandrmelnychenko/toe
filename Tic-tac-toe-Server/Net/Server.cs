@@ -1,9 +1,9 @@
 ﻿using System.Net;
 using System.Net.Sockets;
 using System.Text;
-using System.Threading;
 using Tic_tac_toe_Server.Logging;
 using Tic_tac_toe_Server.Net.Messages;
+using TicTacToeGame.Client.Net;
 
 namespace Tic_tac_toe_Server.Net
 {
@@ -17,34 +17,32 @@ namespace Tic_tac_toe_Server.Net
 
         private bool _disposed = false;
 
-        private Socket _server;
+        private Socket _networkEndPoint;
 
-        private IPEndPoint _ipEndPoint;
+        private List<RemotePeer> _clients = new();
 
-        private List<Client> _clients = new();
-
-        public event Action<string> MessageReceived = delegate { };
+        public event Action<string> MessageReceived = delegate{ };
 
         public Server(IPEndPoint iPEndPoint, ILogger logger)
         {
             _logger = logger;
-            Initialize(iPEndPoint, ref _server!);
+            _networkEndPoint = Initialize(iPEndPoint);
         }
 
         public void StartServer()
         {
             try
             {
-                _server.Listen();
+                _networkEndPoint.Listen();
                 _logger.LogSuccess("Server start successful.");
                 Task.Run(() => AcceptClientsAsync(cancellationTokenSource.Token));
             }
             catch (Exception ex)
             {
                 _logger.LogError($"Exception: {ex.Message}");
-                _server.Shutdown(SocketShutdown.Both);
-                _server.Close();
-                _server.Dispose();
+                _networkEndPoint.Shutdown(SocketShutdown.Both);
+                _networkEndPoint.Close();
+                _networkEndPoint.Dispose();
             }
         }
 
@@ -53,24 +51,25 @@ namespace Tic_tac_toe_Server.Net
             try
             {
                 cancellationTokenSource.Cancel();
-                _server.Shutdown(SocketShutdown.Both);
-                _server.Close();
+                _networkEndPoint.Shutdown(SocketShutdown.Both);
+                _networkEndPoint.Close();
                 _logger.LogSuccess("Server stop successful.");
             }
             catch (Exception ex)
             {
                 _logger.LogError($"Exception: {ex.Message}");
-                _server.Dispose();
+                _networkEndPoint.Dispose();
             }
         }
 
+        //Це не працює
         public async Task SendDataToClients(List<Guid> clientsIds, string message)
         {
-            List<Client> clients = _clients.Where(c => clientsIds.Contains(c.Id)).ToList();
+            List<RemotePeer> clients = _clients.Where(c => clientsIds.Contains(c.Id)).ToList();
 
-            foreach (Client client in clients)
+            foreach (RemotePeer client in clients)
             {
-                var bytes = Encoding.UTF8.GetBytes(message + "\n");
+                byte[] bytes = Encoding.UTF8.GetBytes(message + "\n");
 
                 if (client.Socket.Connected)
                 {
@@ -100,9 +99,9 @@ namespace Tic_tac_toe_Server.Net
             {
                 try
                 {
-                    Socket socket = await _server.AcceptAsync().ConfigureAwait(false);
+                    Socket socket = await _networkEndPoint.AcceptAsync().ConfigureAwait(false);
 
-                    Client client = new(socket);
+                    RemotePeer client = new(socket);
 
                     lock (_clientLock)
                     {
@@ -139,7 +138,7 @@ namespace Tic_tac_toe_Server.Net
             }
         }
 
-        private async Task SendInitializeClientDataAsync(Client client)
+        private async Task SendInitializeClientDataAsync(RemotePeer client)
         {
             PlayerInitializationConfig config = new PlayerInitializationConfig(client.Id);
             JsonValidationResult jsonValidationResult = Serializer.Serialize(config);
@@ -161,39 +160,23 @@ namespace Tic_tac_toe_Server.Net
             }
         }
 
-        private void Initialize(IPEndPoint iPEndPoint, ref Socket server)
+        private Socket Initialize(IPEndPoint endPointAddress)
         {
-            server = new Socket(SocketType.Stream, ProtocolType.Tcp);
+            Socket networkEndPoint = new Socket(SocketType.Stream, ProtocolType.Tcp);
 
-            while (!_server.IsBound)
+            try
             {
-                (bool isValidEndPoint, string endPointValidationMessage) = EndPointValidation.IsValidEndPoint(iPEndPoint);
-
-                if (isValidEndPoint)
-                {
-                    try
-                    {
-                        _server.Bind(iPEndPoint);
-                        _ipEndPoint = iPEndPoint;
-                        _logger.LogSuccess("Server binding successful.");
-                    }
-                    catch (Exception ex)
-                    {
-                        _logger.LogError(ex.Message);
-                        UpdateEndPoint(iPEndPoint);
-                        continue;
-                    }
-                }
-                else
-                {
-                    _logger.LogError(endPointValidationMessage);
-                    UpdateEndPoint(iPEndPoint);
-                    continue;
-                }
+                networkEndPoint.Bind(endPointAddress);
+                return networkEndPoint;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                throw;
             }
         }
 
-        private async Task SendDataToClient(Client client, string message)
+        private async Task SendDataToClient(RemotePeer client, string message)
         {
             var bytes = Encoding.UTF8.GetBytes(message + "\n");
 
@@ -218,24 +201,6 @@ namespace Tic_tac_toe_Server.Net
             }
         }
 
-        private void UpdateEndPoint(IPEndPoint iPEndPoint)
-        {
-            _logger.LogMessage("Please enter new IP address:");
-            IPAddress ipAddress;
-            if (IPAddress.TryParse(Console.ReadLine(), out ipAddress))
-            {
-                iPEndPoint.Address = ipAddress;
-
-                _logger.LogMessage("Please enter new port:");
-                int port;
-
-                if (int.TryParse(Console.ReadLine(), out port))
-                {
-                    iPEndPoint.Port = port;
-                }
-            }
-        }
-
         protected virtual void Dispose(bool disposing)
         {
             if (!_disposed)
@@ -248,10 +213,10 @@ namespace Tic_tac_toe_Server.Net
                         client.Dispose();
                     }
 
-                    if (_server.Connected)
+                    if (_networkEndPoint.Connected)
                     {
-                        _server.Shutdown(SocketShutdown.Both);
-                        _server.Dispose();
+                        _networkEndPoint.Shutdown(SocketShutdown.Both);
+                        _networkEndPoint.Dispose();
                     }
                 }
             }

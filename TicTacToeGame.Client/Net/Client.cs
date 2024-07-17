@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 using TicTacToeGame.Client.Net.Configs;
 using TicTacToeGame.Client.Net.Messages;
 using TicTacToeGame.Client.Net.Messages.ToClientMessages;
-using Tmds.DBus.Protocol;
 
 namespace TicTacToeGame.Client.Net
 {
@@ -16,8 +15,6 @@ namespace TicTacToeGame.Client.Net
         private NetworkStream _stream;
 
         private bool _disposed;
-
-        private IPEndPoint _remoteEndPoint;
 
         private Socket _tcpClient;
 
@@ -29,21 +26,18 @@ namespace TicTacToeGame.Client.Net
 
         public event EventHandler<MessageBase> MessageReceived;
 
-        public Client(IPEndPoint endPoint)
+        public Client()
         {
-
             _buffer = new ArraySegment<byte>(new byte[512]);
 
             _tcpClient = new Socket(SocketType.Stream, ProtocolType.Tcp);
-
-            SetEndPoint(endPoint);
         }
 
-        public async Task ConnectAsync()
+        public async Task ConnectAsync(IPEndPoint endPoint)
         {
             try
             {
-                await _tcpClient.ConnectAsync(_remoteEndPoint);
+                await _tcpClient.ConnectAsync(endPoint);
                 _stream = new NetworkStream(_tcpClient);
                 Debug.WriteLine($"Client connected to server");
 
@@ -144,19 +138,6 @@ namespace TicTacToeGame.Client.Net
             {
                 Debug.WriteLine("Received non-initialization message before initialization.");
                 return;
-            }
-        }
-
-        private void SetEndPoint(IPEndPoint endPoint)
-        {
-            (bool isValidEndPoint, string endPointValidationMessage) = EndPointValidation.IsValidEndPoint(endPoint);
-            if (isValidEndPoint)
-            {
-                _remoteEndPoint = endPoint;
-            }
-            else
-            {
-                Debug.WriteLine($"Remote end point is not valid!");
             }
         }
 

@@ -3,22 +3,16 @@ using System.Text;
 
 namespace Tic_tac_toe_Server.Net
 {
-    public class Client : IDisposable
+    public sealed class RemotePeer(Socket socket) : IDisposable
     {
         private bool _disposed;
-        public Socket Socket { get; set; }
-        public Guid Id { get; private set; }
-
-        private ArraySegment<byte> _buffer;
+        private const int BufferSize = 512;
+        private ArraySegment<byte> _buffer = new ArraySegment<byte>(new byte[BufferSize]);
+        public Socket Socket { get; set; } = socket;
+        public Guid Id { get; private set; } = Guid.NewGuid();
 
         public event EventHandler<string> DataReceived = delegate { };
 
-        public Client(Socket socket)
-        {
-            Id = Guid.NewGuid();
-            Socket = socket;
-            _buffer = new ArraySegment<byte>(new byte[512]);
-        }
 
         public void StartReceiveAsync()
         {
@@ -50,7 +44,7 @@ namespace Tic_tac_toe_Server.Net
             }
         }
 
-        protected virtual void OnDataReceivedAsync(ArraySegment<byte> bytes)
+        private void OnDataReceivedAsync(ArraySegment<byte> bytes)
         {
             string receivedText = Encoding.UTF8.GetString(bytes.Array, bytes.Offset, bytes.Count);
             DataReceived?.Invoke(this, receivedText);
@@ -66,7 +60,7 @@ namespace Tic_tac_toe_Server.Net
             catch (SocketException) { return false; }
         }
 
-        protected virtual void Dispose(bool disposing)
+        private void Dispose(bool disposing)
         {
             if (!_disposed)
             {

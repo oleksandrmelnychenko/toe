@@ -1,10 +1,8 @@
-﻿using System.Net.Sockets;
-using System.Net;
-using System.Text;
-using Tic_tac_toe_Server.Logging;
-using Tic_tac_toe_Server.Game;
-using Tic_tac_toe_Server.Net;
+﻿using System.Net;
 using Tic_tac_toe_Server.Constants;
+using Tic_tac_toe_Server.Game;
+using Tic_tac_toe_Server.Logging;
+using Tic_tac_toe_Server.Net;
 
 namespace Tic_tac_toe_Server
 {
@@ -13,12 +11,16 @@ namespace Tic_tac_toe_Server
         static void Main(string[] args)
         {
             ConsoleLogger consoleLogger = new ConsoleLogger();
-            IPEndPoint endPoint = new IPEndPoint(IPAddress.Parse(AddressConstants.IPAddress), AddressConstants.Port);
+            IPEndPoint endPoint = new IPEndPoint(IPAddress.Parse(NetworkAddressConfig.IPAddress), NetworkAddressConfig.Port);
 
             Server server = new(endPoint, consoleLogger);
             GameMaster gameMaster = new(server, consoleLogger);
 
-            while(true)
+
+
+            server.MessageReceived += gameMaster.OnMessageRecived;
+
+            while (true)
             {
 
             }
