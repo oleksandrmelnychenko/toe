@@ -80,7 +80,6 @@ namespace TicTacToeGame.Client
             }
 
             UpdateActionHistory(serverMessage.ActionHistory);
-            HandleRestartStatus(serverMessage.Status);
 
             UpdateBoardCell(serverMessage.CellIndex, serverMessage.CellSymbol);
 
@@ -90,7 +89,8 @@ namespace TicTacToeGame.Client
 
         public void NewGameSession(NewGameSessionMessage serverMessage)
         {
-            Restart();
+            if (serverMessage.Status == Status.Restart) Restart();
+
             if (serverMessage == null)
             {
                 Debug.WriteLine("Server send ivalid data!!!");

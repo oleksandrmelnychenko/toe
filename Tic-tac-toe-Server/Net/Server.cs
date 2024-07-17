@@ -1,6 +1,7 @@
 ﻿using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading;
 using Tic_tac_toe_Server.Logging;
 using Tic_tac_toe_Server.Net.Messages;
 
@@ -10,6 +11,8 @@ namespace Tic_tac_toe_Server.Net
     {
         private readonly object _clientLock = new();
 
+        private CancellationTokenSource cancellationTokenSource = new();
+
         private readonly ILogger _logger;
 
         private bool _disposed = false;
@@ -18,7 +21,7 @@ namespace Tic_tac_toe_Server.Net
 
         private IPEndPoint _ipEndPoint;
 
-        private List<Client> _clients = new List<Client>();
+        private List<Client> _clients = new();
 
         public event Action<string> MessageReceived = delegate { };
 
@@ -34,7 +37,7 @@ namespace Tic_tac_toe_Server.Net
             {
                 _server.Listen();
                 _logger.LogSuccess("Server start successful.");
-                Task.Run(() => AcceptClientsAsync());
+                Task.Run(() => AcceptClientsAsync(cancellationTokenSource.Token));
             }
             catch (Exception ex)
             {
@@ -49,6 +52,7 @@ namespace Tic_tac_toe_Server.Net
         {
             try
             {
+                cancellationTokenSource.Cancel();
                 _server.Shutdown(SocketShutdown.Both);
                 _server.Close();
                 _logger.LogSuccess("Server stop successful.");
@@ -90,13 +94,13 @@ namespace Tic_tac_toe_Server.Net
             }
         }
 
-        private async Task AcceptClientsAsync()
+        public async Task AcceptClientsAsync(CancellationToken cancellationToken)
         {
-            while (true)
+            while (!cancellationToken.IsCancellationRequested)
             {
                 try
                 {
-                    Socket socket = await _server.AcceptAsync();
+                    Socket socket = await _server.AcceptAsync().ConfigureAwait(false);
 
                     Client client = new(socket);
 
@@ -107,8 +111,14 @@ namespace Tic_tac_toe_Server.Net
 
                     client.DataReceived += Client_DataReceived;
                     _logger.LogMessage($"Client {client.Id} connected.");
-                    await SendInitializeClientDataAsync(client);
-                    _ = Task.Run(() => client.StartReceiveAsync());
+
+                    await SendInitializeClientDataAsync(client).ConfigureAwait(false);
+                    _ = Task.Run(() => client.StartReceiveAsync(), cancellationToken);
+                }
+                catch (OperationCanceledException)
+                {
+                    _logger.LogMessage("Client acceptance was canceled.");
+                    break;
                 }
                 catch (Exception ex)
                 {

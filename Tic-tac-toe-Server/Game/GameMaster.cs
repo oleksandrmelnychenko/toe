@@ -1,9 +1,6 @@
-﻿using Avalonia.Media.TextFormatting.Unicode;
-using Tic_tac_toe_Server.Logging;
+﻿using Tic_tac_toe_Server.Logging;
 using Tic_tac_toe_Server.Net;
 using Tic_tac_toe_Server.Net.Messages;
-using Tic_tac_toe_Server.Player;
-using Tmds.DBus.Protocol;
 
 namespace Tic_tac_toe_Server.Game
 {
@@ -40,7 +37,7 @@ namespace Tic_tac_toe_Server.Game
         public void NewAction(NewActionMessage message)
         {
             (bool, GameSession) session = FindSessionByPlayerId(message.ClientId);
-            if(session.Item1)
+            if (session.Item1)
             {
                 session.Item2!.HandleAction(message);
             }
@@ -133,11 +130,5 @@ namespace Tic_tac_toe_Server.Game
         }
 
         private bool CheckForAvalibleSession() => _rooms.Any(r => r.IsFull == false);
-
-        //public PlayerManager GetPlayerService()
-        //{
-        //    ArgumentNullException.ThrowIfNull(nameof(_rooms));
-        //    return _rooms!.GetPlayerService();
-        //}
     }
 }

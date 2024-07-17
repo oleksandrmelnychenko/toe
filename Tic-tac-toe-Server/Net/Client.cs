@@ -32,7 +32,7 @@ namespace Tic_tac_toe_Server.Net
                 if (result != null)
                 {
                     int numberOfBytesRead = Socket.EndReceive(result);
-                    if (numberOfBytesRead == 0)
+                    if (!IsSocketConnected(Socket))
                     {
                         return;
                     }
@@ -54,6 +54,16 @@ namespace Tic_tac_toe_Server.Net
         {
             string receivedText = Encoding.UTF8.GetString(bytes.Array, bytes.Offset, bytes.Count);
             DataReceived?.Invoke(this, receivedText);
+        }
+
+
+        private bool IsSocketConnected(Socket socket)
+        {
+            try
+            {
+                return !(socket.Poll(1, SelectMode.SelectRead) && socket.Available == 0);
+            }
+            catch (SocketException) { return false; }
         }
 
         protected virtual void Dispose(bool disposing)
