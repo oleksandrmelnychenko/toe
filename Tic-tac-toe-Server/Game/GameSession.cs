@@ -19,7 +19,7 @@ namespace Tic_tac_toe_Server.Game
 
         public List<BoardCell> BoardCells { get; private set; }
 
-        public Guid Id { get; private set; }
+        public Guid Id { get; private set; } = Guid.NewGuid();
 
         public Status Status { get; set; } = Status.Start;
 

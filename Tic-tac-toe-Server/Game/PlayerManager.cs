@@ -49,7 +49,8 @@ namespace Tic_tac_toe_Server.Game
 
         public bool HasPlayer(Guid playerId)
         {
-            return _players.Any(p => p.Id == playerId);
+            var result = _players.Any(p => p.Id == playerId);
+            return result;
         }
 
         public PlayerBase GetPlayer(Guid playerId)

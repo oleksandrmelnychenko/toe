@@ -22,7 +22,6 @@ namespace Tic_tac_toe_Server.Game
         {
             _server = server;
             _logger = logger;
-            _server.ClientConnected += OnClientConnected;
             _server.MessageReceived += OnMessageRecived;
             _server.StartServer();
         }
@@ -61,7 +60,7 @@ namespace Tic_tac_toe_Server.Game
             }
         }
 
-        private void OnClientConnected(Guid clientId)
+        public void ClientConnected(Guid clientId)
         {
             if (CheckForAvalibleSession())
             {
@@ -108,7 +107,7 @@ namespace Tic_tac_toe_Server.Game
         {
             foreach (var room in _rooms)
             {
-                if (room.GetPlayerManager().HasPlayer(playerId));
+                if (room.GetPlayerManager().HasPlayer(playerId))
                 {
                     return (true, room);
                 }

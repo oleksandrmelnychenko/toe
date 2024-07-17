@@ -4,6 +4,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
+using TicTacToeGame.Client.Net.Configs;
 using TicTacToeGame.Client.Net.Messages;
 using TicTacToeGame.Client.Net.Messages.ToClientMessages;
 using Tmds.DBus.Protocol;
@@ -127,7 +128,17 @@ namespace TicTacToeGame.Client.Net
             {
                 ClientId = initMessage.PlayerId;
                 IsInitialized = true;
-                Debug.WriteLine($"Client initialized with ID {ClientId}");
+                PlayerInitializedConfig config = new(ClientId);
+                JsonValidationResult validationResult = Serializer.Serialize(config);
+                if(validationResult.IsValid)
+                {
+                    Task.Run(() => SendDataAsync(validationResult.JsonMessage));
+                    Debug.WriteLine($"Client initialized with ID {ClientId}");
+                }
+                else
+                {
+                    Console.WriteLine($"Unexpected serialization error: {validationResult.JsonMessage}");
+                }
             }
             else
             {

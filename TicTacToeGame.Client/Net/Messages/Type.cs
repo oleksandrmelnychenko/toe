@@ -6,6 +6,7 @@
         NewGameSession,
         NewGameData,
         NewAction,
-        Restart
+        Restart,
+        PlayerInitialized
     }
 }

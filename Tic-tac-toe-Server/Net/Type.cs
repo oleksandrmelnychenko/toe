@@ -12,6 +12,7 @@ namespace Tic_tac_toe_Server.Net
         NewGameSession,
         NewGameData,
         NewAction,
-        Restart
+        Restart,
+        PlayerInitialized
     }
 }

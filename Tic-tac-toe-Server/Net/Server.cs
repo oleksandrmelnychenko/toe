@@ -20,8 +20,6 @@ namespace Tic_tac_toe_Server.Net
 
         private List<Client> _clients = new List<Client>();
 
-        public event Action<Guid> ClientConnected = delegate { };
-
         public event Action<string> MessageReceived = delegate { };
 
         public Server(IPEndPoint iPEndPoint, ILogger logger)
@@ -92,11 +90,6 @@ namespace Tic_tac_toe_Server.Net
             }
         }
 
-        protected virtual void OnClientConnected(Guid clientId)
-        {
-            ClientConnected?.Invoke(clientId);
-        }
-
         private async Task AcceptClientsAsync()
         {
             while (true)
@@ -145,7 +138,6 @@ namespace Tic_tac_toe_Server.Net
             {
                 await SendDataToClient(client, jsonValidationResult.JsonMessage);
                 _logger.LogMessage($"Initialize data send to client {client.Id}");
-                OnClientConnected(client.Id);
             }
             else
             {
