@@ -22,6 +22,8 @@ namespace Tic_tac_toe_Server.Net
                     {
                         Type.NewAction =>
                             JsonConvert.DeserializeObject<NewActionMessage>(json)!,
+                        Type.Restart =>
+                            JsonConvert.DeserializeObject<RestartMessage>(json)!,
                         _ => throw new Exception($"Unsupported message type: {typeInt}")
                     };
                 }
@@ -36,42 +38,7 @@ namespace Tic_tac_toe_Server.Net
             }
         }
 
-        public static JsonValidationResult SerializeClientData(Guid id)
-        {
-            try
-            {
-                PlayerInitializationConfig config = new PlayerInitializationConfig(id);
-                string json = JsonConvert.SerializeObject(config);
-                return new JsonValidationResult(true, json);
-            }
-            catch (JsonException ex)
-            {
-                return new JsonValidationResult(false, $"Serialization error: {ex.Message}");
-            }
-            catch (Exception ex)
-            {
-                return new JsonValidationResult(false, $"Unexpected error: {ex.Message}");
-            }
-        }
-
-        public static JsonValidationResult SerializeNewSession(NewSessionConfig config)
-        {
-            try
-            {
-                string json = JsonConvert.SerializeObject(config);
-                return new JsonValidationResult(true, json);
-            }
-            catch (JsonException ex)
-            {
-                return new JsonValidationResult(false, $"Serialization error: {ex.Message}");
-            }
-            catch (Exception ex)
-            {
-                return new JsonValidationResult(false, $"Unexpected error: {ex.Message}");
-            }
-        }
-
-        public static JsonValidationResult SerializeNewGameData(NewGameDataConfig config)
+        public static JsonValidationResult Serialize<T>(T config)
         {
             try
             {

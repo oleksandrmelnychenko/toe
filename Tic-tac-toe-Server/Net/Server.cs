@@ -2,6 +2,7 @@
 using System.Net.Sockets;
 using System.Text;
 using Tic_tac_toe_Server.Logging;
+using Tic_tac_toe_Server.Net.Messages;
 
 namespace Tic_tac_toe_Server.Net
 {
@@ -137,7 +138,8 @@ namespace Tic_tac_toe_Server.Net
 
         private async Task SendInitializeClientDataAsync(Client client)
         {
-            JsonValidationResult jsonValidationResult = Serializer.SerializeClientData(client.Id);
+            PlayerInitializationConfig config = new PlayerInitializationConfig(client.Id);
+            JsonValidationResult jsonValidationResult = Serializer.Serialize(config);
 
             if (jsonValidationResult.IsValid)
             {

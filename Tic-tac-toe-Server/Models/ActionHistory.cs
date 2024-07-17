@@ -30,6 +30,7 @@ namespace Tic_tac_toe_Server.Game
         public void ClearHistory()
         {
             moves.Clear();
+            History = string.Empty;
         }
 
     }

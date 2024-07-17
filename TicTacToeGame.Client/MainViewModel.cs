@@ -1,7 +1,6 @@
 ﻿using Prism.Commands;
 using ReactiveUI;
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Net;
@@ -91,6 +90,7 @@ namespace TicTacToeGame.Client
 
         public void NewGameSession(NewGameSessionMessage serverMessage)
         {
+            Restart();
             if (serverMessage == null)
             {
                 Debug.WriteLine("Server send ivalid data!!!");
@@ -138,7 +138,7 @@ namespace TicTacToeGame.Client
         {
             GameStatus = status switch
             {
-                Status.PlayerTurn or Status.Start => GameStatusConst.PlayerTurn + " " + symbol,
+                Status.PlayerTurn or Status.Start or Status.Restart => GameStatusConst.PlayerTurn + " " + symbol,
                 Status.Draw => GameStatusConst.Draw,
                 Status.Finish => GameStatusConst.EndOfGame + " " + symbol,
                 _ => GameStatus
@@ -164,6 +164,10 @@ namespace TicTacToeGame.Client
             RestartConfig restartConfig = new(client.ClientId);
             JsonValidationResult restartJson = Serializer.Serialize<RestartConfig>(restartConfig);
             if (restartJson.IsValid)
+            {
+                await client.SendDataAsync(restartJson.JsonMessage);
+            }
+            else
             {
                 Debug.WriteLine($"Unexpected serialization error: {restartJson.JsonMessage}");
             }

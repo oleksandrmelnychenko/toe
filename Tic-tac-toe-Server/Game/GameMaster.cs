@@ -50,12 +50,16 @@ namespace Tic_tac_toe_Server.Game
                 _logger.LogError($"Cannot find a session with a player with the specified id!");
             }
         }
-        
-        //доробити рестарт
-        //public void RestartSession(RestartMessage restartMessage)
-        //{
-        //    GameSession session = _rooms.
-        //}
+
+        public void RestartSession(RestartMessage restartMessage)
+        {
+            GameSession session = _rooms.FirstOrDefault(r => r.GetPlayerManager().HasPlayer(restartMessage.ClientId));
+
+            if (session != null)
+            {
+                session.Restart();
+            }
+        }
 
         private void OnClientConnected(Guid clientId)
         {
@@ -81,7 +85,7 @@ namespace Tic_tac_toe_Server.Game
             {
                 List<Guid> playersIds = gameSession.GetSessionPlayers();
                 NewSessionConfig config = gameSession.GetStartSessionData();
-                JsonValidationResult json = Serializer.SerializeNewSession(config);
+                JsonValidationResult json = Serializer.Serialize(config);
 
                 if (json.IsValid)
                 {
@@ -113,12 +117,12 @@ namespace Tic_tac_toe_Server.Game
             return (false, null);
         }
 
-        private void On_SessionDataProcessed(object sender, NewGameDataConfig config)
+        private void On_SessionDataProcessed(object sender, ConfigBase config)
         {
             GameSession gameSession = (GameSession)sender;
 
             List<Guid> playersIds = gameSession.GetSessionPlayers();
-            JsonValidationResult jsonValidationResult = Serializer.SerializeNewGameData(config);
+            JsonValidationResult jsonValidationResult = Serializer.Serialize(config);
             if (jsonValidationResult.IsValid)
             {
                 Task.Run(() => _server.SendDataToClients(playersIds, jsonValidationResult.JsonMessage));

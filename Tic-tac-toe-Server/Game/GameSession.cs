@@ -1,12 +1,15 @@
 ﻿using Tic_tac_toe_Server.Logging;
 using Tic_tac_toe_Server.Net.Messages;
 using Tic_tac_toe_Server.Player;
+using TicTacToeGame.Client.Net.Messages.ToGameMessages;
 
 namespace Tic_tac_toe_Server.Game
 {
     public class GameSession
     {
         private const ushort MaximumPlayerPerRoom = 2;
+
+        private const ushort BoardCellCount = 9;
 
         private PlayerManager _playerManager;
 
@@ -22,12 +25,12 @@ namespace Tic_tac_toe_Server.Game
 
         public ActionHistory History { get; set; } = new();
 
-        public event EventHandler<NewGameDataConfig> MessageProcessed = delegate { };
+        public event EventHandler<ConfigBase> MessageProcessed = delegate { };
 
         public GameSession(ILogger logger)
         {
             _logger = logger;
-            BoardCells = CellFactory.Build(9);
+            BoardCells = CellFactory.Build(BoardCellCount);
             _playerManager = new(MaximumPlayerPerRoom, logger);
         }
 
@@ -44,6 +47,7 @@ namespace Tic_tac_toe_Server.Game
                 _logger.LogWarning($"Session: {this.Id} full.");
             }
         }
+
 
         /// <summary>
         /// Sends the initial game data to players when the session is full.
@@ -76,6 +80,15 @@ namespace Tic_tac_toe_Server.Game
         public PlayerManager GetPlayerManager()
         {
             return _playerManager;
+        }
+
+        public void Restart()
+        {
+            BoardCells = CellFactory.Build(BoardCellCount);
+            Status = Status.Restart;
+            History.ClearHistory();
+
+            MessageProcessed?.Invoke(this, GetStartSessionData());
         }
 
         private void UpdateGameStatus()

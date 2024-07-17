@@ -7,7 +7,7 @@ using Tic_tac_toe_Server.Game;
 
 namespace Tic_tac_toe_Server.Net.Messages
 {
-    internal class RestartMessage : MessageBase
+    public class RestartMessage : MessageBase
     {
         public Guid ClientId { get; set; }
 
