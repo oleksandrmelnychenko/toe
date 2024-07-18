@@ -7,10 +7,5 @@ namespace Tic_tac_toe_Server.Net.Messages
         public Guid ClientId { get; set; }
 
         public ushort CellIndex { get; set; }
-
-        public override void Handle(GameMaster gameMaster)
-        {
-            gameMaster.NewAction(this);
-        }
     }
 }

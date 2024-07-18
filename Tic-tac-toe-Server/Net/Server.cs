@@ -57,24 +57,23 @@ namespace Tic_tac_toe_Server.Net
             }
         }
 
-        //Це не працює
         public async Task SendDataToClients(List<Guid> clientsIds, string message)
         {
-            List<RemotePeer> clients = _remotePeers.Where(c => clientsIds.Contains(c.Id)).ToList();
+            List<RemotePeer> remotePeers = _remotePeers.Where(c => clientsIds.Contains(c.Id)).ToList();
 
-            foreach (RemotePeer client in clients)
+            foreach (RemotePeer remotePeer in remotePeers)
             {
                 byte[] bytes = Encoding.UTF8.GetBytes(message + "\n");
 
-                if (client.Socket.Connected)
+                if (remotePeer.Socket.Connected)
                 {
                     try
                     {
-                        NetworkStream networkStream = new NetworkStream(client.Socket);
+                        NetworkStream networkStream = new NetworkStream(remotePeer.Socket);
 
                         await networkStream.WriteAsync(bytes, 0, bytes.Length);
 
-                        _logger.LogMessage($"Message send to clients: {client.Id}");
+                        _logger.LogMessage($"Message send to remotePeers: {remotePeer.Id}");
                     }
                     catch (Exception ex)
                     {
@@ -83,7 +82,7 @@ namespace Tic_tac_toe_Server.Net
                 }
                 else
                 {
-                    _logger.LogWarning($"Client {client.Id} is not connected.");
+                    _logger.LogWarning($"Client {remotePeer.Id} is not connected.");
                 }
             }
         }
@@ -116,7 +115,7 @@ namespace Tic_tac_toe_Server.Net
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError($"Exception while accepting client: {ex.Message}");
+                    _logger.LogError($"Exception while accepting remotePeer: {ex.Message}");
                 }
             }
         }
@@ -141,11 +140,11 @@ namespace Tic_tac_toe_Server.Net
             if (jsonValidationResult.IsValid)
             {
                 await SendDataToClient(client, jsonValidationResult.JsonMessage);
-                _logger.LogMessage($"Initialize data send to client {client.Id}");
+                _logger.LogMessage($"Initialize data send to remotePeer {client.Id}");
             }
             else
             {
-                _logger.LogError($"Serialization problem for client {client.Id}: {jsonValidationResult.JsonMessage}");
+                _logger.LogError($"Serialization problem for remotePeer {client.Id}: {jsonValidationResult.JsonMessage}");
 
                 await SendDataToClient(client, "An error occurred during initialization. Please try again.");
 
@@ -183,7 +182,7 @@ namespace Tic_tac_toe_Server.Net
 
                     await networkStream.WriteAsync(bytes, 0, bytes.Length);
 
-                    _logger.LogMessage($"Message send to client: {client.Id}");
+                    _logger.LogMessage($"Message send to remotePeer: {client.Id}");
                 }
                 catch (Exception ex)
                 {

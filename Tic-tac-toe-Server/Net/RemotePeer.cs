@@ -5,9 +5,10 @@ namespace Tic_tac_toe_Server.Net
 {
     public sealed class RemotePeer(Socket socket) : IDisposable
     {
+        private const int BufferSize = 128;
         private bool _disposed;
-        private const int BufferSize = 512;
         private ArraySegment<byte> _buffer = new ArraySegment<byte>(new byte[BufferSize]);
+        private StringBuilder _messageBuffer = new StringBuilder();
         public Socket Socket { get; set; } = socket;
         public Guid Id { get; private set; } = Guid.NewGuid();
 
@@ -46,8 +47,12 @@ namespace Tic_tac_toe_Server.Net
 
         private void OnDataReceivedAsync(ArraySegment<byte> bytes)
         {
-            string receivedText = Encoding.UTF8.GetString(bytes.Array, bytes.Offset, bytes.Count);
-            DataReceived?.Invoke(this, receivedText);
+            _messageBuffer.Append(Encoding.UTF8.GetString(bytes.Array, bytes.Offset, bytes.Count));
+            if(Socket.Available == 0)
+            {
+                DataReceived?.Invoke(this, _messageBuffer.ToString());
+                _messageBuffer.Clear();
+            }
         }
 
 

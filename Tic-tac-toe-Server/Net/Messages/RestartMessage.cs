@@ -10,10 +10,5 @@ namespace Tic_tac_toe_Server.Net.Messages
     public class RestartMessage : MessageBase
     {
         public Guid ClientId { get; set; }
-
-        public override void Handle(GameMaster gameMaster)
-        {
-            gameMaster.RestartSession(this);
-        }
     }
 }
