@@ -4,9 +4,9 @@ using Tic_tac_toe_Server.Net.Messages;
 
 namespace Tic_tac_toe_Server.Net.Configs
 {
-    internal record RestartConfig(Status status, Guid CurrentPlayerId, Symbol CurrentPlayerSymbol) : ConfigBase
+    internal record RestartConfig(SessionStatus status, Guid CurrentPlayerId, Symbol CurrentPlayerSymbol) : ConfigBase
     {
         [JsonProperty("Type")]
-        Type type = Type.Restart;
+        MessageType type = MessageType.Restart;
     }
 }

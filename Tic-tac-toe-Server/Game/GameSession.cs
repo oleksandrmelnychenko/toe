@@ -21,7 +21,7 @@ namespace Tic_tac_toe_Server.Game
 
         public Guid Id { get; private set; } = Guid.NewGuid();
 
-        public Status Status { get; set; } = Status.Start;
+        public SessionStatus Status { get; set; } = SessionStatus.Start;
 
         public ActionHistory History { get; set; } = new();
 
@@ -85,7 +85,7 @@ namespace Tic_tac_toe_Server.Game
         public void Restart()
         {
             BoardCells = CellFactory.Build(BoardCellCount);
-            Status = Status.Restart;
+            Status = SessionStatus.Restart;
             History.ClearHistory();
 
             MessageProcessed?.Invoke(this, GetStartSessionData());
@@ -95,11 +95,11 @@ namespace Tic_tac_toe_Server.Game
         {
             Status = OutcomeDeterminer.IsWinner(BoardCells) switch
             {
-                true => Status.Finish,
+                true => SessionStatus.Finish,
                 false => OutcomeDeterminer.IsDraw(BoardCells) switch
                 {
-                    true => Status.Draw,
-                    false => Status.PlayerTurn
+                    true => SessionStatus.Draw,
+                    false => SessionStatus.PlayerTurn
                 }
             };
 
@@ -108,7 +108,7 @@ namespace Tic_tac_toe_Server.Game
 
         private void HandleGameStatus()
         {
-            if (Status == Status.PlayerTurn)
+            if (Status == SessionStatus.PlayerTurn)
             {
                 _playerManager.ChangeCurrentPlayer();
             }

@@ -1,6 +1,6 @@
 namespace Tic_tac_toe_Server.Game
 {
-    public enum Status
+    public enum SessionStatus
     {
         Start,
         PlayerTurn,

@@ -14,11 +14,10 @@ namespace Tic_tac_toe_Server
             IPEndPoint endPoint = new IPEndPoint(IPAddress.Parse(NetworkAddressConfig.IPAddress), NetworkAddressConfig.Port);
 
             Server server = new(endPoint, consoleLogger);
-            GameMaster gameMaster = new(server, consoleLogger);
+            GameMaster gameMaster = new(consoleLogger);
+            server.StartServer();
 
-
-
-            server.MessageReceived += gameMaster.OnMessageRecived;
+            DataTransferManager dataTransferManager = new DataTransferManager(server, gameMaster, consoleLogger);
 
             while (true)
             {

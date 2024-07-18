@@ -14,15 +14,15 @@ namespace Tic_tac_toe_Server.Net
                 if (typeToken.Type == JTokenType.Integer)
                 {
                     int typeInt = typeToken.ToObject<int>();
-                    Type messageType = (Type)typeInt;
+                    MessageType messageType = (MessageType)typeInt;
 
                     return messageType switch
                     {
-                        Type.NewAction =>
+                        MessageType.NewAction =>
                             JsonConvert.DeserializeObject<NewActionMessage>(json)!,
-                        Type.Restart =>
+                        MessageType.Restart =>
                             JsonConvert.DeserializeObject<RestartMessage>(json)!,
-                        Type.PlayerInitialized =>
+                        MessageType.PlayerInitialized =>
                            JsonConvert.DeserializeObject<PlayerInitializedMessage>(json)!,
                         _ => throw new Exception($"Unsupported message type: {typeInt}")
                     };

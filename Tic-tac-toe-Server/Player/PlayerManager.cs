@@ -1,9 +1,7 @@
 ﻿using Tic_tac_toe_Server.Logging;
-using Tic_tac_toe_Server.Net;
-using Tic_tac_toe_Server.Player;
 using Tic_tac_toe_Server.Player.Factory;
 
-namespace Tic_tac_toe_Server.Game
+namespace Tic_tac_toe_Server.Player
 {
     public class PlayerManager
     {

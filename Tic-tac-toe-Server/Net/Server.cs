@@ -3,7 +3,6 @@ using System.Net.Sockets;
 using System.Text;
 using Tic_tac_toe_Server.Logging;
 using Tic_tac_toe_Server.Net.Messages;
-using TicTacToeGame.Client.Net;
 
 namespace Tic_tac_toe_Server.Net
 {
@@ -19,9 +18,9 @@ namespace Tic_tac_toe_Server.Net
 
         private Socket _networkEndPoint;
 
-        private List<RemotePeer> _clients = new();
+        private List<RemotePeer> _remotePeers = new();
 
-        public event Action<string> MessageReceived = delegate{ };
+        public event Action<string> MessageReceived = delegate { };
 
         public Server(IPEndPoint iPEndPoint, ILogger logger)
         {
@@ -39,10 +38,7 @@ namespace Tic_tac_toe_Server.Net
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Exception: {ex.Message}");
-                _networkEndPoint.Shutdown(SocketShutdown.Both);
-                _networkEndPoint.Close();
-                _networkEndPoint.Dispose();
+                HandleServerException(ex, "start");
             }
         }
 
@@ -57,15 +53,14 @@ namespace Tic_tac_toe_Server.Net
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Exception: {ex.Message}");
-                _networkEndPoint.Dispose();
+                HandleServerException(ex, "stop");
             }
         }
 
         //Це не працює
         public async Task SendDataToClients(List<Guid> clientsIds, string message)
         {
-            List<RemotePeer> clients = _clients.Where(c => clientsIds.Contains(c.Id)).ToList();
+            List<RemotePeer> clients = _remotePeers.Where(c => clientsIds.Contains(c.Id)).ToList();
 
             foreach (RemotePeer client in clients)
             {
@@ -105,7 +100,7 @@ namespace Tic_tac_toe_Server.Net
 
                     lock (_clientLock)
                     {
-                        _clients.Add(client);
+                        _remotePeers.Add(client);
                     }
 
                     client.DataReceived += Client_DataReceived;
@@ -154,7 +149,7 @@ namespace Tic_tac_toe_Server.Net
 
                 await SendDataToClient(client, "An error occurred during initialization. Please try again.");
 
-                _clients.Remove(client);
+                _remotePeers.Remove(client);
                 client.Socket.Dispose();
                 _logger.LogMessage($"Client {client.Id} disconnected due to serialization error.");
             }
@@ -207,18 +202,10 @@ namespace Tic_tac_toe_Server.Net
             {
                 if (disposing)
                 {
-                    foreach (var client in _clients)
-                    {
-                        client.DataReceived -= Client_DataReceived;
-                        client.Dispose();
-                    }
-
-                    if (_networkEndPoint.Connected)
-                    {
-                        _networkEndPoint.Shutdown(SocketShutdown.Both);
-                        _networkEndPoint.Dispose();
-                    }
+                    DisposeClients();
+                    DisposeNetworkEndPoint();
                 }
+                _disposed = true;
             }
         }
 
@@ -226,6 +213,30 @@ namespace Tic_tac_toe_Server.Net
         {
             Dispose(true);
             GC.SuppressFinalize(this);
+        }
+
+        private void DisposeClients()
+        {
+            foreach (var client in _remotePeers)
+            {
+                client.DataReceived -= Client_DataReceived;
+                client.Dispose();
+            }
+        }
+
+        private void DisposeNetworkEndPoint()
+        {
+            if (_networkEndPoint.Connected)
+            {
+                StopServer();
+            }
+            _networkEndPoint.Dispose();
+        }
+
+        private void HandleServerException(Exception ex, string action)
+        {
+            _logger.LogError($"Exception during server {action}: {ex.Message}");
+            _networkEndPoint.Dispose();
         }
 
     }

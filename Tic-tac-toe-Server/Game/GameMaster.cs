@@ -10,18 +10,14 @@ namespace Tic_tac_toe_Server.Game
 
         private ILogger _logger;
 
-        private Server _server;
-
         public event Action<ConfigBase, List<Guid>> SubmitData = delegate { };
 
         /// <summary>
         ///     The GameMaster class represents the game master that manages the Tic Tac Toe game.
         /// </summary>
-        public GameMaster(Server server, ILogger logger)
+        public GameMaster(ILogger logger)
         {
-            _server = server;
             _logger = logger;
-            _server.StartServer();
         }
 
         /// <summary>
@@ -82,23 +78,14 @@ namespace Tic_tac_toe_Server.Game
             {
                 List<Guid> playersIds = gameSession.GetSessionPlayers();
                 NewSessionConfig config = gameSession.GetStartSessionData();
-                JsonValidationResult json = Serializer.Serialize(config);
 
-                if (json.IsValid)
-                {
-                    Task.Run(() => _server.SendDataToClients(playersIds, json.JsonMessage));
-                }
-                else
-                {
-                    _logger.LogError($"Invalid json format!");
-                }
+                SubmitData?.Invoke(config, playersIds);
             }
         }
 
-        public void OnMessageRecived(string message)
+        public void OnMessageRecived(MessageBase message)
         {
-            MessageBase messageBase = Serializer.ParseMessage(message);
-            messageBase.Handle(this);
+            message.Handle(this);
         }
 
         private (bool, GameSession) FindSessionByPlayerId(Guid playerId)

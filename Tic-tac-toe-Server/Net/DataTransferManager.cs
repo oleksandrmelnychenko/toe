@@ -4,7 +4,6 @@ using Tic_tac_toe_Server.Net.Messages;
 
 namespace Tic_tac_toe_Server.Net
 {
-    //Доробити
     public class DataTransferManager
     {
         private readonly Server _server;
@@ -38,7 +37,19 @@ namespace Tic_tac_toe_Server.Net
 
         public void TransferReceivedData(string message)
         {
-            _master.OnMessageRecived(message);
+            try
+            {
+                MessageBase messageBase = Serializer.ParseMessage(message);
+                _master.OnMessageRecived(messageBase);
+            }
+            catch (InvalidOperationException e)
+            {
+                _logger.LogError(e.Message);
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e.Message);
+            }
         }
     }
 }
