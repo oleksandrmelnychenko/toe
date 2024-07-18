@@ -95,7 +95,7 @@ namespace Tic_tac_toe_Server.Net
                 {
                     Socket socket = await _networkEndPoint.AcceptAsync().ConfigureAwait(false);
 
-                    RemotePeer client = new(socket);
+                    RemotePeer client = new(socket, _logger);
 
                     lock (_clientLock)
                     {

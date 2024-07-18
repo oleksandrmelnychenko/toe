@@ -1,19 +1,20 @@
 ﻿using System.Net.Sockets;
 using System.Text;
+using Tic_tac_toe_Server.Logging;
 
 namespace Tic_tac_toe_Server.Net
 {
-    public sealed class RemotePeer(Socket socket) : IDisposable
+    public sealed class RemotePeer(Socket socket, ILogger logger) : IDisposable
     {
-        private const int BufferSize = 128;
+        private const int BufferSize = 8;
         private bool _disposed;
         private ArraySegment<byte> _buffer = new ArraySegment<byte>(new byte[BufferSize]);
         private StringBuilder _messageBuffer = new StringBuilder();
+        private ILogger _logger = logger;
+
         public Socket Socket { get; set; } = socket;
         public Guid Id { get; private set; } = Guid.NewGuid();
-
         public event EventHandler<string> DataReceived = delegate { };
-
 
         public void StartReceiveAsync()
         {
@@ -29,6 +30,7 @@ namespace Tic_tac_toe_Server.Net
                     int numberOfBytesRead = Socket.EndReceive(result);
                     if (!IsSocketConnected(Socket))
                     {
+                        Dispose();
                         return;
                     }
 
@@ -39,9 +41,25 @@ namespace Tic_tac_toe_Server.Net
 
                 Socket.BeginReceive(_buffer.Array, _buffer.Offset, _buffer.Count, SocketFlags.None, ReceiveAsyncLoop, null);
             }
-            catch (Exception ex)
+            catch (ArgumentNullException ex)
             {
-                Console.WriteLine($"Socket error: {ex.Message}");
+                _logger.LogError($"ReceiveAsyncLoop argument null exception: {ex.Message}");
+            }
+            catch(SocketException ex)
+            {
+                _logger.LogError($"ReceiveAsyncLoop socket exception: {ex.Message}");
+            }
+            catch (ObjectDisposedException ex)
+            {
+                _logger.LogError($"ReceiveAsyncLoop object disposed exception: {ex.Message}");
+            }
+            catch(ArgumentOutOfRangeException ex)
+            {
+                _logger.LogError($"ReceiveAsyncLoop argument out of range exception: {ex.Message}");
+            }
+            catch(Exception ex)
+            {
+                _logger.LogError($"ReceiveAsyncLoop unexpected exception: {ex.Message}");
             }
         }
 

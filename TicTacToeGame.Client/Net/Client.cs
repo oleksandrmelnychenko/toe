@@ -16,22 +16,18 @@ namespace TicTacToeGame.Client.Net
 
         private bool _disposed;
 
-        private Socket _tcpClient;
+        private Socket _tcpClient = new Socket(SocketType.Stream, ProtocolType.Tcp);
+        private const int BufferSize = 128;
 
-        private ArraySegment<byte> _buffer;
+        private ArraySegment<byte> _buffer = new ArraySegment<byte>(new byte[BufferSize]);
+
+        private StringBuilder _messageBuffer = new StringBuilder();
 
         public bool IsInitialized { get; private set; } = false;
 
         public Guid ClientId { get; private set; }
 
         public event EventHandler<MessageBase> MessageReceived;
-
-        public Client()
-        {
-            _buffer = new ArraySegment<byte>(new byte[512]);
-
-            _tcpClient = new Socket(SocketType.Stream, ProtocolType.Tcp);
-        }
 
         public async Task ConnectAsync(IPEndPoint endPoint)
         {
@@ -103,16 +99,20 @@ namespace TicTacToeGame.Client.Net
 
         private void OnDataReceivedAsync(ArraySegment<byte> newSegment)
         {
-            string receivedText = Encoding.UTF8.GetString(newSegment.Array, newSegment.Offset, newSegment.Count);
+            _messageBuffer.Append(Encoding.UTF8.GetString(newSegment.Array, newSegment.Offset, newSegment.Count));
 
-            MessageBase message = Serializer.ParseMessage(receivedText);
-            if (!IsInitialized)
+            if(_tcpClient.Available == 0)
             {
-                ClientInitialization(message);
-            }
-            else
-            {
-                MessageReceived?.Invoke(this, message);
+                MessageBase message = Serializer.ParseMessage(_messageBuffer.ToString());
+                if (!IsInitialized)
+                {
+                    ClientInitialization(message);
+                }
+                else
+                {
+                    MessageReceived?.Invoke(this, message);
+                }
+                _messageBuffer.Clear();
             }
         }
 
