@@ -41,8 +41,14 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Resource Include="Symbols\Empty.png" />
-    <Resource Include="Symbols\O.png" />
-    <Resource Include="Symbols\X.png" />
+    <Content Include="Symbols\Empty.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Symbols\O.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Symbols\X.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 </Project>

@@ -474,3 +474,6 @@ D:\Programming\Course projects\TicTacToeLast\toe\Tic-tac-toe-Server\obj\Debug\ne
 D:\Programming\Course projects\TicTacToeLast\toe\Tic-tac-toe-Server\obj\Debug\net8.0\Tic-tac-toe-Server.pdb
 D:\Programming\Course projects\TicTacToeLast\toe\Tic-tac-toe-Server\obj\Debug\net8.0\Tic-tac-toe-Server.genruntimeconfig.cache
 D:\Programming\Course projects\TicTacToeLast\toe\Tic-tac-toe-Server\obj\Debug\net8.0\ref\Tic-tac-toe-Server.dll
+C:\Projects\Tic-tac-toe\Tic-tac-toe-Server\bin\Debug\net8.0\Symbols\Empty.png
+C:\Projects\Tic-tac-toe\Tic-tac-toe-Server\bin\Debug\net8.0\Symbols\O.png
+C:\Projects\Tic-tac-toe\Tic-tac-toe-Server\bin\Debug\net8.0\Symbols\X.png

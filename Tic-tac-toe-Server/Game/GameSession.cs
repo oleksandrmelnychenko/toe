@@ -1,7 +1,6 @@
 ﻿using Tic_tac_toe_Server.Logging;
 using Tic_tac_toe_Server.Net.Messages;
 using Tic_tac_toe_Server.Player;
-using TicTacToeGame.Client.Net.Messages.ToGameMessages;
 
 namespace Tic_tac_toe_Server.Game
 {
@@ -14,6 +13,8 @@ namespace Tic_tac_toe_Server.Game
         private PlayerManager _playerManager;
 
         private ILogger _logger;
+
+        public bool RestartRequired { get; set; } = false;
 
         public bool IsFull { get; private set; } = false;
 
@@ -45,6 +46,21 @@ namespace Tic_tac_toe_Server.Game
             else
             {
                 _logger.LogWarning($"Session: {this.Id} full.");
+            }
+        }
+
+        public void RemovePlayer(Guid clientId)
+        {
+            if(_playerManager.HasPlayer(clientId))
+            {
+                _playerManager.DisconnectClientFromPlayer(clientId);
+
+                IsFull = false;
+                RestartRequired = true;
+            }
+            else
+            {
+                _logger.LogWarning($"Can not disconnect player: {clientId}.");
             }
         }
 

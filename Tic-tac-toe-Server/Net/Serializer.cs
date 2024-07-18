@@ -24,6 +24,8 @@ namespace Tic_tac_toe_Server.Net
                             JsonConvert.DeserializeObject<RestartMessage>(json)!,
                         MessageType.PlayerInitialized =>
                            JsonConvert.DeserializeObject<PlayerInitializedMessage>(json)!,
+                        MessageType.ClientDisconnected =>
+                           JsonConvert.DeserializeObject<ClientDisconnectedMessage>(json)!,
                         _ => throw new Exception($"Unsupported message Type: {typeInt}")
                     };
                 }

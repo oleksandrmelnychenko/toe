@@ -2,6 +2,7 @@
 using System.Net.Sockets;
 using System.Text;
 using Tic_tac_toe_Server.Logging;
+using Tic_tac_toe_Server.Net.Configs;
 using Tic_tac_toe_Server.Net.Messages;
 
 namespace Tic_tac_toe_Server.Net
@@ -103,6 +104,7 @@ namespace Tic_tac_toe_Server.Net
                     }
 
                     remotePeer.DataReceived += Client_DataReceived;
+                    remotePeer.ClientDisconnected += Client_Disconnected;
                     _logger.LogMessage($"Client {remotePeer.Id} connected.");
 
                     await SendInitializeClientDataAsync(remotePeer).ConfigureAwait(false);
@@ -132,6 +134,22 @@ namespace Tic_tac_toe_Server.Net
             }
         }
 
+        private void Client_Disconnected(Guid id)
+        {
+            ClientDisconnectedConfig config = new ClientDisconnectedConfig(id);
+            JsonValidationResult validationResult = Serializer.Serialize(config);
+
+            if(validationResult.IsValid)
+            {
+                MessageReceived?.Invoke(validationResult.JsonMessage);
+                DisposeClient(id);
+            }
+            else
+            {
+                _logger.LogError($"Client disconected error: {validationResult.JsonMessage}");
+            }
+        }
+
         private async Task SendInitializeClientDataAsync(RemotePeer remotePeer)
         {
             PlayerInitializationConfig config = new PlayerInitializationConfig(remotePeer.Id);
@@ -145,8 +163,6 @@ namespace Tic_tac_toe_Server.Net
             else
             {
                 _logger.LogError($"Serialization problem for remotePeer {remotePeer.Id}: {jsonValidationResult.JsonMessage}");
-
-                await SendDataToRemotePeer(remotePeer, "An error occurred during initialization. Please try again.");
 
                 _remotePeers.Remove(remotePeer);
                 remotePeer.Socket.Dispose();
@@ -221,6 +237,13 @@ namespace Tic_tac_toe_Server.Net
                 client.DataReceived -= Client_DataReceived;
                 client.Dispose();
             }
+        }
+
+        private void DisposeClient(Guid id)
+        {
+            RemotePeer peer = _remotePeers.First(p => p.Id == id);
+            _remotePeers.Remove(peer);
+            peer.Dispose();
         }
 
         private void DisposeNetworkEndPoint()

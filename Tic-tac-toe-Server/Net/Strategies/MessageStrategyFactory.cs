@@ -9,6 +9,7 @@
                 MessageType.NewAction => new NewActionStrategy(),
                 MessageType.Restart => new RestartStrategy(),
                 MessageType.PlayerInitialized => new PlayerInitializedStrategy(),
+                MessageType.ClientDisconnected => new ClientDisconnectedStrategy(),
                 _ => throw new Exception($"Unsupported message Type: {messageType}")
             };
         }

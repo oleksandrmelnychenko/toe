@@ -73,13 +73,27 @@ namespace Tic_tac_toe_Server.Game
 
                 gameSession.AddPlayer(clientId);
 
-                SendInitialSessionData(gameSession);
+                (gameSession.RestartRequired ? (Action)gameSession.Restart : () => SendInitialSessionData(gameSession))();
             }
             else
             {
                 GameSession gameSession = StartNewGameSession();
                 gameSession.MessageProcessed += On_SessionDataProcessed;
                 gameSession.AddPlayer(clientId);
+            }
+        }
+
+        public void ClientDisconnected(Guid clientId)
+        {
+            var session = FindSessionByPlayerId(clientId);
+
+            if (session.Item1)
+            {
+                session.Item2.RemovePlayer(clientId);
+            }
+            else
+            {
+                _logger.LogWarning($"There is no sesssion with this player: {clientId}");
             }
         }
 

@@ -5,7 +5,7 @@ namespace TicTacToeGame.Client.Symbols
 {
     public static class SymbolPath
     {
-        private static readonly string BasePath = Directory.GetParent(Environment.CurrentDirectory).Parent.Parent.FullName;
+        private static readonly string BasePath = AppDomain.CurrentDomain.BaseDirectory;
 
         private const string XRelativePath = "Symbols\\X.png";
         private const string ORelativePath = "Symbols\\O.png";

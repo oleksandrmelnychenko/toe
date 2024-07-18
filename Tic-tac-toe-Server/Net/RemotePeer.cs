@@ -15,6 +15,7 @@ namespace Tic_tac_toe_Server.Net
         public Socket Socket { get; set; } = socket;
         public Guid Id { get; private set; } = Guid.NewGuid();
         public event EventHandler<string> DataReceived = delegate { };
+        public event Action<Guid> ClientDisconnected = delegate { };
 
         public void StartReceiveAsync()
         {
@@ -47,6 +48,8 @@ namespace Tic_tac_toe_Server.Net
             }
             catch(SocketException ex)
             {
+                ClientDisconnected?.Invoke(Id);
+                Dispose();
                 _logger.LogError($"ReceiveAsyncLoop socket exception: {ex.Message}");
             }
             catch (ObjectDisposedException ex)

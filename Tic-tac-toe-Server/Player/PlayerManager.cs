@@ -30,25 +30,24 @@ namespace Tic_tac_toe_Server.Player
             _currentPlayerIndex = _currentPlayerIndex == 0 ? 1 : 0;
         }
 
-        public bool ConnectClientToPlayer(Guid clientId)
+        public void ConnectClientToPlayer(Guid clientId)
         {
-            var player = Players.FirstOrDefault(p => p.Status == PlayerStatus.Disconnected);
-
-            if (player == null)
-            {
-                _logger.LogError("Can not connect client to player.");
-                return false;
-            }
+            var player = Players.First(p => p.Status == PlayerStatus.Disconnected);
 
             player.Status = PlayerStatus.Connected;
             player.Id = clientId;
-            return true;
+        }
+
+        public void DisconnectClientFromPlayer(Guid clientId)
+        {
+            var player = Players.First(p => p.Id == clientId);
+            player.Status = PlayerStatus.Disconnected;
+            player.Id = Guid.Empty;
         }
 
         public bool HasPlayer(Guid playerId)
         {
-            var result = _players.Any(p => p.Id == playerId);
-            return result;
+            return _players.Any(p => p.Id == playerId);
         }
 
         public PlayerBase GetPlayer(Guid playerId)
