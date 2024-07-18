@@ -28,7 +28,7 @@ namespace Tic_tac_toe_Server.Net
             JsonValidationResult jsonMessage = Serializer.Serialize(config);
             if (jsonMessage.IsValid)
             {
-                Task.Run(() => _server.SendDataToClients(ids, jsonMessage.JsonMessage));
+                Task.Run(() => _server.SendDataToRemotePeers(ids, jsonMessage.JsonMessage));
             }
             else
             {

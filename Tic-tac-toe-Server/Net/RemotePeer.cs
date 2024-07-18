@@ -8,7 +8,7 @@ namespace Tic_tac_toe_Server.Net
     {
         private const int BufferSize = 8;
         private bool _disposed;
-        private ArraySegment<byte> _buffer = new ArraySegment<byte>(new byte[BufferSize]);
+        private ArraySegment<byte> _packageBuffer = new ArraySegment<byte>(new byte[BufferSize]);
         private StringBuilder _messageBuffer = new StringBuilder();
         private ILogger _logger = logger;
 
@@ -34,12 +34,12 @@ namespace Tic_tac_toe_Server.Net
                         return;
                     }
 
-                    var newSegment = new ArraySegment<byte>(_buffer.Array, _buffer.Offset, numberOfBytesRead);
+                    var newSegment = new ArraySegment<byte>(_packageBuffer.Array, _packageBuffer.Offset, numberOfBytesRead);
 
                     OnDataReceivedAsync(newSegment);
                 }
 
-                Socket.BeginReceive(_buffer.Array, _buffer.Offset, _buffer.Count, SocketFlags.None, ReceiveAsyncLoop, null);
+                Socket.BeginReceive(_packageBuffer.Array, _packageBuffer.Offset, _packageBuffer.Count, SocketFlags.None, ReceiveAsyncLoop, null);
             }
             catch (ArgumentNullException ex)
             {

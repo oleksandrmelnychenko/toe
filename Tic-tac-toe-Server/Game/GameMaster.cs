@@ -1,5 +1,4 @@
 ﻿using Tic_tac_toe_Server.Logging;
-using Tic_tac_toe_Server.Net;
 using Tic_tac_toe_Server.Net.Messages;
 using Tic_tac_toe_Server.Net.Strategies;
 
@@ -11,7 +10,7 @@ namespace Tic_tac_toe_Server.Game
 
         private ILogger _logger;
 
-        private IMessageStrategy _messageStrategy = new PlayerInitializedStrategy();
+        private IMessageStrategy _strategy;
 
         public event Action<ConfigBase, List<Guid>> SubmitData = delegate { };
 
@@ -36,7 +35,7 @@ namespace Tic_tac_toe_Server.Game
 
         public void SetStrategy(IMessageStrategy strategy)
         {
-            _messageStrategy = strategy;
+            _strategy = strategy;
         }
 
         public void NewAction(NewActionMessage message)
@@ -52,13 +51,17 @@ namespace Tic_tac_toe_Server.Game
             }
         }
 
-        public void RestartSession(RestartMessage restartMessage)
+        public void RestartSession(RestartMessage message)
         {
-            GameSession session = _rooms.FirstOrDefault(r => r.GetPlayerManager().HasPlayer(restartMessage.ClientId));
+            (bool, GameSession) session = FindSessionByPlayerId(message.ClientId);
 
-            if (session != null)
+            if (session.Item1)
             {
-                session.Restart();
+                session.Item2!.Restart();
+            }
+            else
+            {
+                _logger.LogError($"Cannot find a session with a player with the specified id!");
             }
         }
 
@@ -84,16 +87,13 @@ namespace Tic_tac_toe_Server.Game
         {
             if (gameSession.IsFull)
             {
-                List<Guid> playersIds = gameSession.GetSessionPlayers();
-                NewSessionConfig config = gameSession.GetStartSessionData();
-
-                SubmitData?.Invoke(config, playersIds);
+                SubmitData?.Invoke(gameSession.GetStartSessionData(), gameSession.GetSessionPlayers());
             }
         }
 
         public void OnMessageRecived(MessageBase message)
         {
-            _messageStrategy.ProcessMessage(this, message);
+            _strategy.ProcessMessage(this, message);
         }
 
         private (bool, GameSession) FindSessionByPlayerId(Guid playerId)

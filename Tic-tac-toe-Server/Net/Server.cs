@@ -57,7 +57,7 @@ namespace Tic_tac_toe_Server.Net
             }
         }
 
-        public async Task SendDataToClients(List<Guid> clientsIds, string message)
+        public async Task SendDataToRemotePeers(List<Guid> clientsIds, string message)
         {
             List<RemotePeer> remotePeers = _remotePeers.Where(c => clientsIds.Contains(c.Id)).ToList();
 
@@ -95,18 +95,18 @@ namespace Tic_tac_toe_Server.Net
                 {
                     Socket socket = await _networkEndPoint.AcceptAsync().ConfigureAwait(false);
 
-                    RemotePeer client = new(socket, _logger);
+                    RemotePeer remotePeer = new(socket, _logger);
 
                     lock (_clientLock)
                     {
-                        _remotePeers.Add(client);
+                        _remotePeers.Add(remotePeer);
                     }
 
-                    client.DataReceived += Client_DataReceived;
-                    _logger.LogMessage($"Client {client.Id} connected.");
+                    remotePeer.DataReceived += Client_DataReceived;
+                    _logger.LogMessage($"Client {remotePeer.Id} connected.");
 
-                    await SendInitializeClientDataAsync(client).ConfigureAwait(false);
-                    _ = Task.Run(() => client.StartReceiveAsync(), cancellationToken);
+                    await SendInitializeClientDataAsync(remotePeer).ConfigureAwait(false);
+                    _ = Task.Run(() => remotePeer.StartReceiveAsync(), cancellationToken);
                 }
                 catch (OperationCanceledException)
                 {
@@ -120,11 +120,11 @@ namespace Tic_tac_toe_Server.Net
             }
         }
 
-        private void Client_DataReceived(object sender, string data)
+        private void Client_DataReceived(object sender, string message)
         {
             try
             {
-                MessageReceived?.Invoke(data);
+                MessageReceived?.Invoke(message);
             }
             catch (Exception ex)
             {
@@ -132,25 +132,25 @@ namespace Tic_tac_toe_Server.Net
             }
         }
 
-        private async Task SendInitializeClientDataAsync(RemotePeer client)
+        private async Task SendInitializeClientDataAsync(RemotePeer remotePeer)
         {
-            PlayerInitializationConfig config = new PlayerInitializationConfig(client.Id);
+            PlayerInitializationConfig config = new PlayerInitializationConfig(remotePeer.Id);
             JsonValidationResult jsonValidationResult = Serializer.Serialize(config);
 
             if (jsonValidationResult.IsValid)
             {
-                await SendDataToClient(client, jsonValidationResult.JsonMessage);
-                _logger.LogMessage($"Initialize data send to remotePeer {client.Id}");
+                await SendDataToRemotePeer(remotePeer, jsonValidationResult.JsonMessage);
+                _logger.LogMessage($"Initialize message send to remotePeer {remotePeer.Id}");
             }
             else
             {
-                _logger.LogError($"Serialization problem for remotePeer {client.Id}: {jsonValidationResult.JsonMessage}");
+                _logger.LogError($"Serialization problem for remotePeer {remotePeer.Id}: {jsonValidationResult.JsonMessage}");
 
-                await SendDataToClient(client, "An error occurred during initialization. Please try again.");
+                await SendDataToRemotePeer(remotePeer, "An error occurred during initialization. Please try again.");
 
-                _remotePeers.Remove(client);
-                client.Socket.Dispose();
-                _logger.LogMessage($"Client {client.Id} disconnected due to serialization error.");
+                _remotePeers.Remove(remotePeer);
+                remotePeer.Socket.Dispose();
+                _logger.LogMessage($"Client {remotePeer.Id} disconnected due to serialization error.");
             }
         }
 
@@ -170,19 +170,19 @@ namespace Tic_tac_toe_Server.Net
             }
         }
 
-        private async Task SendDataToClient(RemotePeer client, string message)
+        private async Task SendDataToRemotePeer(RemotePeer remotePeer, string message)
         {
             var bytes = Encoding.UTF8.GetBytes(message + "\n");
 
-            if (client.Socket.Connected)
+            if (remotePeer.Socket.Connected)
             {
                 try
                 {
-                    NetworkStream networkStream = new NetworkStream(client.Socket);
+                    NetworkStream networkStream = new NetworkStream(remotePeer.Socket);
 
                     await networkStream.WriteAsync(bytes, 0, bytes.Length);
 
-                    _logger.LogMessage($"Message send to remotePeer: {client.Id}");
+                    _logger.LogMessage($"Message send to remotePeer: {remotePeer.Id}");
                 }
                 catch (Exception ex)
                 {
@@ -191,7 +191,7 @@ namespace Tic_tac_toe_Server.Net
             }
             else
             {
-                _logger.LogWarning($"Client {client.Id} is not connected.");
+                _logger.LogWarning($"Client {remotePeer.Id} is not connected.");
             }
         }
 
