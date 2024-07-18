@@ -24,12 +24,12 @@ namespace Tic_tac_toe_Server.Net
                             JsonConvert.DeserializeObject<RestartMessage>(json)!,
                         MessageType.PlayerInitialized =>
                            JsonConvert.DeserializeObject<PlayerInitializedMessage>(json)!,
-                        _ => throw new Exception($"Unsupported message type: {typeInt}")
+                        _ => throw new Exception($"Unsupported message Type: {typeInt}")
                     };
                 }
                 else
                 {
-                    throw new InvalidOperationException($"Invalid message type: {json}");
+                    throw new InvalidOperationException($"Invalid message Type: {json}");
                 }
             }
             else

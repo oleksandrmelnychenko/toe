@@ -1,6 +1,7 @@
 ﻿using Tic_tac_toe_Server.Game;
 using Tic_tac_toe_Server.Logging;
 using Tic_tac_toe_Server.Net.Messages;
+using Tic_tac_toe_Server.Net.Strategies;
 
 namespace Tic_tac_toe_Server.Net
 {
@@ -40,6 +41,7 @@ namespace Tic_tac_toe_Server.Net
             try
             {
                 MessageBase messageBase = Serializer.ParseMessage(message);
+                _master.SetStrategy(MessageStrategyFactory.GetStrategy(messageBase.Type));
                 _master.OnMessageRecived(messageBase);
             }
             catch (InvalidOperationException e)

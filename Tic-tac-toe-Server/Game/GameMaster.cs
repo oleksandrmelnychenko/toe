@@ -1,6 +1,7 @@
 ﻿using Tic_tac_toe_Server.Logging;
 using Tic_tac_toe_Server.Net;
 using Tic_tac_toe_Server.Net.Messages;
+using Tic_tac_toe_Server.Net.Strategies;
 
 namespace Tic_tac_toe_Server.Game
 {
@@ -9,6 +10,8 @@ namespace Tic_tac_toe_Server.Game
         private List<GameSession> _rooms = new List<GameSession>();
 
         private ILogger _logger;
+
+        private IMessageStrategy _messageStrategy = new PlayerInitializedStrategy();
 
         public event Action<ConfigBase, List<Guid>> SubmitData = delegate { };
 
@@ -29,6 +32,11 @@ namespace Tic_tac_toe_Server.Game
             _rooms.Add(gameSession);
 
             return gameSession;
+        }
+
+        public void SetStrategy(IMessageStrategy strategy)
+        {
+            _messageStrategy = strategy;
         }
 
         public void NewAction(NewActionMessage message)
@@ -85,7 +93,7 @@ namespace Tic_tac_toe_Server.Game
 
         public void OnMessageRecived(MessageBase message)
         {
-            message.Handle(this);
+            _messageStrategy.ProcessMessage(this, message);
         }
 
         private (bool, GameSession) FindSessionByPlayerId(Guid playerId)
