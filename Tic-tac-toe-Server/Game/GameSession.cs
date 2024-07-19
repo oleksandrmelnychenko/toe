@@ -10,9 +10,9 @@ namespace Tic_tac_toe_Server.Game
 
         private const ushort BoardCellCount = 9;
 
-        private PlayerManager _playerManager;
+        private readonly PlayerManager _playerManager;
 
-        private ILogger _logger;
+        private readonly ILogger _logger;
 
         public bool RestartRequired { get; set; } = false;
 

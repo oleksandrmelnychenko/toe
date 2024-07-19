@@ -2,6 +2,7 @@ using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using System.Net;
+using System.Net.Sockets;
 using System.Threading.Tasks;
 using TicTacToeGame.Client.Constants;
 using TicTacToeGame.Client.Net;
@@ -16,7 +17,7 @@ namespace TicTacToeGame.Client
         }
 
         private readonly MainViewModel _mainViewModel = new MainViewModel();
-        private Net.Client _client = new Net.Client();
+        private Net.Client _client = new Net.Client(false);
         private DataTransferManager _dataTransferManager;
 
         public override void OnFrameworkInitializationCompleted()

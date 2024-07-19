@@ -15,9 +15,9 @@ namespace TicTacToeGame.Client
 {
     public sealed class MainViewModel : ReactiveObject
     {
+        private const ushort CellsCount = 9;
         private string? _gameStatus = GameStatusConst.PlayerTurn + " X";
         private string? _actionHistory;
-        private ushort cellsCount = 9;
         private Guid _playerId = Guid.Empty;
         private IMessageStrategy _messageStrategy;
 
@@ -59,7 +59,7 @@ namespace TicTacToeGame.Client
             OnCellCommand = new DelegateCommand<BoardCell>(OnCellClickCommandHandler);
             OnRestartCommand = new DelegateCommand(OnRestartClickCommandHandler);
 
-            BoardCells = new ObservableCollection<BoardCell>(CellFactory.Build(cellsCount));
+            BoardCells = new ObservableCollection<BoardCell>(CellFactory.Build(CellsCount));
         }
 
         public async void OnCellClickCommandHandler(BoardCell boardCell) =>
@@ -129,7 +129,7 @@ namespace TicTacToeGame.Client
 
         private void Restart()
         {
-            BoardCells = new ObservableCollection<BoardCell>(CellFactory.Build(cellsCount));
+            BoardCells = new ObservableCollection<BoardCell>(CellFactory.Build(CellsCount));
         }
 
         private void UpdatePlayerData(Guid id, Status status)

@@ -6,9 +6,9 @@ namespace Tic_tac_toe_Server.Game
 {
     public class GameMaster
     {
-        private List<GameSession> _rooms = new List<GameSession>();
+        private readonly List<GameSession> _rooms = new List<GameSession>();
 
-        private ILogger _logger;
+        private readonly ILogger _logger;
 
         private IMessageStrategy _strategy;
 

@@ -4,23 +4,20 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
-using TicTacToeGame.Client.Net.Configs;
-using TicTacToeGame.Client.Net.Messages;
 
 namespace TicTacToeGame.Client.Net
 {
-    public class Client : IDisposable
+    public class Client(bool disposed) : IDisposable
     {
-        private NetworkStream _stream;
-
-        private bool _disposed;
-
-        private Socket _tcpClient = new Socket(SocketType.Stream, ProtocolType.Tcp);
         private const int BufferSize = 128;
 
-        private ArraySegment<byte> _buffer = new ArraySegment<byte>(new byte[BufferSize]);
+        private NetworkStream _stream;
 
-        private StringBuilder _messageBuffer = new StringBuilder();
+        private Socket _tcpClient = new Socket(SocketType.Stream, ProtocolType.Tcp);
+
+        private readonly ArraySegment<byte> _buffer = new ArraySegment<byte>(new byte[BufferSize]);
+
+        private readonly StringBuilder _messageBuffer = new StringBuilder();
 
         public Guid ClientId { get; private set; }
 
@@ -31,7 +28,7 @@ namespace TicTacToeGame.Client.Net
             try
             {
                 await _tcpClient.ConnectAsync(endPoint);
-                _stream = new NetworkStream(_tcpClient);
+                _stream = new(_tcpClient);
                 Debug.WriteLine($"Client connected to server");
 
                 _ = Task.Run(() => StartReceive());
@@ -98,7 +95,7 @@ namespace TicTacToeGame.Client.Net
         {
             _messageBuffer.Append(Encoding.UTF8.GetString(newSegment.Array, newSegment.Offset, newSegment.Count));
 
-            if(_tcpClient.Available == 0)
+            if (_tcpClient.Available == 0)
             {
                 MessageReceived?.Invoke(_messageBuffer.ToString());
                 _messageBuffer.Clear();
@@ -107,17 +104,17 @@ namespace TicTacToeGame.Client.Net
 
         protected virtual void Dispose(bool disposing)
         {
-            if(!_disposed)
+            if (!disposed)
             {
-                if(disposing)
+                if (disposing)
                 {
-                    if(_stream.CanRead)
+                    if (_stream.CanRead)
                     {
                         _stream.Close();
                         _stream.Dispose();
                     }
 
-                    if(_tcpClient.Connected)
+                    if (_tcpClient.Connected)
                     {
                         _tcpClient.Close();
                         _tcpClient.Dispose();

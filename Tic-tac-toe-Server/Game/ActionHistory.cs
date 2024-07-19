@@ -7,7 +7,7 @@ namespace Tic_tac_toe_Server.Game
 {
     public class ActionHistory
     {
-        private List<GameAction> moves;
+        private readonly List<GameAction> moves;
 
         public string History { get; set; } = string.Empty;
 
