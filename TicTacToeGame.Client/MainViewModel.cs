@@ -3,14 +3,13 @@ using ReactiveUI;
 using System;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
-using System.Net;
 using System.Threading.Tasks;
+using Tic_tac_toe_Server.Net.Strategies;
 using TicTacToeGame.Client.Constants;
 using TicTacToeGame.Client.Game;
 using TicTacToeGame.Client.Net;
 using TicTacToeGame.Client.Net.Configs;
 using TicTacToeGame.Client.Net.Messages;
-using TicTacToeGame.Client.Net.Messages.ToGameMessages;
 
 namespace TicTacToeGame.Client
 {
@@ -18,11 +17,11 @@ namespace TicTacToeGame.Client
     {
         private string? _gameStatus = GameStatusConst.PlayerTurn + " X";
         private string? _actionHistory;
-        private Net.Client client;
         private ushort cellsCount = 9;
+        private Guid _playerId = Guid.Empty;
+        private IMessageStrategy _messageStrategy;
 
         private ObservableCollection<BoardCell> _boardBoardCells = null!;
-
 
         private bool isActiveBoard;
 
@@ -53,16 +52,14 @@ namespace TicTacToeGame.Client
         public DelegateCommand<BoardCell> OnCellCommand { get; init; }
         public DelegateCommand OnRestartCommand { get; init; }
 
+        public event Action<ConfigBase> SubmitData = delegate { };
+
         public MainViewModel()
         {
-            InitializeClient();
-
             OnCellCommand = new DelegateCommand<BoardCell>(OnCellClickCommandHandler);
             OnRestartCommand = new DelegateCommand(OnRestartClickCommandHandler);
 
             BoardCells = new ObservableCollection<BoardCell>(CellFactory.Build(cellsCount));
-
-            this.client.MessageReceived += Client_MessageReceived;
         }
 
         public async void OnCellClickCommandHandler(BoardCell boardCell) =>
@@ -70,6 +67,11 @@ namespace TicTacToeGame.Client
 
         public async void OnRestartClickCommandHandler() =>
             await RestartRequest();
+
+        public void SetStrategy(IMessageStrategy strategy)
+        {
+            _messageStrategy = strategy;
+        }
 
         public void UpdateGameData(NewGameDataMessage serverMessage)
         {
@@ -101,17 +103,16 @@ namespace TicTacToeGame.Client
             UpdatePlayerData(serverMessage.CurrentPlayerId, serverMessage.Status);
         }
 
+        public void InitializeClient(Guid id)
+        {
+            _playerId = id;
+            PlayerInitializedConfig config = new(id);
+            SubmitData?.Invoke(config);
+        }
+
         private void UpdateActionHistory(string history)
         {
             ActionHistory = history;
-        }
-
-        private void HandleRestartStatus(Status status)
-        {
-            if (status == Status.Restart)
-            {
-                Restart();
-            }
         }
 
         private void UpdateBoardCell(ushort cellIndex, Symbol? cellSymbol)
@@ -132,7 +133,7 @@ namespace TicTacToeGame.Client
         }
 
         private void UpdatePlayerData(Guid id, Status status)
-            => IsActiveBoard = client.ClientId == id && (status != Status.Finish && status != Status.Draw) ? true : false;
+            => IsActiveBoard = _playerId == id && (status != Status.Finish && status != Status.Draw) ? true : false;
 
         private void UpdateGameStatus(Status status, Symbol symbol)
         {
@@ -147,46 +148,20 @@ namespace TicTacToeGame.Client
 
         private async Task ApplyGameAction(BoardCell boardCell)
         {
-            NewActionConfig newActionConfig = new(boardCell.Index, client.ClientId);
-            JsonValidationResult actionJson = Serializer.Serialize<NewActionConfig>(newActionConfig);
-            if (actionJson.IsValid)
-            {
-                await client.SendDataAsync(actionJson.JsonMessage);
-            }
-            else
-            {
-                Debug.WriteLine($"Unexpected serialization error: {actionJson.JsonMessage}");
-            }
+            NewActionConfig newActionConfig = new(boardCell.Index, _playerId);
+
+            SubmitData?.Invoke(newActionConfig);
         }
 
         private async Task RestartRequest()
         {
-            RestartConfig restartConfig = new(client.ClientId);
-            JsonValidationResult restartJson = Serializer.Serialize<RestartConfig>(restartConfig);
-            if (restartJson.IsValid)
-            {
-                await client.SendDataAsync(restartJson.JsonMessage);
-            }
-            else
-            {
-                Debug.WriteLine($"Unexpected serialization error: {restartJson.JsonMessage}");
-            }
-
+            RestartConfig restartConfig = new(_playerId);
+            SubmitData?.Invoke(restartConfig);
         }
 
-        private async void InitializeClient()
+        public void OnMessageRecived(MessageBase message)
         {
-            IPEndPoint endPoint = new IPEndPoint(IPAddress.Parse(NetworkAddressConfig.IPAddress), NetworkAddressConfig.Port);
-            client = new Net.Client();
-            await client.ConnectAsync(endPoint);
-        }
-
-        private void Client_MessageReceived(object? sender, MessageBase message)
-        {
-            if(message is ToGameBaseMessage toGameMessage)
-            {
-                toGameMessage.Handle(this);
-            }
+            _messageStrategy.ProcessMessage(this, message);
         }
     }
 }

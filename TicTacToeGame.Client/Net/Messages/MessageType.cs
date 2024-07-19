@@ -1,6 +1,6 @@
 ﻿namespace TicTacToeGame.Client.Net.Messages
 {
-    public enum Type
+    public enum MessageType
     {
         PlayerInitialization,
         NewGameSession,

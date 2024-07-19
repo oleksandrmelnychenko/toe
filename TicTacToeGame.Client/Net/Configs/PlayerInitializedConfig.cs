@@ -3,9 +3,9 @@ using System;
 
 namespace TicTacToeGame.Client.Net.Configs
 {
-    internal record PlayerInitializedConfig(Guid ClientId)
+    internal record PlayerInitializedConfig(Guid ClientId) : ConfigBase
     {
         [JsonProperty]
-        Messages.Type Type = Messages.Type.PlayerInitialized;
+        Messages.MessageType Type = Messages.MessageType.PlayerInitialized;
     }
 }

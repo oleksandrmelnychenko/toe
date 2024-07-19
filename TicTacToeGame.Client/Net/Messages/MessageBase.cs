@@ -8,6 +8,6 @@ namespace TicTacToeGame.Client.Net.Messages
 {
     public abstract class MessageBase
     {
-        public Type Type { get; set; }
+        public MessageType Type { get; set; }
     }
 }

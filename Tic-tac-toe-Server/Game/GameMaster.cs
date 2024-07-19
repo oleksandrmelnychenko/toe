@@ -78,7 +78,7 @@ namespace Tic_tac_toe_Server.Game
             else
             {
                 GameSession gameSession = StartNewGameSession();
-                gameSession.MessageProcessed += On_SessionDataProcessed;
+                gameSession.MessageProcessed += On_SessionDataProcessed!;
                 gameSession.AddPlayer(clientId);
             }
         }

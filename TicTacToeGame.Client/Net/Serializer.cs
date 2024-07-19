@@ -1,7 +1,5 @@
 ﻿using System;
-using Type = TicTacToeGame.Client.Net.Messages.Type;
-using TicTacToeGame.Client.Net.Messages.ToGameMessages;
-using TicTacToeGame.Client.Net.Messages.ToClientMessages;
+using MessageType = TicTacToeGame.Client.Net.Messages.MessageType;
 using TicTacToeGame.Client.Net.Messages;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
@@ -19,15 +17,15 @@ namespace TicTacToeGame.Client.Net
                 if (typeToken.Type == JTokenType.Integer)
                 {
                     int typeInt = typeToken.ToObject<int>();
-                    Type messageType = (Type)typeInt;
+                    MessageType messageType = (MessageType)typeInt;
 
                     return messageType switch
                     {
-                        Type.PlayerInitialization =>
+                        MessageType.PlayerInitialization =>
                             JsonConvert.DeserializeObject<ClientInitializationMessage>(json)!,
-                        Type.NewGameSession =>
+                        MessageType.NewGameSession =>
                             JsonConvert.DeserializeObject<NewGameSessionMessage>(json)!,
-                        Type.NewGameData =>
+                        MessageType.NewGameData =>
                             JsonConvert.DeserializeObject<NewGameDataMessage>(json)!,
                         _ => throw new Exception($"Unsupported message type: {typeInt}")
                     };

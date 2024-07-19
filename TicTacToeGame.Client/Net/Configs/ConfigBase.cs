@@ -4,6 +4,6 @@ namespace TicTacToeGame.Client.Net.Configs
 {
     public abstract record ConfigBase
     {
-        Type Type { get; set; }
+        MessageType Type { get; set; }
     }
 }

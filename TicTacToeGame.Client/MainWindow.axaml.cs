@@ -8,7 +8,6 @@ namespace TicTacToeGame.Client
         public MainWindow()
         {
             InitializeComponent();
-            DataContext = new MainViewModel();
         }
     }
 

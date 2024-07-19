@@ -6,7 +6,6 @@ using System.Text;
 using System.Threading.Tasks;
 using TicTacToeGame.Client.Net.Configs;
 using TicTacToeGame.Client.Net.Messages;
-using TicTacToeGame.Client.Net.Messages.ToClientMessages;
 
 namespace TicTacToeGame.Client.Net
 {
@@ -23,11 +22,9 @@ namespace TicTacToeGame.Client.Net
 
         private StringBuilder _messageBuffer = new StringBuilder();
 
-        public bool IsInitialized { get; private set; } = false;
-
         public Guid ClientId { get; private set; }
 
-        public event EventHandler<MessageBase> MessageReceived;
+        public event Action<string> MessageReceived;
 
         public async Task ConnectAsync(IPEndPoint endPoint)
         {
@@ -103,41 +100,8 @@ namespace TicTacToeGame.Client.Net
 
             if(_tcpClient.Available == 0)
             {
-                MessageBase message = Serializer.ParseMessage(_messageBuffer.ToString());
-                if (!IsInitialized)
-                {
-                    ClientInitialization(message);
-                }
-                else
-                {
-                    MessageReceived?.Invoke(this, message);
-                }
+                MessageReceived?.Invoke(_messageBuffer.ToString());
                 _messageBuffer.Clear();
-            }
-        }
-
-        private void ClientInitialization(MessageBase message)
-        {
-            if (message is ClientInitializationMessage initMessage)
-            {
-                ClientId = initMessage.PlayerId;
-                IsInitialized = true;
-                PlayerInitializedConfig config = new(ClientId);
-                JsonValidationResult validationResult = Serializer.Serialize(config);
-                if(validationResult.IsValid)
-                {
-                    Task.Run(() => SendDataAsync(validationResult.JsonMessage));
-                    Debug.WriteLine($"Client initialized with ID {ClientId}");
-                }
-                else
-                {
-                    Console.WriteLine($"Unexpected serialization error: {validationResult.JsonMessage}");
-                }
-            }
-            else
-            {
-                Debug.WriteLine("Received non-initialization message before initialization.");
-                return;
             }
         }
 
