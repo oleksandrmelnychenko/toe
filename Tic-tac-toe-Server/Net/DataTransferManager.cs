@@ -19,7 +19,7 @@ namespace Tic_tac_toe_Server.Net
             _master = gameMaster;
             _logger = logger;
 
-            server.MessageReceived += TransferReceivedData;
+            server.OnReceived += TransferReceivedData;
             gameMaster.SubmitData += TransferProcessedData;
         }
 

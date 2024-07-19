@@ -1,21 +1,23 @@
-﻿using System.Net.Sockets;
+﻿using System.Diagnostics;
+using System.Net.Sockets;
 using System.Text;
 using Tic_tac_toe_Server.Logging;
 
 namespace Tic_tac_toe_Server.Net
 {
-    public sealed class RemotePeer(Socket socket, ILogger logger) : IDisposable
+    public sealed class RemotePeer(Socket socket, ILogger logger, bool disposed, NetworkStream stream, Action<string> onDataReceived, Action<Guid> onClientDisconnected) : IDisposable
     {
         private const int BufferSize = 8;
-        private bool _disposed;
-        private ArraySegment<byte> _packageBuffer = new ArraySegment<byte>(new byte[BufferSize]);
-        private StringBuilder _messageBuffer = new StringBuilder();
-        private ILogger _logger = logger;
+        private readonly ArraySegment<byte> _packageBuffer = new ArraySegment<byte>(new byte[BufferSize]);
+        private readonly StringBuilder _messageBuffer = new StringBuilder();
+        private readonly ILogger _logger = logger;
 
-        public Socket Socket { get; set; } = socket;
-        public Guid Id { get; private set; } = Guid.NewGuid();
-        public event EventHandler<string> DataReceived = delegate { };
-        public event Action<Guid> ClientDisconnected = delegate { };
+        public Guid Id { get; set; } = Guid.NewGuid();
+        public Socket RemoteEndPoint { get; set; } = socket;
+        public NetworkStream Stream { get; init; } = stream;
+
+        private readonly Action<string> _onDataReceived = onDataReceived;
+        private readonly Action<Guid> _onClientDisconnected = onClientDisconnected;
 
         public void StartReceiveAsync()
         {
@@ -28,8 +30,8 @@ namespace Tic_tac_toe_Server.Net
             {
                 if (result != null)
                 {
-                    int numberOfBytesRead = Socket.EndReceive(result);
-                    if (!IsSocketConnected(Socket))
+                    int numberOfBytesRead = RemoteEndPoint.EndReceive(result);
+                    if (!IsSocketConnected(RemoteEndPoint))
                     {
                         Dispose();
                         return;
@@ -40,7 +42,7 @@ namespace Tic_tac_toe_Server.Net
                     OnDataReceivedAsync(newSegment);
                 }
 
-                Socket.BeginReceive(_packageBuffer.Array, _packageBuffer.Offset, _packageBuffer.Count, SocketFlags.None, ReceiveAsyncLoop, null);
+                RemoteEndPoint.BeginReceive(_packageBuffer.Array, _packageBuffer.Offset, _packageBuffer.Count, SocketFlags.None, ReceiveAsyncLoop, null);
             }
             catch (ArgumentNullException ex)
             {
@@ -48,7 +50,7 @@ namespace Tic_tac_toe_Server.Net
             }
             catch(SocketException ex)
             {
-                ClientDisconnected?.Invoke(Id);
+                _onClientDisconnected?.Invoke(Id);
                 Dispose();
                 _logger.LogError($"ReceiveAsyncLoop socket exception: {ex.Message}");
             }
@@ -69,9 +71,9 @@ namespace Tic_tac_toe_Server.Net
         private void OnDataReceivedAsync(ArraySegment<byte> bytes)
         {
             _messageBuffer.Append(Encoding.UTF8.GetString(bytes.Array, bytes.Offset, bytes.Count));
-            if(Socket.Available == 0)
+            if(RemoteEndPoint.Available == 0)
             {
-                DataReceived?.Invoke(this, _messageBuffer.ToString());
+                _onDataReceived?.Invoke(_messageBuffer.ToString());
                 _messageBuffer.Clear();
             }
         }
@@ -88,11 +90,11 @@ namespace Tic_tac_toe_Server.Net
 
         private void Dispose(bool disposing)
         {
-            if (!_disposed)
+            if (!disposed)
             {
                 if (disposing)
                 {
-                    Socket.Dispose();
+                    RemoteEndPoint.Dispose();
                 }
             }
         }
