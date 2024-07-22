@@ -59,9 +59,9 @@ namespace Tic_tac_toe_Server.Net
 
         public async Task SendDataToRemotePeers(List<Guid> clientsIds, string message)
         {
-            List<RemotePeer> remotePeers = _remotePeers.Values.Where(c => clientsIds.Contains(c.Id)).ToList();
+            //List<RemotePeer> remotePeers = _remotePeers.Values.Where(c => clientsIds.Contains(c.Id)).ToList();
 
-            foreach (RemotePeer remotePeer in remotePeers)
+            foreach (RemotePeer remotePeer in _remotePeers.Values.Where(c => clientsIds.Contains(c.Id)))
             {
                 byte[] bytes = Encoding.UTF8.GetBytes(message + "\n");
 
@@ -93,9 +93,9 @@ namespace Tic_tac_toe_Server.Net
             {
                 try
                 {
-                    Socket socket = await _networkEndPoint.AcceptAsync().ConfigureAwait(false);
+                    Socket socket = await _networkEndPoint.AcceptAsync();
 
-                    RemotePeer remotePeer = new(socket, _logger, false, new NetworkStream(socket), Client_DataReceived, Client_Disconnected);
+                    RemotePeer remotePeer = CreateAndInitializeRemotePeer(socket);
 
                     _remotePeers.TryAdd(remotePeer.Id, remotePeer);
 
@@ -118,14 +118,7 @@ namespace Tic_tac_toe_Server.Net
 
         private void Client_DataReceived(string message)
         {
-            try
-            {
-                OnReceived.Invoke(message);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError($"Exception in OnReceived handler: {ex.Message}");
-            }
+            OnReceived.Invoke(message);
         }
 
         private void Client_Disconnected(Guid id)
@@ -203,6 +196,11 @@ namespace Tic_tac_toe_Server.Net
             }
         }
 
+        private RemotePeer CreateAndInitializeRemotePeer(Socket socket)
+        {
+            return new(socket, _logger, false, new NetworkStream(socket), Client_DataReceived, Client_Disconnected);
+        }
+
         protected virtual void Dispose(bool disposing)
         {
             if (!_disposed)
@@ -251,6 +249,5 @@ namespace Tic_tac_toe_Server.Net
             _logger.LogError($"Exception during server {action}: {ex.Message}");
             _networkEndPoint.Dispose();
         }
-
     }
 }
