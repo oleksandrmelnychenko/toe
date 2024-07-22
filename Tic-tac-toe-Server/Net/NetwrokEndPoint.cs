@@ -8,7 +8,7 @@ using Tic_tac_toe_Server.Net.Messages;
 
 namespace Tic_tac_toe_Server.Net
 {
-    public class Server : IDisposable
+    public class NetwrokEndPoint : IDisposable
     {
         private readonly CancellationTokenSource cancellationTokenSource = new();
 
@@ -22,7 +22,7 @@ namespace Tic_tac_toe_Server.Net
 
         public event Action<string> OnReceived = delegate { };
 
-        public Server(IPEndPoint iPEndPoint, ILogger logger)
+        public NetwrokEndPoint(IPEndPoint iPEndPoint, ILogger logger)
         {
             _logger = logger;
             _networkEndPoint = Initialize(iPEndPoint);

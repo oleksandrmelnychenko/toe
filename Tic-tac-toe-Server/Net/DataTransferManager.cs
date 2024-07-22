@@ -7,13 +7,13 @@ namespace Tic_tac_toe_Server.Net
 {
     public class DataTransferManager
     {
-        private readonly Server _server;
+        private readonly NetwrokEndPoint _server;
 
         private readonly GameMaster _master;
 
         private readonly ILogger _logger;
 
-        public DataTransferManager(Server server, GameMaster gameMaster, ILogger logger)
+        public DataTransferManager(NetwrokEndPoint server, GameMaster gameMaster, ILogger logger)
         {
             this._server = server;
             _master = gameMaster;

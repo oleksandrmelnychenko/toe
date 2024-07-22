@@ -9,15 +9,16 @@ namespace TicTacToeGame.Client.Net
 {
     public class Client(bool disposed) : IDisposable
     {
-        private const int BufferSize = 128;
-
-        private NetworkStream _stream;
-
-        private Socket _tcpClient = new Socket(SocketType.Stream, ProtocolType.Tcp);
 
         private readonly ArraySegment<byte> _buffer = new ArraySegment<byte>(new byte[BufferSize]);
 
         private readonly StringBuilder _messageBuffer = new StringBuilder();
+
+        private readonly Socket _tcpClient = new Socket(SocketType.Stream, ProtocolType.Tcp);
+
+        private const int BufferSize = 128;
+
+        private NetworkStream _stream;
 
         public Guid ClientId { get; private set; }
 

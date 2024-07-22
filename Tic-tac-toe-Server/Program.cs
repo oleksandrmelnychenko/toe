@@ -13,7 +13,7 @@ namespace Tic_tac_toe_Server
             ConsoleLogger consoleLogger = new ConsoleLogger();
             IPEndPoint endPoint = new IPEndPoint(IPAddress.Parse(NetworkAddressConfig.IPAddress), NetworkAddressConfig.Port);
 
-            Server server = new(endPoint, consoleLogger);
+            NetwrokEndPoint server = new(endPoint, consoleLogger);
             GameMaster gameMaster = new(consoleLogger);
             server.StartServer();
 
