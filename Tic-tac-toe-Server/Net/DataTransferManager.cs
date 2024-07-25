@@ -7,7 +7,7 @@ namespace Tic_tac_toe_Server.Net
 {
     public class DataTransferManager
     {
-        private readonly NetwrokEndPoint _server;
+        private readonly NetwrokEndPoint _networkEndPoint;
 
         private readonly GameMaster _master;
 
@@ -15,7 +15,7 @@ namespace Tic_tac_toe_Server.Net
 
         public DataTransferManager(NetwrokEndPoint server, GameMaster gameMaster, ILogger logger)
         {
-            this._server = server;
+            this._networkEndPoint = server;
             _master = gameMaster;
             _logger = logger;
 
@@ -28,7 +28,7 @@ namespace Tic_tac_toe_Server.Net
             JsonValidationResult jsonMessage = Serializer.Serialize(config);
             if (jsonMessage.IsValid)
             {
-                Task.Run(() => _server.SendDataToRemotePeers(ids, jsonMessage.JsonMessage));
+                Task.Run(() => _networkEndPoint.SendDataToRemotePeers(ids, jsonMessage.JsonMessage));
             }
             else
             {

@@ -7,6 +7,7 @@
         NewGameData,
         NewAction,
         Restart,
-        PlayerInitialized
+        PlayerInitialized,
+        PlayerDisconnected
     }
 }

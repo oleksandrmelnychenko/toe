@@ -46,7 +46,7 @@ namespace TicTacToeGame.Client.Net
             {
                 try
                 {
-                    var bytes = Encoding.UTF8.GetBytes(jsonMessage);
+                    byte[] bytes = Encoding.UTF8.GetBytes(jsonMessage);
                     await _stream.WriteAsync(bytes, 0, bytes.Length);
                     Debug.WriteLine("Data has been sent to the server");
                 }
@@ -79,7 +79,7 @@ namespace TicTacToeGame.Client.Net
                         return;
                     }
 
-                    var newSegment = new ArraySegment<byte>(_buffer.Array, _buffer.Offset, numberOfBytesRead);
+                    ArraySegment<byte> newSegment = new ArraySegment<byte>(_buffer.Array, _buffer.Offset, numberOfBytesRead);
 
                     OnDataReceivedAsync(newSegment);
                 }

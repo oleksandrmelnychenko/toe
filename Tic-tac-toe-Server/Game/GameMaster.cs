@@ -131,6 +131,6 @@ namespace Tic_tac_toe_Server.Game
             SubmitData?.Invoke(config, playersIds);
         }
 
-        private bool CheckForAvalibleSession() => _rooms.Any(r => r.IsFull == false);
+        private bool CheckForAvalibleSession() => _rooms.Any(r => !r.IsFull);
     }
 }

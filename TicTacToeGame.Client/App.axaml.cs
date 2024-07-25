@@ -6,6 +6,7 @@ using System.Net.Sockets;
 using System.Threading.Tasks;
 using TicTacToeGame.Client.Constants;
 using TicTacToeGame.Client.Net;
+using TicTacToeGame.Client.Net.Configs;
 
 namespace TicTacToeGame.Client
 {

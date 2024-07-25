@@ -1,6 +1,5 @@
 ﻿using Tic_tac_toe_Server.Net.Strategies;
 using TicTacToeGame.Client.Net.Messages;
-using Tmds.DBus.Protocol;
 
 namespace TicTacToeGame.Client.Net.Strategies
 {

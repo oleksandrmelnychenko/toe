@@ -14,9 +14,9 @@ namespace Tic_tac_toe_Server.Game
 
         private readonly ILogger _logger;
 
-        public bool RestartRequired { get; set; } = false;
+        public bool RestartRequired { get; set; }
 
-        public bool IsFull { get; private set; } = false;
+        public bool IsFull { get; private set; }
 
         public List<BoardCell> BoardCells { get; private set; }
 
